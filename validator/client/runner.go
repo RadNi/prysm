@@ -35,10 +35,13 @@ var backOffPeriod = 10 * time.Second
 // 5 - Determine role at current slot
 // 6 - Perform assigned role, if any
 func run(ctx context.Context, v iface.Validator) {
+	log.Info("hatta inja na?")
 	cleanup := v.Done
 	defer cleanup()
 
 	headSlot, err := waitForActivation(ctx, v)
+	log.Info("pass az activationnn")
+
 	if err != nil {
 		return // Exit if context is canceled.
 	}
@@ -70,6 +73,7 @@ func run(ctx context.Context, v iface.Validator) {
 		log.Warnln("Validator client started without proposer settings such as fee recipient" +
 			" and will continue to use settings provided in the beacon node.")
 	}
+	log.Info("inja khoobe")
 
 	for {
 		_, cancel := context.WithCancel(ctx)
@@ -84,12 +88,14 @@ func run(ctx context.Context, v iface.Validator) {
 			close(accountsChangedChan)
 			return // Exit if context is canceled.
 		case blocksError := <-connectionErrorChannel:
+			log.Info("in blocksError?")
 			if blocksError != nil {
 				log.WithError(blocksError).Warn("block stream interrupted")
 				go v.ReceiveBlocks(ctx, connectionErrorChannel)
 				continue
 			}
 		case newKeys := <-accountsChangedChan:
+			log.Info("in yeki newKeys")
 			anyActive, err := v.HandleKeyReload(ctx, newKeys)
 			if err != nil {
 				log.WithError(err).Error("Could not properly handle reloaded keys")
@@ -102,6 +108,7 @@ func run(ctx context.Context, v iface.Validator) {
 				}
 			}
 		case slot := <-v.NextSlot():
+			log.Info("vaaa next slot. OooO")
 			span.AddAttributes(trace.Int64Attribute("slot", int64(slot))) // lint:ignore uintcast -- This conversion is OK for tracing.
 			reloadRemoteKeys(ctx, km)
 			allExited, err := v.AllValidatorsAreExited(ctx)
@@ -150,6 +157,7 @@ func run(ctx context.Context, v iface.Validator) {
 				span.End()
 				continue
 			}
+			log.Info("dar entehaaa")
 			performRoles(slotCtx, allRoles, v, slot, &wg, span)
 		}
 	}
@@ -189,15 +197,17 @@ func waitForActivation(ctx context.Context, v iface.Validator) (types.Slot, erro
 		if err != nil {
 			log.WithError(err).Fatal("Could not determine if beacon chain started")
 		}
-
+		log.Info("aya kilid ha fa'al mishavand??")
 		err = v.WaitForKeymanagerInitialization(ctx)
+		log.Info("va kilid ha fa'al shodannndd")
 		if err != nil {
 			// log.Fatal will prevent defer from being called
 			v.Done()
 			log.WithError(err).Fatal("Wallet is not ready")
 		}
-
+		log.Info("montazere sync bash")
 		err = v.WaitForSync(ctx)
+		log.Info("sync be etmam resid")
 		if isConnectionError(err) {
 			log.WithError(err).Warn("Could not determine if beacon chain started")
 			continue

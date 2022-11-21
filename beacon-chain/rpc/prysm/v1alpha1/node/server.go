@@ -9,6 +9,8 @@ import (
 	"sort"
 	"time"
 
+	"github.com/sirupsen/logrus"
+
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/golang/protobuf/ptypes/timestamp"
 	"github.com/libp2p/go-libp2p/core/network"
@@ -47,6 +49,8 @@ type Server struct {
 
 // GetSyncStatus checks the current network sync status of the node.
 func (ns *Server) GetSyncStatus(_ context.Context, _ *empty.Empty) (*ethpb.SyncStatus, error) {
+	var log = logrus.WithField("prefix", "radni")
+	log.Info(ns.SyncChecker.Syncing())
 	return &ethpb.SyncStatus{
 		Syncing: ns.SyncChecker.Syncing(),
 	}, nil

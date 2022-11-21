@@ -44,10 +44,12 @@ func (s *Service) roundRobinSync(genesis time.Time) error {
 	s.counter = ratecounter.NewRateCounter(counterSeconds * time.Second)
 
 	// Step 1 - Sync to end of finalized epoch.
+	log.Info("sync to finalized epoch")
 	if err := s.syncToFinalizedEpoch(ctx, genesis); err != nil {
+		log.Info("error bazgardande shod !!")
 		return err
 	}
-
+	log.Info("ham aknoon be etmam resid")
 	// Already at head, no need for 2nd phase.
 	if s.cfg.Chain.HeadSlot() == slots.Since(genesis) {
 		return nil
@@ -61,12 +63,15 @@ func (s *Service) roundRobinSync(genesis time.Time) error {
 // syncToFinalizedEpoch sync from head to best known finalized epoch.
 func (s *Service) syncToFinalizedEpoch(ctx context.Context, genesis time.Time) error {
 	highestFinalizedSlot, err := slots.EpochStart(s.highestFinalizedEpoch() + 1)
+	log.Info("chetor?")
+	log.Info(highestFinalizedSlot)
 	if err != nil {
 		return err
 	}
 	if s.cfg.Chain.HeadSlot() >= highestFinalizedSlot {
 		// No need to sync, already synced to the finalized slot.
 		log.Debug("Already synced to finalized epoch")
+		log.Info("Already synced to finalized epoch")
 		return nil
 	}
 	queue := newBlocksQueue(ctx, &blocksQueueConfig{
@@ -79,8 +84,12 @@ func (s *Service) syncToFinalizedEpoch(ctx context.Context, genesis time.Time) e
 	if err := queue.start(); err != nil {
 		return err
 	}
+	log.Info("intor?")
+	log.Info("intor2?")
+	log.Info("intor3?")
 
 	for data := range queue.fetchedData {
+		log.Info("Processinggg")
 		s.processFetchedData(ctx, genesis, s.cfg.Chain.HeadSlot(), data)
 	}
 
@@ -88,6 +97,7 @@ func (s *Service) syncToFinalizedEpoch(ctx context.Context, genesis time.Time) e
 		"syncedSlot":  s.cfg.Chain.HeadSlot(),
 		"currentSlot": slots.Since(genesis),
 	}).Info("Synced to finalized epoch - now syncing blocks up to current head")
+	log.Info("in dg chi mige ?!")
 	if err := queue.stop(); err != nil {
 		log.WithError(err).Debug("Error stopping queue")
 	}
@@ -98,6 +108,7 @@ func (s *Service) syncToFinalizedEpoch(ctx context.Context, genesis time.Time) e
 // syncToNonFinalizedEpoch sync from head to best known non-finalized epoch supported by majority
 // of peers (no less than MinimumSyncPeers*2 peers).
 func (s *Service) syncToNonFinalizedEpoch(ctx context.Context, genesis time.Time) error {
+	log.Info("tashrif avardan inja")
 	queue := newBlocksQueue(ctx, &blocksQueueConfig{
 		p2p:                 s.cfg.P2P,
 		db:                  s.cfg.DB,
@@ -109,8 +120,10 @@ func (s *Service) syncToNonFinalizedEpoch(ctx context.Context, genesis time.Time
 		return err
 	}
 	for data := range queue.fetchedData {
+		log.Info("hala process konn")
 		s.processFetchedDataRegSync(ctx, genesis, s.cfg.Chain.HeadSlot(), data)
 	}
+	log.Info("be etmam resid")
 	log.WithFields(logrus.Fields{
 		"syncedSlot":  s.cfg.Chain.HeadSlot(),
 		"currentSlot": slots.Since(genesis),

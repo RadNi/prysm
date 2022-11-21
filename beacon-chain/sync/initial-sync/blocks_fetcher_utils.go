@@ -59,6 +59,7 @@ func (f *blocksFetcher) nonSkippedSlotAfterWithPeersTarget(
 ) (types.Slot, error) {
 	// Exit early if no peers are ready.
 	if len(peers) == 0 {
+		log.Info("panjo panjo panj")
 		return 0, errNoPeersAvailable
 	}
 
@@ -175,6 +176,7 @@ func (f *blocksFetcher) findFork(ctx context.Context, slot types.Slot) (*forkDat
 	// Exit early if no peers are ready.
 	_, peers := f.p2p.Peers().BestNonFinalized(1, epoch+1)
 	if len(peers) == 0 {
+		log.Info("shisho shisho shish")
 		return nil, errNoPeersAvailable
 	}
 	f.rand.Shuffle(len(peers), func(i, j int) {
@@ -307,12 +309,19 @@ func (f *blocksFetcher) bestNonFinalizedSlot() types.Slot {
 // epoch. For the latter peers supporting that target epoch are returned as well.
 func (f *blocksFetcher) calculateHeadAndTargetEpochs() (headEpoch, targetEpoch types.Epoch, peers []peer.ID) {
 	if f.mode == modeStopOnFinalizedEpoch {
+		log.Info("injao")
 		cp := f.chain.FinalizedCheckpt()
+		log.Info(cp)
 		headEpoch = cp.Epoch
+		log.Info(headEpoch)
 		targetEpoch, peers = f.p2p.Peers().BestFinalized(params.BeaconConfig().MaxPeersToSync, headEpoch)
 	} else {
+		log.Info("oonja")
 		headEpoch = slots.ToEpoch(f.chain.HeadSlot())
 		targetEpoch, peers = f.p2p.Peers().BestNonFinalized(flags.Get().MinimumSyncPeers, headEpoch)
+		log.Info(headEpoch)
+		log.Info(targetEpoch)
+		log.Info(flags.Get().MinimumSyncPeers)
 	}
 	return headEpoch, targetEpoch, peers
 }

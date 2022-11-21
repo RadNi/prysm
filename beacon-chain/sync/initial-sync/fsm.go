@@ -164,6 +164,9 @@ func (m *stateMachine) setState(name stateID) {
 // trigger invokes the event handler on a given state machine.
 func (m *stateMachine) trigger(event eventID, data interface{}) error {
 	handlers, ok := m.smm.handlers[m.state]
+	log.Info("inside trigger")
+	log.Info(m.state)
+	log.Info(event)
 	if !ok {
 		return fmt.Errorf("no event handlers registered for event: %v, state: %v", event, m.state)
 	}

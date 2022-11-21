@@ -186,6 +186,7 @@ func (q *blocksQueue) loop() {
 
 	ticker := time.NewTicker(pollingInterval)
 	defer ticker.Stop()
+	log.Info("loop tashrif avordan")
 	for {
 		if waitHighestExpectedSlot(q) {
 			continue
@@ -202,6 +203,7 @@ func (q *blocksQueue) loop() {
 		case <-ticker.C:
 			for _, key := range q.smm.keys {
 				fsm := q.smm.machines[key]
+				log.Info("az inja ejra mishe")
 				if err := fsm.trigger(eventTick, nil); err != nil {
 					log.WithFields(logrus.Fields{
 						"highestExpectedSlot":       q.highestExpectedSlot,
@@ -305,7 +307,10 @@ func (q *blocksQueue) onScheduleEvent(ctx context.Context) eventHandlerFn {
 // onDataReceivedEvent is an event called when data is received from fetcher.
 func (q *blocksQueue) onDataReceivedEvent(ctx context.Context) eventHandlerFn {
 	return func(m *stateMachine, in interface{}) (stateID, error) {
+		log.Info("asan miad inja?")
+		log.Info(m.state)
 		if ctx.Err() != nil {
+			log.Info("inja chetor?")
 			return m.state, ctx.Err()
 		}
 		if m.state != stateScheduled {
@@ -329,6 +334,9 @@ func (q *blocksQueue) onDataReceivedEvent(ctx context.Context) eventHandlerFn {
 				q.blocksFetcher.p2p.Peers().Scorers().BadResponsesScorer().Increment(m.pid)
 				log.WithField("pid", response.pid).Debug("Peer is penalized for invalid blocks")
 			}
+			log.Info("bad miad inja. ajibe!")
+			log.Info(m.state)
+			log.Info(response.err)
 			return m.state, response.err
 		}
 		m.pid = response.pid
@@ -340,6 +348,7 @@ func (q *blocksQueue) onDataReceivedEvent(ctx context.Context) eventHandlerFn {
 // onReadyToSendEvent is an event called to allow epochs with available blocks to send them downstream.
 func (q *blocksQueue) onReadyToSendEvent(ctx context.Context) eventHandlerFn {
 	return func(m *stateMachine, in interface{}) (stateID, error) {
+		log.Info("injaha miad vali khalie!")
 		if ctx.Err() != nil {
 			return m.state, ctx.Err()
 		}
@@ -350,6 +359,7 @@ func (q *blocksQueue) onReadyToSendEvent(ctx context.Context) eventHandlerFn {
 		if len(m.blocks) == 0 {
 			return stateSkipped, nil
 		}
+		log.Info("avazi miai?")
 
 		send := func() (stateID, error) {
 			data := &blocksQueueFetchedData{
@@ -380,6 +390,7 @@ func (q *blocksQueue) onReadyToSendEvent(ctx context.Context) eventHandlerFn {
 				}
 			}
 		}
+		log.Info("in che kooftie?")
 
 		return send()
 	}

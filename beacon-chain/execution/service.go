@@ -563,12 +563,14 @@ func (s *Service) initPOWService() {
 				// we assume the genesis block to be 0.
 				if genHash != [32]byte{} {
 					genHeader, err := s.eth1DataFetcher.HeaderByHash(ctx, genHash)
+					log.Info(genHash.Hex())
 					if err != nil {
 						s.retryExecutionClientConnection(ctx, err)
 						errorLogger(err, "Unable to retrieve proof-of-stake genesis block data")
 						continue
 					}
 					genBlock = genHeader.Number.Uint64()
+					log.Info(genBlock)
 				}
 				s.chainStartData.GenesisBlock = genBlock
 				if err := s.savePowchainData(ctx); err != nil {
@@ -737,6 +739,8 @@ func (s *Service) initializeEth1Data(ctx context.Context, eth1DataInDB *ethpb.ET
 		return err
 	}
 	s.chainStartData = eth1DataInDB.ChainstartData
+	//var log = logrus.WithField("prefix", "radni")
+	log.Info(common.BytesToHash(s.chainStartData.Eth1Data.BlockHash).Hex())
 	if !reflect.ValueOf(eth1DataInDB.BeaconState).IsZero() {
 		s.preGenesisState, err = native.InitializeFromProtoPhase0(eth1DataInDB.BeaconState)
 		if err != nil {

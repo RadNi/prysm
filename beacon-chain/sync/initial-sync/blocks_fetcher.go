@@ -258,6 +258,7 @@ func (f *blocksFetcher) handleRequest(ctx context.Context, start types.Slot, cou
 
 	_, targetEpoch, peers := f.calculateHeadAndTargetEpochs()
 	if len(peers) == 0 {
+		log.Info("yeko yeko yek")
 		response.err = errNoPeersAvailable
 		return response
 	}
@@ -300,6 +301,7 @@ func (f *blocksFetcher) fetchBlocksFromPeer(
 			log.WithError(err).Debug("Could not request blocks by range")
 		}
 	}
+	log.Info("do do do")
 	return nil, "", errNoPeersAvailable
 }
 

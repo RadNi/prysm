@@ -412,6 +412,8 @@ func (p *Status) Connected() []peer.ID {
 	defer p.store.RUnlock()
 	peers := make([]peer.ID, 0)
 	for pid, peerData := range p.store.Peers() {
+		log.Info("Peeersss:")
+		log.Info(pid)
 		if peerData.ConnState == PeerConnected {
 			peers = append(peers, pid)
 		}
@@ -653,7 +655,12 @@ func (p *Status) BestFinalized(maxPeers int, ourFinalizedEpoch types.Epoch) (typ
 	potentialPIDs := make([]peer.ID, 0, len(connected))
 	for _, pid := range connected {
 		peerChainState, err := p.ChainState(pid)
+		log.Info("pid haie in yeki:")
+		log.Info(pid)
+		log.Info(peerChainState.FinalizedEpoch)
+		log.Info(ourFinalizedEpoch)
 		if err == nil && peerChainState != nil && peerChainState.FinalizedEpoch >= ourFinalizedEpoch {
+			log.Info("miad?")
 			finalizedEpochVotes[peerChainState.FinalizedEpoch]++
 			pidEpoch[pid] = peerChainState.FinalizedEpoch
 			potentialPIDs = append(potentialPIDs, pid)
@@ -678,7 +685,7 @@ func (p *Status) BestFinalized(maxPeers int, ourFinalizedEpoch types.Epoch) (typ
 		}
 		return pidEpoch[potentialPIDs[i]] > pidEpoch[potentialPIDs[j]]
 	})
-
+	log.Info("injaha chetor?")
 	// Trim potential peers to those on or after target epoch.
 	for i, pid := range potentialPIDs {
 		if pidEpoch[pid] < targetEpoch {
@@ -686,7 +693,7 @@ func (p *Status) BestFinalized(maxPeers int, ourFinalizedEpoch types.Epoch) (typ
 			break
 		}
 	}
-
+	log.Info("hatta in?")
 	// Trim potential peers to at most maxPeers.
 	if len(potentialPIDs) > maxPeers {
 		potentialPIDs = potentialPIDs[:maxPeers]
@@ -719,6 +726,9 @@ func (p *Status) BestNonFinalized(minPeers int, ourHeadEpoch types.Epoch) (types
 	// Select the target epoch, which has enough peers' votes (>= minPeers).
 	var targetEpoch types.Epoch
 	for epoch, votes := range epochVotes {
+		log.Info("votea ham inan:")
+		log.Info(epoch)
+		log.Info(votes)
 		if votes >= uint64(minPeers) && targetEpoch < epoch {
 			targetEpoch = epoch
 		}
@@ -731,6 +741,9 @@ func (p *Status) BestNonFinalized(minPeers int, ourHeadEpoch types.Epoch) (types
 
 	// Trim potential peers to those on or after target epoch.
 	for i, pid := range potentialPIDs {
+		log.Info("peers inan:")
+		log.Info(pid)
+		log.Info(pidEpoch[pid])
 		if pidEpoch[pid] < targetEpoch {
 			potentialPIDs = potentialPIDs[:i]
 			break

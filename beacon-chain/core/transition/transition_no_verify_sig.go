@@ -266,7 +266,7 @@ func ProcessOperationsNoVerifyAttsSigs(
 //    process_randao(state, block.body)
 //    process_eth1_data(state, block.body)
 //    process_operations(state, block.body)
-//    process_sync_aggregate(state, block.body.sync_aggregate)
+//    process_SLOTS_PER_EPOCHsync_aggregate(state, block.body.sync_aggregate)
 func ProcessBlockForStateRoot(
 	ctx context.Context,
 	state state.BeaconState,

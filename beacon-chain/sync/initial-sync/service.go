@@ -77,8 +77,14 @@ func NewService(ctx context.Context, cfg *Config) *Service {
 // Start the initial sync service.
 func (s *Service) Start() {
 	// Wait for state initialized event.
+
+	var log = logrus.WithField("prefix", "radni")
+	log.Info("attempt to start")
 	genesis := <-s.genesisChan
 	if genesis.IsZero() {
+
+		//var log = logrus.WithField("prefix", "radni")
+		log.Info("Exiting initial sync service")
 		log.Debug("Exiting Initial Sync Service")
 		return
 	}
@@ -101,11 +107,15 @@ func (s *Service) Start() {
 		s.markSynced(genesis)
 		return
 	}
+	log.Info("wait for minimum?")
 	s.waitForMinimumPeers()
+	log.Info("yes")
 	if err := s.roundRobinSync(genesis); err != nil {
 		if errors.Is(s.ctx.Err(), context.Canceled) {
+			log.Info("aammmaaadd")
 			return
 		}
+		log.Info("panic kardd")
 		panic(err)
 	}
 	log.Infof("Synced up to slot %d", s.cfg.Chain.HeadSlot())
@@ -128,6 +138,8 @@ func (s *Service) Status() error {
 
 // Syncing returns true if initial sync is still running.
 func (s *Service) Syncing() bool {
+	//var log = logrus.WithField("prefix", "radni")
+	//log.Info("yoyo")
 	return s.synced.IsNotSet()
 }
 
@@ -150,6 +162,8 @@ func (s *Service) Resync() error {
 	}
 
 	// Set it to false since we are syncing again.
+	var log = logrus.WithField("prefix", "radni")
+	log.Info("yoyo Resync")
 	s.synced.UnSet()
 	defer func() { s.synced.Set() }()                       // Reset it at the end of the method.
 	genesis := time.Unix(int64(headState.GenesisTime()), 0) // lint:ignore uintcast -- Genesis time will not exceed int64 in your lifetime.

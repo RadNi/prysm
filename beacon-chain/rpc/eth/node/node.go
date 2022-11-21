@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/sirupsen/logrus"
 	"github.com/libp2p/go-libp2p/core/peer"
 	"github.com/pkg/errors"
 	grpcutil "github.com/prysmaticlabs/prysm/v3/api/grpc"
@@ -271,6 +272,9 @@ func (ns *Server) GetSyncStatus(ctx context.Context, _ *emptypb.Empty) (*ethpb.S
 	}
 
 	headSlot := ns.HeadFetcher.HeadSlot()
+	var log = logrus.WithField("prefix", "powchain")
+	log.Info(ns.GenesisTimeFetcher.CurrentSlot())
+	log.Info(headSlot)
 	return &ethpb.SyncingResponse{
 		Data: &ethpb.SyncInfo{
 			HeadSlot:     headSlot,
