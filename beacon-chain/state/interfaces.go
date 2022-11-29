@@ -63,6 +63,8 @@ type ReadOnlyBeaconState interface {
 	IsNil() bool
 	Version() int
 	LatestExecutionPayloadHeader() (interfaces.ExecutionData, error)
+	LastWithdrawalValidatorIndex() (types.ValidatorIndex, error)
+	ExpectedWithdrawals() ([]*enginev1.Withdrawal, error)
 }
 
 // WriteOnlyBeaconState defines a struct which only has write access to beacon state methods.
@@ -85,10 +87,8 @@ type WriteOnlyBeaconState interface {
 	UpdateSlashingsAtIndex(idx, val uint64) error
 	AppendHistoricalRoots(root [32]byte) error
 	SetLatestExecutionPayloadHeader(payload interfaces.ExecutionData) error
-	SetWithdrawalQueue(val []*enginev1.Withdrawal) error
-	AppendWithdrawal(val *enginev1.Withdrawal) error
 	SetNextWithdrawalIndex(i uint64) error
-	SetNextPartialWithdrawalValidatorIndex(i types.ValidatorIndex) error
+	SetLastWithdrawalValidatorIndex(i types.ValidatorIndex) error
 }
 
 // ReadOnlyValidator defines a struct which only has read access to validator methods.
