@@ -2,6 +2,8 @@ package enginev1
 
 import (
 	"encoding/json"
+	"fmt"
+	"github.com/ethereum/go-ethereum/log"
 	"math/big"
 	"reflect"
 	"strings"
@@ -237,22 +239,40 @@ func (e *ExecutionPayload) UnmarshalJSON(enc []byte) error {
 }
 
 type payloadAttributesJSON struct {
-	Timestamp             hexutil.Uint64 `json:"timestamp"`
-	PrevRandao            hexutil.Bytes  `json:"prevRandao"`
-	SuggestedFeeRecipient hexutil.Bytes  `json:"suggestedFeeRecipient"`
+	Timestamp             hexutil.Uint64  `json:"timestamp"`
+	PrevRandao            hexutil.Bytes   `json:"prevRandao"`
+	SuggestedFeeRecipient hexutil.Bytes   `json:"suggestedFeeRecipient"`
+	D                     hexutil.Bytes   `json:"d"`
+	Primes                []hexutil.Bytes `json:"primes"`
 }
 
 // MarshalJSON --
 func (p *PayloadAttributes) MarshalJSON() ([]byte, error) {
-	return json.Marshal(payloadAttributesJSON{
+	primes := make([]hexutil.Bytes, len(p.Primes))
+	for i, v := range p.Primes {
+		primes[i] = v
+	}
+	log.Info("Marshal json")
+	ret, er := json.Marshal(payloadAttributesJSON{
 		Timestamp:             hexutil.Uint64(p.Timestamp),
 		PrevRandao:            p.PrevRandao,
 		SuggestedFeeRecipient: p.SuggestedFeeRecipient,
+		D:                     p.D,
+		Primes:                primes,
 	})
+	if er != nil {
+		log.Info("error khord")
+	}
+	fmt.Printf("%v\n", ret)
+	return ret, er
 }
 
 // UnmarshalJSON --
 func (p *PayloadAttributes) UnmarshalJSON(enc []byte) error {
+	primes := make([][]byte, len(p.Primes))
+	for i, v := range p.Primes {
+		primes[i] = v
+	}
 	dec := payloadAttributesJSON{}
 	if err := json.Unmarshal(enc, &dec); err != nil {
 		return err
@@ -261,6 +281,8 @@ func (p *PayloadAttributes) UnmarshalJSON(enc []byte) error {
 	p.Timestamp = uint64(dec.Timestamp)
 	p.PrevRandao = dec.PrevRandao
 	p.SuggestedFeeRecipient = dec.SuggestedFeeRecipient
+	p.D = dec.D
+	p.Primes = primes
 	return nil
 }
 

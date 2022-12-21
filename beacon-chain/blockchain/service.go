@@ -240,6 +240,11 @@ func (s *Service) StartFromSavedState(saved state.BeaconState) error {
 		return errors.Wrap(err, "could not verify initial checkpoint provided for chain sync")
 	}
 
+	log.Info("radni:")
+	log.Info(s.genesisTime)
+	log.Info(slots.ToEpoch(slots.Since(s.genesisTime)))
+	log.Info(params.BeaconConfig().SlotsPerEpoch)
+	log.Info(params.BeaconConfig().SecondsPerSlot)
 	s.cfg.StateNotifier.StateFeed().Send(&feed.Event{
 		Type: statefeed.Initialized,
 		Data: &statefeed.InitializedData{

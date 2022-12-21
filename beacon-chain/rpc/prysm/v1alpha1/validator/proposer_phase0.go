@@ -75,6 +75,7 @@ func (vs *Server) getPhase0BeaconBlock(ctx context.Context, req *ethpb.BlockRequ
 
 // Build data required for creating a new beacon block, so this method can be shared across forks.
 func (vs *Server) buildPhase0BlockData(ctx context.Context, req *ethpb.BlockRequest) (*blockData, error) {
+	log.Info("radni: buildPhase0BlockData")
 	ctx, span := trace.StartSpan(ctx, "ProposerServer.buildPhase0BlockData")
 	defer span.End()
 

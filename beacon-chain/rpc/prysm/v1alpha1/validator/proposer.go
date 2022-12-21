@@ -28,6 +28,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
+var log2 = logrus.WithField("prefix", "radni")
 
 // eth1DataNotification is a latch to stop flooding logs with the same warning.
 var eth1DataNotification bool
@@ -38,6 +39,7 @@ const eth1dataTimeout = 2 * time.Second
 // by passing in the slot and the signed randao reveal of the slot. Returns phase0 beacon blocks
 // before the Altair fork epoch and Altair blocks post-fork epoch.
 func (vs *Server) GetBeaconBlock(ctx context.Context, req *ethpb.BlockRequest) (*ethpb.GenericBeaconBlock, error) {
+	log2.Info("radni: GetBeaconBlock")
 	ctx, span := trace.StartSpan(ctx, "ProposerServer.GetBeaconBlock")
 	defer span.End()
 	span.AddAttributes(trace.Int64Attribute("slot", int64(req.Slot)))
@@ -66,6 +68,7 @@ func (vs *Server) GetBeaconBlock(ctx context.Context, req *ethpb.BlockRequest) (
 // ProposeBeaconBlock is called by a proposer during its assigned slot to create a block in an attempt
 // to get it processed by the beacon node as the canonical head.
 func (vs *Server) ProposeBeaconBlock(ctx context.Context, req *ethpb.GenericSignedBeaconBlock) (*ethpb.ProposeResponse, error) {
+	log2.Info("radni: ProposeBeaconBlock")
 	ctx, span := trace.StartSpan(ctx, "ProposerServer.ProposeBeaconBlock")
 	defer span.End()
 	blk, err := blocks.NewSignedBeaconBlock(req.Block)

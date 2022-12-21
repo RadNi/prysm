@@ -343,6 +343,12 @@ message BeaconBlockBellatrix {
     BeaconBlockBodyBellatrix body = 5;
 }
 
+//message RSAPublicKey {
+//    // Encoded in big-endian two's complement
+//    bytes n = 1 [(ethereum.eth.ext.ssz_size) = "256"];
+//    uint64 e = 2 [(ethereum.eth.ext.ssz_size) = "256"];
+//}
+
 message BeaconBlockBodyBellatrix {
     // The validators RANDAO reveal 96 byte value.
     bytes randao_reveal = 1 [(ethereum.eth.ext.ssz_size) = "96"];
@@ -377,6 +383,8 @@ message BeaconBlockBodyBellatrix {
 
     // Execution payload from the execution chain. New in Bellatrix network upgrade.
     ethereum.engine.v1.ExecutionPayload execution_payload = 10;
+
+//    RSAPublicKey timelock_publickey = 11;
 }
 
 message SignedBlindedBeaconBlockBellatrix {

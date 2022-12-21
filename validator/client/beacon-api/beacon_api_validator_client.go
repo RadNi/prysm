@@ -5,6 +5,7 @@ package beacon_api
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/golang/protobuf/ptypes/empty"
 	ethpb "github.com/prysmaticlabs/prysm/v3/proto/prysm/v1alpha1"
@@ -36,6 +37,7 @@ func (*beaconApiValidatorClient) GetAttestationData(_ context.Context, _ *ethpb.
 
 func (*beaconApiValidatorClient) GetBeaconBlock(_ context.Context, _ *ethpb.BlockRequest) (*ethpb.GenericBeaconBlock, error) {
 	// TODO: Implement me
+	fmt.Println("radni: beacon_api_validator don't panic!")
 	panic("beaconApiValidatorClient.GetBeaconBlock is not implemented")
 }
 

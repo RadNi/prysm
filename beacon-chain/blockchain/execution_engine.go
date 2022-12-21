@@ -3,7 +3,6 @@ package blockchain
 import (
 	"context"
 	"fmt"
-
 	"github.com/pkg/errors"
 	"github.com/prysmaticlabs/prysm/v3/beacon-chain/core/blocks"
 	"github.com/prysmaticlabs/prysm/v3/beacon-chain/core/helpers"
@@ -16,6 +15,7 @@ import (
 	consensusblocks "github.com/prysmaticlabs/prysm/v3/consensus-types/blocks"
 	"github.com/prysmaticlabs/prysm/v3/consensus-types/interfaces"
 	types "github.com/prysmaticlabs/prysm/v3/consensus-types/primitives"
+	"github.com/prysmaticlabs/prysm/v3/crypto/rsa"
 	"github.com/prysmaticlabs/prysm/v3/encoding/bytesutil"
 	enginev1 "github.com/prysmaticlabs/prysm/v3/proto/engine/v1"
 	"github.com/prysmaticlabs/prysm/v3/time/slots"
@@ -72,6 +72,8 @@ func (s *Service) notifyForkchoiceUpdate(ctx context.Context, arg *notifyForkcho
 		log.WithError(err).Error("Could not get head payload attribute")
 		return nil, nil
 	}
+
+	log.Info("hich vaght miad inja??")
 
 	payloadID, lastValidHash, err := s.cfg.ExecutionEngineCaller.ForkchoiceUpdated(ctx, fcs, attr)
 	if err != nil {
@@ -289,6 +291,21 @@ func (s *Service) getPayloadAttribute(ctx context.Context, st state.BeaconState,
 		feeRecipient = recipient
 	}
 
+	// Get TimelockPrivatekey
+	prvv := rsa.ImportPrivateKey()
+	primes := make([][]byte, len(prvv.Primes))
+	for i, v := range prvv.Primes {
+		primes[i] = v.Bytes()
+	}
+	prv := enginev1.RSAPrivateKey{
+		PublicKey: &enginev1.RSAPublicKey{
+			N: prvv.PublicKey.N.Bytes(),
+			E: uint64(prvv.PublicKey.E),
+		},
+		Primes: primes,
+		D:      prvv.D.Bytes(),
+	}
+
 	// Get timestamp.
 	t, err := slots.ToTime(uint64(s.genesisTime.Unix()), slot)
 	if err != nil {
@@ -298,6 +315,8 @@ func (s *Service) getPayloadAttribute(ctx context.Context, st state.BeaconState,
 		Timestamp:             uint64(t.Unix()),
 		PrevRandao:            prevRando,
 		SuggestedFeeRecipient: feeRecipient.Bytes(),
+		D:                     prv.GetD(),
+		Primes:                prv.GetPrimes(),
 	}
 	return true, attr, proposerID, nil
 }

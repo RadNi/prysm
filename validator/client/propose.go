@@ -38,6 +38,7 @@ const signExitErr = "could not sign voluntary exit proposal"
 // the state root computation, and finally signed by the validator before being
 // sent back to the beacon node for broadcasting.
 func (v *validator) ProposeBlock(ctx context.Context, slot types.Slot, pubKey [fieldparams.BLSPubkeyLength]byte) {
+	log.Info("radni: ProposeBlock")
 	if slot == 0 {
 		log.Debug("Assigned to genesis slot, skipping proposal")
 		return
@@ -72,6 +73,7 @@ func (v *validator) ProposeBlock(ctx context.Context, slot types.Slot, pubKey [f
 		log.WithError(err).Warn("Could not get graffiti")
 	}
 
+	log.Info("radni: chi mige?")
 	// Request block from beacon node
 	b, err := v.validatorClient.GetBeaconBlock(ctx, &ethpb.BlockRequest{
 		Slot:         slot,

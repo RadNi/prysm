@@ -39,6 +39,8 @@ var builderGetPayloadMissCount = promauto.NewCounter(prometheus.CounterOpts{
 const blockBuilderTimeout = 1 * time.Second
 
 func (vs *Server) getBellatrixBeaconBlock(ctx context.Context, req *ethpb.BlockRequest) (*ethpb.GenericBeaconBlock, error) {
+	log.Info("radni: getBellatrixBeaconBlock")
+	log.Info("radni: be nazar miad inja block ro misaze")
 	altairBlk, err := vs.BuildAltairBeaconBlock(ctx, req)
 	if err != nil {
 		return nil, err
@@ -68,6 +70,12 @@ func (vs *Server) getBellatrixBeaconBlock(ctx context.Context, req *ethpb.BlockR
 		return nil, err
 	}
 
+	log.Info("radni: unbelievable, vali resid")
+	//pk := rsa.ImportPublicKey()
+	//rsapk := &ethpb.RSAPublicKey{
+	//	N: pk.N.Bytes(),
+	//	E: uint64(pk.E),
+	//}
 	blk := &ethpb.BeaconBlockBellatrix{
 		Slot:          altairBlk.Slot,
 		ProposerIndex: altairBlk.ProposerIndex,
@@ -84,6 +92,7 @@ func (vs *Server) getBellatrixBeaconBlock(ctx context.Context, req *ethpb.BlockR
 			VoluntaryExits:    altairBlk.Body.VoluntaryExits,
 			SyncAggregate:     altairBlk.Body.SyncAggregate,
 			ExecutionPayload:  payload,
+			//TimelockPublickey: rsapk,
 		},
 	}
 	// Compute state root with the newly constructed block.

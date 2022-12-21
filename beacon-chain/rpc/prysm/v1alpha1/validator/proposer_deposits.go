@@ -18,6 +18,7 @@ import (
 )
 
 func (vs *Server) packDepositsAndAttestations(ctx context.Context, head state.BeaconState, eth1Data *ethpb.Eth1Data) ([]*ethpb.Deposit, []*ethpb.Attestation, error) {
+	log.Info("radni: packDepositsAndAttestations")
 	eg, egctx := errgroup.WithContext(ctx)
 	var deposits []*ethpb.Deposit
 	var atts []*ethpb.Attestation
