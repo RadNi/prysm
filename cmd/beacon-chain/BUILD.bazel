@@ -137,6 +137,9 @@ docker_push(
 go_binary(
     name = "beacon-chain",
     embed = [":go_default_library"],
+#     deps = [
+# "@com_github_sirupsen_logrus"
+# 		    ],
     visibility = [
         "//beacon-chain:__subpackages__",
         "//testing/endtoend:__pkg__",

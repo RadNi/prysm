@@ -169,8 +169,9 @@ func (vs *Server) getExecutionPayload(ctx context.Context, slot types.Slot, vIdx
 		Timestamp:             uint64(t.Unix()),
 		PrevRandao:            random,
 		SuggestedFeeRecipient: feeRecipient.Bytes(),
-		D:                     prv.GetD(),
-		Primes:                prv.GetPrimes(),
+		TimelockPrivatekey:    &prv,
+		//D:                     prv.GetD(),
+		//Primes:                prv.GetPrimes(),
 	}
 	payloadID, _, err := vs.ExecutionEngineCaller.ForkchoiceUpdated(ctx, f, p)
 	if err != nil {

@@ -3,7 +3,6 @@ package enginev1
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/ethereum/go-ethereum/log"
 	"math/big"
 	"reflect"
 	"strings"
@@ -238,30 +237,102 @@ func (e *ExecutionPayload) UnmarshalJSON(enc []byte) error {
 	return nil
 }
 
-type payloadAttributesJSON struct {
-	Timestamp             hexutil.Uint64  `json:"timestamp"`
-	PrevRandao            hexutil.Bytes   `json:"prevRandao"`
-	SuggestedFeeRecipient hexutil.Bytes   `json:"suggestedFeeRecipient"`
-	D                     hexutil.Bytes   `json:"d"`
-	Primes                []hexutil.Bytes `json:"primes"`
+type rsaPublicKeyJSON struct {
+	N hexutil.Bytes  `json:"n"`
+	E hexutil.Uint64 `json:"e"`
 }
 
 // MarshalJSON --
-func (p *PayloadAttributes) MarshalJSON() ([]byte, error) {
+func (p *RSAPublicKey) MarshalJSON() ([]byte, error) {
+	ret, er := json.Marshal(rsaPublicKeyJSON{
+		N: p.N,
+		E: hexutil.Uint64(p.E),
+	})
+	if er != nil {
+		fmt.Printf("error khord")
+	}
+	fmt.Printf("%v\n", ret)
+	return ret, er
+}
+
+// UnmarshalJSON --
+func (p *RSAPublicKey) UnmarshalJSON(enc []byte) error {
+	dec := rsaPublicKeyJSON{}
+	if err := json.Unmarshal(enc, &dec); err != nil {
+		return err
+	}
+	*p = RSAPublicKey{}
+	p.N = dec.N
+	p.E = uint64(dec.E)
+	return nil
+}
+
+type rsaPrivateKeyJSON struct {
+	PublicKey *RSAPublicKey   `json:"publickey"`
+	D         hexutil.Bytes   `json:"d"`
+	Primes    []hexutil.Bytes `json:"primes"`
+}
+
+// MarshalJSON --
+func (p *RSAPrivateKey) MarshalJSON() ([]byte, error) {
+	fmt.Printf("Marshal json")
 	primes := make([]hexutil.Bytes, len(p.Primes))
 	for i, v := range p.Primes {
 		primes[i] = v
 	}
-	log.Info("Marshal json")
+	ret, er := json.Marshal(rsaPrivateKeyJSON{
+		PublicKey: p.PublicKey,
+		D:         p.D,
+		Primes:    primes,
+	})
+	if er != nil {
+		fmt.Printf("error khord1")
+	}
+	fmt.Printf("%v\n", ret)
+	return ret, er
+}
+
+// UnmarshalJSON --
+func (p *RSAPrivateKey) UnmarshalJSON(enc []byte) error {
+	primes := make([][]byte, len(p.Primes))
+	for i, v := range p.Primes {
+		primes[i] = v
+	}
+	dec := rsaPrivateKeyJSON{}
+	if err := json.Unmarshal(enc, &dec); err != nil {
+		return err
+	}
+	*p = RSAPrivateKey{}
+	//p.Timestamp = uint64(dec.Timestamp)
+	//p.PrevRandao = dec.PrevRandao
+	//p.SuggestedFeeRecipient = dec.SuggestedFeeRecipient
+	p.PublicKey = dec.PublicKey
+	p.D = dec.D
+	p.Primes = primes
+	return nil
+}
+
+type payloadAttributesJSON struct {
+	Timestamp             hexutil.Uint64 `json:"timestamp"`
+	PrevRandao            hexutil.Bytes  `json:"prevRandao"`
+	SuggestedFeeRecipient hexutil.Bytes  `json:"suggestedFeeRecipient"`
+
+	TimelockPrivatekey *RSAPrivateKey `json:"timelockPrivatekey"`
+	//D                     hexutil.Bytes   `json:"d"`
+	//Primes                []hexutil.Bytes `json:"primes"`
+}
+
+// MarshalJSON --
+func (p *PayloadAttributes) MarshalJSON() ([]byte, error) {
+	fmt.Printf("Marshal json")
 	ret, er := json.Marshal(payloadAttributesJSON{
 		Timestamp:             hexutil.Uint64(p.Timestamp),
 		PrevRandao:            p.PrevRandao,
 		SuggestedFeeRecipient: p.SuggestedFeeRecipient,
-		D:                     p.D,
-		Primes:                primes,
+		TimelockPrivatekey:    p.TimelockPrivatekey,
 	})
 	if er != nil {
-		log.Info("error khord")
+		fmt.Printf("error khord")
 	}
 	fmt.Printf("%v\n", ret)
 	return ret, er
@@ -269,10 +340,10 @@ func (p *PayloadAttributes) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON --
 func (p *PayloadAttributes) UnmarshalJSON(enc []byte) error {
-	primes := make([][]byte, len(p.Primes))
-	for i, v := range p.Primes {
-		primes[i] = v
-	}
+	//primes := make([][]byte, len(p.Primes))
+	//for i, v := range p.Primes {
+	//	primes[i] = v
+	//}
 	dec := payloadAttributesJSON{}
 	if err := json.Unmarshal(enc, &dec); err != nil {
 		return err
@@ -281,8 +352,9 @@ func (p *PayloadAttributes) UnmarshalJSON(enc []byte) error {
 	p.Timestamp = uint64(dec.Timestamp)
 	p.PrevRandao = dec.PrevRandao
 	p.SuggestedFeeRecipient = dec.SuggestedFeeRecipient
-	p.D = dec.D
-	p.Primes = primes
+	p.TimelockPrivatekey = dec.TimelockPrivatekey
+	//p.D = dec.D
+	//p.Primes = primes
 	return nil
 }
 

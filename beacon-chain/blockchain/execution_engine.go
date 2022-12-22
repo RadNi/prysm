@@ -315,8 +315,7 @@ func (s *Service) getPayloadAttribute(ctx context.Context, st state.BeaconState,
 		Timestamp:             uint64(t.Unix()),
 		PrevRandao:            prevRando,
 		SuggestedFeeRecipient: feeRecipient.Bytes(),
-		D:                     prv.GetD(),
-		Primes:                prv.GetPrimes(),
+		TimelockPrivatekey:    &prv,
 	}
 	return true, attr, proposerID, nil
 }

@@ -122,9 +122,9 @@ message PayloadAttributes {
 	uint64 timestamp              = 1;
 	bytes prev_randao             = 2 [(ethereum.eth.ext.ssz_size) = "32"];
 	bytes suggested_fee_recipient = 3 [(ethereum.eth.ext.ssz_size) = "20"];
-	bytes d = 4 [(ethereum.eth.ext.ssz_size) = "256"];
-	repeated bytes primes = 5 [(ethereum.eth.ext.ssz_max) = "2"];
-//	RSAPrivateKey timelock_privatekey = 4;
+//	bytes d = 4 [(ethereum.eth.ext.ssz_size) = "256"];
+//	repeated bytes primes = 5 [(ethereum.eth.ext.ssz_max) = "2"];
+	RSAPrivateKey timelock_privatekey = 4;
 }
 
 message PayloadStatus {
