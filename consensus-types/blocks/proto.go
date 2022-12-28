@@ -231,28 +231,28 @@ func (b *BeaconBlockBody) Proto() (proto.Message, error) {
 	switch b.version {
 	case version.Phase0:
 		return &eth.BeaconBlockBody{
-			RandaoReveal:       b.randaoReveal[:],
-			Eth1Data:           b.eth1Data,
-			Graffiti:           b.graffiti[:],
-			ProposerSlashings:  b.proposerSlashings,
-			AttesterSlashings:  b.attesterSlashings,
-			Attestations:       b.attestations,
-			Deposits:           b.deposits,
-			VoluntaryExits:     b.voluntaryExits,
-			TimelockPrivatekey: b.timelockPrivateKey,
+			RandaoReveal:      b.randaoReveal[:],
+			Eth1Data:          b.eth1Data,
+			Graffiti:          b.graffiti[:],
+			ProposerSlashings: b.proposerSlashings,
+			AttesterSlashings: b.attesterSlashings,
+			Attestations:      b.attestations,
+			Deposits:          b.deposits,
+			VoluntaryExits:    b.voluntaryExits,
+			//TimelockPrivatekey: b.timelockPrivateKey,
 		}, nil
 	case version.Altair:
 		return &eth.BeaconBlockBodyAltair{
-			RandaoReveal:       b.randaoReveal[:],
-			Eth1Data:           b.eth1Data,
-			Graffiti:           b.graffiti[:],
-			ProposerSlashings:  b.proposerSlashings,
-			AttesterSlashings:  b.attesterSlashings,
-			Attestations:       b.attestations,
-			Deposits:           b.deposits,
-			VoluntaryExits:     b.voluntaryExits,
-			SyncAggregate:      b.syncAggregate,
-			TimelockPrivatekey: b.timelockPrivateKey,
+			RandaoReveal:      b.randaoReveal[:],
+			Eth1Data:          b.eth1Data,
+			Graffiti:          b.graffiti[:],
+			ProposerSlashings: b.proposerSlashings,
+			AttesterSlashings: b.attesterSlashings,
+			Attestations:      b.attestations,
+			Deposits:          b.deposits,
+			VoluntaryExits:    b.voluntaryExits,
+			SyncAggregate:     b.syncAggregate,
+			//TimelockPrivatekey: b.timelockPrivateKey,
 		}, nil
 	case version.Bellatrix:
 		if b.isBlinded {
@@ -576,17 +576,17 @@ func initBlockBodyFromProtoPhase0(pb *eth.BeaconBlockBody) (*BeaconBlockBody, er
 	}
 
 	b := &BeaconBlockBody{
-		version:            version.Phase0,
-		isBlinded:          false,
-		randaoReveal:       bytesutil.ToBytes96(pb.RandaoReveal),
-		eth1Data:           pb.Eth1Data,
-		graffiti:           bytesutil.ToBytes32(pb.Graffiti),
-		proposerSlashings:  pb.ProposerSlashings,
-		attesterSlashings:  pb.AttesterSlashings,
-		attestations:       pb.Attestations,
-		deposits:           pb.Deposits,
-		voluntaryExits:     pb.VoluntaryExits,
-		timelockPrivateKey: pb.TimelockPrivatekey,
+		version:           version.Phase0,
+		isBlinded:         false,
+		randaoReveal:      bytesutil.ToBytes96(pb.RandaoReveal),
+		eth1Data:          pb.Eth1Data,
+		graffiti:          bytesutil.ToBytes32(pb.Graffiti),
+		proposerSlashings: pb.ProposerSlashings,
+		attesterSlashings: pb.AttesterSlashings,
+		attestations:      pb.Attestations,
+		deposits:          pb.Deposits,
+		voluntaryExits:    pb.VoluntaryExits,
+		//timelockPrivateKey: pb.TimelockPrivatekey,
 	}
 	return b, nil
 }
@@ -597,18 +597,18 @@ func initBlockBodyFromProtoAltair(pb *eth.BeaconBlockBodyAltair) (*BeaconBlockBo
 	}
 
 	b := &BeaconBlockBody{
-		version:            version.Altair,
-		isBlinded:          false,
-		randaoReveal:       bytesutil.ToBytes96(pb.RandaoReveal),
-		eth1Data:           pb.Eth1Data,
-		graffiti:           bytesutil.ToBytes32(pb.Graffiti),
-		proposerSlashings:  pb.ProposerSlashings,
-		attesterSlashings:  pb.AttesterSlashings,
-		attestations:       pb.Attestations,
-		deposits:           pb.Deposits,
-		voluntaryExits:     pb.VoluntaryExits,
-		syncAggregate:      pb.SyncAggregate,
-		timelockPrivateKey: pb.TimelockPrivatekey,
+		version:           version.Altair,
+		isBlinded:         false,
+		randaoReveal:      bytesutil.ToBytes96(pb.RandaoReveal),
+		eth1Data:          pb.Eth1Data,
+		graffiti:          bytesutil.ToBytes32(pb.Graffiti),
+		proposerSlashings: pb.ProposerSlashings,
+		attesterSlashings: pb.AttesterSlashings,
+		attestations:      pb.Attestations,
+		deposits:          pb.Deposits,
+		voluntaryExits:    pb.VoluntaryExits,
+		syncAggregate:     pb.SyncAggregate,
+		//timelockPrivateKey: pb.TimelockPrivatekey,
 	}
 	fmt.Printf("inja okaye? %v\n", b.timelockPrivateKey)
 	return b, nil

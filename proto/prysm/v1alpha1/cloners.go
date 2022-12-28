@@ -112,15 +112,15 @@ func CopyBeaconBlockBody(body *BeaconBlockBody) *BeaconBlockBody {
 		return nil
 	}
 	return &BeaconBlockBody{
-		RandaoReveal:       bytesutil.SafeCopyBytes(body.RandaoReveal),
-		Eth1Data:           CopyETH1Data(body.Eth1Data),
-		Graffiti:           bytesutil.SafeCopyBytes(body.Graffiti),
-		ProposerSlashings:  CopyProposerSlashings(body.ProposerSlashings),
-		AttesterSlashings:  CopyAttesterSlashings(body.AttesterSlashings),
-		Attestations:       CopyAttestations(body.Attestations),
-		Deposits:           CopyDeposits(body.Deposits),
-		VoluntaryExits:     CopySignedVoluntaryExits(body.VoluntaryExits),
-		TimelockPrivatekey: CopyBeaconBlockTimelockPrivateKey(body.TimelockPrivatekey),
+		RandaoReveal:      bytesutil.SafeCopyBytes(body.RandaoReveal),
+		Eth1Data:          CopyETH1Data(body.Eth1Data),
+		Graffiti:          bytesutil.SafeCopyBytes(body.Graffiti),
+		ProposerSlashings: CopyProposerSlashings(body.ProposerSlashings),
+		AttesterSlashings: CopyAttesterSlashings(body.AttesterSlashings),
+		Attestations:      CopyAttestations(body.Attestations),
+		Deposits:          CopyDeposits(body.Deposits),
+		VoluntaryExits:    CopySignedVoluntaryExits(body.VoluntaryExits),
+		//TimelockPrivatekey: CopyTimelockPrivatekey(body.TimelockPrivatekey),
 	}
 }
 
@@ -155,16 +155,16 @@ func CopyBeaconBlockBodyAltair(body *BeaconBlockBodyAltair) *BeaconBlockBodyAlta
 		return nil
 	}
 	return &BeaconBlockBodyAltair{
-		RandaoReveal:       bytesutil.SafeCopyBytes(body.RandaoReveal),
-		Eth1Data:           CopyETH1Data(body.Eth1Data),
-		Graffiti:           bytesutil.SafeCopyBytes(body.Graffiti),
-		ProposerSlashings:  CopyProposerSlashings(body.ProposerSlashings),
-		AttesterSlashings:  CopyAttesterSlashings(body.AttesterSlashings),
-		Attestations:       CopyAttestations(body.Attestations),
-		Deposits:           CopyDeposits(body.Deposits),
-		VoluntaryExits:     CopySignedVoluntaryExits(body.VoluntaryExits),
-		SyncAggregate:      CopySyncAggregate(body.SyncAggregate),
-		TimelockPrivatekey: CopyBeaconBlockTimelockPrivateKey(body.TimelockPrivatekey),
+		RandaoReveal:      bytesutil.SafeCopyBytes(body.RandaoReveal),
+		Eth1Data:          CopyETH1Data(body.Eth1Data),
+		Graffiti:          bytesutil.SafeCopyBytes(body.Graffiti),
+		ProposerSlashings: CopyProposerSlashings(body.ProposerSlashings),
+		AttesterSlashings: CopyAttesterSlashings(body.AttesterSlashings),
+		Attestations:      CopyAttestations(body.Attestations),
+		Deposits:          CopyDeposits(body.Deposits),
+		VoluntaryExits:    CopySignedVoluntaryExits(body.VoluntaryExits),
+		SyncAggregate:     CopySyncAggregate(body.SyncAggregate),
+		//TimelockPrivatekey: CopyTimelockPrivatekey(body.TimelockPrivatekey),
 	}
 }
 
@@ -219,8 +219,8 @@ func CopyBeaconBlockHeader(header *BeaconBlockHeader) *BeaconBlockHeader {
 	}
 }
 
-// CopyBeaconBlockTimelockPrivateKey copies the provided BeaconBlockTimelockPrivateKey.
-func CopyBeaconBlockTimelockPrivateKey(prv *enginev1.RSAPrivateKey) *enginev1.RSAPrivateKey {
+// CopyTimelockPrivatekey copies the provided BeaconBlockTimelockPrivatekey.
+func CopyTimelockPrivatekey(prv *enginev1.RSAPrivateKey) *enginev1.RSAPrivateKey {
 	if prv == nil {
 		return nil
 	}
@@ -433,16 +433,17 @@ func CopyBeaconBlockBodyBellatrix(body *BeaconBlockBodyBellatrix) *BeaconBlockBo
 		return nil
 	}
 	return &BeaconBlockBodyBellatrix{
-		RandaoReveal:      bytesutil.SafeCopyBytes(body.RandaoReveal),
-		Eth1Data:          CopyETH1Data(body.Eth1Data),
-		Graffiti:          bytesutil.SafeCopyBytes(body.Graffiti),
-		ProposerSlashings: CopyProposerSlashings(body.ProposerSlashings),
-		AttesterSlashings: CopyAttesterSlashings(body.AttesterSlashings),
-		Attestations:      CopyAttestations(body.Attestations),
-		Deposits:          CopyDeposits(body.Deposits),
-		VoluntaryExits:    CopySignedVoluntaryExits(body.VoluntaryExits),
-		SyncAggregate:     CopySyncAggregate(body.SyncAggregate),
-		ExecutionPayload:  CopyExecutionPayload(body.ExecutionPayload),
+		RandaoReveal:       bytesutil.SafeCopyBytes(body.RandaoReveal),
+		Eth1Data:           CopyETH1Data(body.Eth1Data),
+		Graffiti:           bytesutil.SafeCopyBytes(body.Graffiti),
+		ProposerSlashings:  CopyProposerSlashings(body.ProposerSlashings),
+		AttesterSlashings:  CopyAttesterSlashings(body.AttesterSlashings),
+		Attestations:       CopyAttestations(body.Attestations),
+		Deposits:           CopyDeposits(body.Deposits),
+		VoluntaryExits:     CopySignedVoluntaryExits(body.VoluntaryExits),
+		SyncAggregate:      CopySyncAggregate(body.SyncAggregate),
+		ExecutionPayload:   CopyExecutionPayload(body.ExecutionPayload),
+		TimelockPrivatekey: CopyTimelockPrivatekey(body.TimelockPrivatekey),
 	}
 }
 

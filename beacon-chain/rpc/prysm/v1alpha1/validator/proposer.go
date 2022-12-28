@@ -47,7 +47,7 @@ func (vs *Server) GetBeaconBlock(ctx context.Context, req *ethpb.BlockRequest) (
 	if slots.ToEpoch(req.Slot) < params.BeaconConfig().AltairForkEpoch {
 		log2.Info("phase0")
 		blk, err := vs.getPhase0BeaconBlock(ctx, req)
-		fmt.Printf("%v\n", blk)
+		//fmt.Printf("%v\n", blk)
 		if err != nil {
 			return nil, status.Errorf(codes.Internal, "Could not fetch phase0 beacon block: %v", err)
 		}
@@ -55,7 +55,7 @@ func (vs *Server) GetBeaconBlock(ctx context.Context, req *ethpb.BlockRequest) (
 	} else if slots.ToEpoch(req.Slot) < params.BeaconConfig().BellatrixForkEpoch {
 		log2.Info("altair")
 		blk, err := vs.getAltairBeaconBlock(ctx, req)
-		fmt.Printf("%v\n", blk)
+		//fmt.Printf("%v\n", blk)
 		if err != nil {
 			return nil, status.Errorf(codes.Internal, "Could not fetch Altair beacon block: %v", err)
 		}

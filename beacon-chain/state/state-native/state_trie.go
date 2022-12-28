@@ -196,9 +196,9 @@ func InitializeFromProtoUnsafePhase0(st *ethpb.BeaconState) (state.BeaconState, 
 	// Finalizer runs when dst is being destroyed in garbage collection.
 	runtime.SetFinalizer(b, finalizerCleanup)
 	if b.latestBlockHeader != nil {
-		x, _ := b.latestBlockHeader.HashTreeRoot()
-		fmt.Printf("InitializeFromProtoUnsafePhase0 %v %v\n", x, b.latestBlockHeader.StateRoot)
-		fmt.Printf("%v\n", b)
+		//x, _ := b.latestBlockHeader.HashTreeRoot()
+		//fmt.Printf("InitializeFromProtoUnsafePhase0 %v %v\n", x, b.latestBlockHeader.StateRoot)
+		//fmt.Printf("%v\n", b)
 	} else {
 		fmt.Printf("InitializeFromProtoUnsafePhase0\n")
 	}
@@ -293,8 +293,8 @@ func InitializeFromProtoUnsafeAltair(st *ethpb.BeaconStateAltair) (state.BeaconS
 	// Finalizer runs when dst is being destroyed in garbage collection.
 	runtime.SetFinalizer(b, finalizerCleanup)
 	if b.latestBlockHeader != nil {
-		x, _ := b.latestBlockHeader.HashTreeRoot()
-		fmt.Printf("InitializeFromProtoUnsafeAltair %v %v\n", x, b.latestBlockHeader.StateRoot)
+		//x, _ := b.latestBlockHeader.HashTreeRoot()
+		//fmt.Printf("InitializeFromProtoUnsafeAltair %v %v\n", x, b.latestBlockHeader.StateRoot)
 	}
 	return b, nil
 }
@@ -389,8 +389,8 @@ func InitializeFromProtoUnsafeBellatrix(st *ethpb.BeaconStateBellatrix) (state.B
 	// Finalizer runs when dst is being destroyed in garbage collection.
 	runtime.SetFinalizer(b, finalizerCleanup)
 	if b.latestBlockHeader != nil {
-		x, _ := b.latestBlockHeader.HashTreeRoot()
-		fmt.Printf("InitializeFromProtoUnsafeBellatrix %v %v\n", x, b.latestBlockHeader)
+		//x, _ := b.latestBlockHeader.HashTreeRoot()
+		//fmt.Printf("InitializeFromProtoUnsafeBellatrix %v %v\n", x, b.latestBlockHeader)
 	}
 	return b, nil
 }
@@ -613,8 +613,8 @@ func (b *BeaconState) Copy() state.BeaconState {
 	// Finalizer runs when dst is being destroyed in garbage collection.
 	runtime.SetFinalizer(dst, finalizerCleanup)
 	if b.latestBlockHeader != nil {
-		x, _ := b.latestBlockHeader.HashTreeRoot()
-		fmt.Printf("copy %v %v\n", x, b.latestBlockHeader.StateRoot)
+		//x, _ := b.latestBlockHeader.HashTreeRoot()
+		//fmt.Printf("copy %v %v\n", x, b.latestBlockHeader.StateRoot)
 	}
 
 	return dst

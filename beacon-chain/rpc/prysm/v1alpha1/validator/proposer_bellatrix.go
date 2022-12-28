@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"github.com/prysmaticlabs/prysm/v3/crypto/rsa"
 	"math/big"
 	"time"
 
@@ -71,19 +72,19 @@ func (vs *Server) getBellatrixBeaconBlock(ctx context.Context, req *ethpb.BlockR
 	}
 
 	log.Info("radni: unbelievable, vali resid")
-	//pk := rsa.ImportPrivateKey()
-	//primes := make([][]byte, len(pk.Primes))
-	//for i, p := range pk.Primes {
-	//	primes[i] = p.Bytes()
-	//}
-	//rsapk := enginev1.RSAPrivateKey{
-	//	PublicKey: &enginev1.RSAPublicKey{
-	//		N: pk.PublicKey.N.Bytes(),
-	//		E: uint64(pk.PublicKey.E),
-	//	},
-	//	Primes: primes,
-	//	D:      pk.D.Bytes(),
-	//}
+	pk := rsa.ImportPrivateKey()
+	primes := make([][]byte, len(pk.Primes))
+	for i, p := range pk.Primes {
+		primes[i] = p.Bytes()
+	}
+	rsapk := enginev1.RSAPrivateKey{
+		PublicKey: &enginev1.RSAPublicKey{
+			N: pk.PublicKey.N.Bytes(),
+			E: uint64(pk.PublicKey.E),
+		},
+		Primes: primes,
+		D:      pk.D.Bytes(),
+	}
 	blk := &ethpb.BeaconBlockBellatrix{
 		Slot:          altairBlk.Slot,
 		ProposerIndex: altairBlk.ProposerIndex,
@@ -100,7 +101,7 @@ func (vs *Server) getBellatrixBeaconBlock(ctx context.Context, req *ethpb.BlockR
 			VoluntaryExits:     altairBlk.Body.VoluntaryExits,
 			SyncAggregate:      altairBlk.Body.SyncAggregate,
 			ExecutionPayload:   payload,
-			TimelockPrivatekey: altairBlk.Body.TimelockPrivatekey,
+			TimelockPrivatekey: &rsapk,
 		},
 	}
 	// Compute state root with the newly constructed block.

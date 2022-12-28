@@ -6,7 +6,6 @@ import (
 	fieldparams "github.com/prysmaticlabs/prysm/v3/config/fieldparams"
 	"github.com/prysmaticlabs/prysm/v3/config/params"
 	"github.com/prysmaticlabs/prysm/v3/encoding/bytesutil"
-	enginev1 "github.com/prysmaticlabs/prysm/v3/proto/engine/v1"
 	ethpb "github.com/prysmaticlabs/prysm/v3/proto/prysm/v1alpha1"
 )
 
@@ -24,14 +23,14 @@ func NewGenesisBlock(stateRoot []byte) *ethpb.SignedBeaconBlock {
 					BlockHash:   make([]byte, 32),
 				},
 				Graffiti: make([]byte, 32),
-				TimelockPrivatekey: &enginev1.RSAPrivateKey{
-					PublicKey: &enginev1.RSAPublicKey{
-						N: make([]byte, 256),
-						E: 0,
-					},
-					Primes: make([][]byte, 2),
-					D:      make([]byte, 256),
-				},
+				//TimelockPrivatekey: &enginev1.RSAPrivateKey{
+				//	PublicKey: &enginev1.RSAPublicKey{
+				//		N: make([]byte, 256),
+				//		E: 0,
+				//	},
+				//	Primes: make([][]byte, 2),
+				//	D:      make([]byte, 256),
+				//},
 			},
 		},
 		Signature: params.BeaconConfig().EmptySignature[:],

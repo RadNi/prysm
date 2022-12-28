@@ -156,7 +156,7 @@ message BeaconBlockBody {
     // At most MAX_VOLUNTARY_EXITS.
     repeated SignedVoluntaryExit voluntary_exits = 8 [(ethereum.eth.ext.ssz_max) = "16"];
 
-    ethereum.engine.v1.RSAPrivateKey timelock_privatekey = 9;
+//    ethereum.engine.v1.RSAPrivateKey timelock_privatekey = 9;
 }
 
 
@@ -194,7 +194,7 @@ message BeaconBlockBodyAltair {
     // Sync aggregate object to track sync committee votes for light client support. [New in ]
     SyncAggregate sync_aggregate = 9;
 
-    ethereum.engine.v1.RSAPrivateKey timelock_privatekey = 10;
+//    ethereum.engine.v1.RSAPrivateKey timelock_privatekey = 10;
 }
 
 // Proposer slashings are proofs that a slashable offense has been committed by
