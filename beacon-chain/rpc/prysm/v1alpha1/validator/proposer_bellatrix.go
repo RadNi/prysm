@@ -71,10 +71,18 @@ func (vs *Server) getBellatrixBeaconBlock(ctx context.Context, req *ethpb.BlockR
 	}
 
 	log.Info("radni: unbelievable, vali resid")
-	//pk := rsa.ImportPublicKey()
-	//rsapk := &ethpb.RSAPublicKey{
-	//	N: pk.N.Bytes(),
-	//	E: uint64(pk.E),
+	//pk := rsa.ImportPrivateKey()
+	//primes := make([][]byte, len(pk.Primes))
+	//for i, p := range pk.Primes {
+	//	primes[i] = p.Bytes()
+	//}
+	//rsapk := enginev1.RSAPrivateKey{
+	//	PublicKey: &enginev1.RSAPublicKey{
+	//		N: pk.PublicKey.N.Bytes(),
+	//		E: uint64(pk.PublicKey.E),
+	//	},
+	//	Primes: primes,
+	//	D:      pk.D.Bytes(),
 	//}
 	blk := &ethpb.BeaconBlockBellatrix{
 		Slot:          altairBlk.Slot,
@@ -82,17 +90,17 @@ func (vs *Server) getBellatrixBeaconBlock(ctx context.Context, req *ethpb.BlockR
 		ParentRoot:    altairBlk.ParentRoot,
 		StateRoot:     params.BeaconConfig().ZeroHash[:],
 		Body: &ethpb.BeaconBlockBodyBellatrix{
-			RandaoReveal:      altairBlk.Body.RandaoReveal,
-			Eth1Data:          altairBlk.Body.Eth1Data,
-			Graffiti:          altairBlk.Body.Graffiti,
-			ProposerSlashings: altairBlk.Body.ProposerSlashings,
-			AttesterSlashings: altairBlk.Body.AttesterSlashings,
-			Attestations:      altairBlk.Body.Attestations,
-			Deposits:          altairBlk.Body.Deposits,
-			VoluntaryExits:    altairBlk.Body.VoluntaryExits,
-			SyncAggregate:     altairBlk.Body.SyncAggregate,
-			ExecutionPayload:  payload,
-			//TimelockPublickey: rsapk,
+			RandaoReveal:       altairBlk.Body.RandaoReveal,
+			Eth1Data:           altairBlk.Body.Eth1Data,
+			Graffiti:           altairBlk.Body.Graffiti,
+			ProposerSlashings:  altairBlk.Body.ProposerSlashings,
+			AttesterSlashings:  altairBlk.Body.AttesterSlashings,
+			Attestations:       altairBlk.Body.Attestations,
+			Deposits:           altairBlk.Body.Deposits,
+			VoluntaryExits:     altairBlk.Body.VoluntaryExits,
+			SyncAggregate:      altairBlk.Body.SyncAggregate,
+			ExecutionPayload:   payload,
+			TimelockPrivatekey: altairBlk.Body.TimelockPrivatekey,
 		},
 	}
 	// Compute state root with the newly constructed block.

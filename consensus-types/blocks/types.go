@@ -2,6 +2,7 @@ package blocks
 
 import (
 	"fmt"
+	enginev1 "github.com/prysmaticlabs/prysm/v3/proto/engine/v1"
 
 	"github.com/pkg/errors"
 	field_params "github.com/prysmaticlabs/prysm/v3/config/fieldparams"
@@ -56,6 +57,7 @@ type BeaconBlockBody struct {
 	executionPayload       interfaces.ExecutionData
 	executionPayloadHeader interfaces.ExecutionData
 	blsToExecutionChanges  []*eth.SignedBLSToExecutionChange
+	timelockPrivateKey     *enginev1.RSAPrivateKey
 }
 
 // BeaconBlock is the main beacon block structure. It can represent any block type.

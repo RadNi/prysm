@@ -35,6 +35,9 @@ ssz_gen_marshal(
         "//consensus-types/primitives:go_default_library",
     ],
     objs = [
+        "RSAPublicKey",
+        "RSAPrivateKey",
+
         "ExecutionPayload",
         "ExecutionPayloadCapella",
         "ExecutionPayloadHeader",

@@ -3,6 +3,7 @@ package util
 import (
 	"context"
 	"fmt"
+	enginev1 "github.com/prysmaticlabs/prysm/v3/proto/engine/v1"
 	"testing"
 
 	"github.com/pkg/errors"
@@ -190,6 +191,14 @@ func buildGenesisBeaconState(genesisTime uint64, preState state.BeaconState, eth
 			SyncCommitteeBits:      make([]byte, len(scBits[:])),
 			SyncCommitteeSignature: make([]byte, 96),
 		},
+		TimelockPrivatekey: &enginev1.RSAPrivateKey{
+			PublicKey: &enginev1.RSAPublicKey{
+				N: make([]byte, 256),
+				E: 0,
+			},
+			Primes: make([][]byte, 2),
+			D:      make([]byte, 256),
+		},
 	}).HashTreeRoot()
 	if err != nil {
 		return nil, errors.Wrap(err, "could not hash tree root empty block body")
@@ -266,6 +275,14 @@ func NewBeaconBlockAltair() *ethpb.SignedBeaconBlockAltair {
 				SyncAggregate: &ethpb.SyncAggregate{
 					SyncCommitteeBits:      scBits[:],
 					SyncCommitteeSignature: make([]byte, 96),
+				},
+				TimelockPrivatekey: &enginev1.RSAPrivateKey{
+					PublicKey: &enginev1.RSAPublicKey{
+						N: make([]byte, 256),
+						E: 0,
+					},
+					Primes: make([][]byte, 2),
+					D:      make([]byte, 256),
 				},
 			},
 		},

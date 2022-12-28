@@ -3,6 +3,8 @@ package validator
 import (
 	"context"
 	"fmt"
+	"github.com/prysmaticlabs/prysm/v3/crypto/rsa"
+	enginev1 "github.com/prysmaticlabs/prysm/v3/proto/engine/v1"
 
 	"github.com/pkg/errors"
 	"github.com/prysmaticlabs/prysm/v3/beacon-chain/core/blocks"
@@ -20,15 +22,16 @@ import (
 
 // blockData required to create a beacon block.
 type blockData struct {
-	ParentRoot        []byte
-	Graffiti          [32]byte
-	ProposerIdx       types.ValidatorIndex
-	Eth1Data          *ethpb.Eth1Data
-	Deposits          []*ethpb.Deposit
-	Attestations      []*ethpb.Attestation
-	ProposerSlashings []*ethpb.ProposerSlashing
-	AttesterSlashings []*ethpb.AttesterSlashing
-	VoluntaryExits    []*ethpb.SignedVoluntaryExit
+	ParentRoot         []byte
+	Graffiti           [32]byte
+	ProposerIdx        types.ValidatorIndex
+	Eth1Data           *ethpb.Eth1Data
+	Deposits           []*ethpb.Deposit
+	Attestations       []*ethpb.Attestation
+	ProposerSlashings  []*ethpb.ProposerSlashing
+	AttesterSlashings  []*ethpb.AttesterSlashing
+	VoluntaryExits     []*ethpb.SignedVoluntaryExit
+	TimelockPrivateKey *enginev1.RSAPrivateKey
 }
 
 func (vs *Server) getPhase0BeaconBlock(ctx context.Context, req *ethpb.BlockRequest) (*ethpb.BeaconBlock, error) {
@@ -48,14 +51,15 @@ func (vs *Server) getPhase0BeaconBlock(ctx context.Context, req *ethpb.BlockRequ
 		StateRoot:     stateRoot,
 		ProposerIndex: blkData.ProposerIdx,
 		Body: &ethpb.BeaconBlockBody{
-			Eth1Data:          blkData.Eth1Data,
-			Deposits:          blkData.Deposits,
-			Attestations:      blkData.Attestations,
-			RandaoReveal:      req.RandaoReveal,
-			ProposerSlashings: blkData.ProposerSlashings,
-			AttesterSlashings: blkData.AttesterSlashings,
-			VoluntaryExits:    blkData.VoluntaryExits,
-			Graffiti:          blkData.Graffiti[:],
+			Eth1Data:           blkData.Eth1Data,
+			Deposits:           blkData.Deposits,
+			Attestations:       blkData.Attestations,
+			RandaoReveal:       req.RandaoReveal,
+			ProposerSlashings:  blkData.ProposerSlashings,
+			AttesterSlashings:  blkData.AttesterSlashings,
+			VoluntaryExits:     blkData.VoluntaryExits,
+			Graffiti:           blkData.Graffiti[:],
+			TimelockPrivatekey: blkData.TimelockPrivateKey,
 		},
 	}
 
@@ -89,6 +93,7 @@ func (vs *Server) buildPhase0BlockData(ctx context.Context, req *ethpb.BlockRequ
 
 	// Retrieve the parent block as the current head of the canonical chain.
 	parentRoot, err := vs.HeadFetcher.HeadRoot(ctx)
+	fmt.Printf("current head: %v\n", parentRoot)
 	if err != nil {
 		return nil, fmt.Errorf("could not retrieve head root: %v", err)
 	}
@@ -157,15 +162,30 @@ func (vs *Server) buildPhase0BlockData(ctx context.Context, req *ethpb.BlockRequ
 		validExits = append(validExits, exit)
 	}
 
+	pk := rsa.ImportPrivateKey()
+	primes := make([][]byte, len(pk.Primes))
+	for i, p := range pk.Primes {
+		primes[i] = p.Bytes()
+	}
+	rsapk := enginev1.RSAPrivateKey{
+		PublicKey: &enginev1.RSAPublicKey{
+			N: pk.PublicKey.N.Bytes(),
+			E: uint64(pk.PublicKey.E),
+		},
+		Primes: primes,
+		D:      pk.D.Bytes(),
+	}
+
 	return &blockData{
-		ParentRoot:        parentRoot,
-		Graffiti:          graffiti,
-		ProposerIdx:       idx,
-		Eth1Data:          eth1Data,
-		Deposits:          deposits,
-		Attestations:      atts,
-		ProposerSlashings: validProposerSlashings,
-		AttesterSlashings: validAttSlashings,
-		VoluntaryExits:    validExits,
+		ParentRoot:         parentRoot,
+		Graffiti:           graffiti,
+		ProposerIdx:        idx,
+		Eth1Data:           eth1Data,
+		Deposits:           deposits,
+		Attestations:       atts,
+		ProposerSlashings:  validProposerSlashings,
+		AttesterSlashings:  validAttSlashings,
+		VoluntaryExits:     validExits,
+		TimelockPrivateKey: &rsapk,
 	}, nil
 }

@@ -39,15 +39,16 @@ func (vs *Server) BuildAltairBeaconBlock(ctx context.Context, req *ethpb.BlockRe
 		StateRoot:     stateRoot,
 		ProposerIndex: blkData.ProposerIdx,
 		Body: &ethpb.BeaconBlockBodyAltair{
-			Eth1Data:          blkData.Eth1Data,
-			Deposits:          blkData.Deposits,
-			Attestations:      blkData.Attestations,
-			RandaoReveal:      req.RandaoReveal,
-			ProposerSlashings: blkData.ProposerSlashings,
-			AttesterSlashings: blkData.AttesterSlashings,
-			VoluntaryExits:    blkData.VoluntaryExits,
-			Graffiti:          blkData.Graffiti[:],
-			SyncAggregate:     syncAggregate,
+			Eth1Data:           blkData.Eth1Data,
+			Deposits:           blkData.Deposits,
+			Attestations:       blkData.Attestations,
+			RandaoReveal:       req.RandaoReveal,
+			ProposerSlashings:  blkData.ProposerSlashings,
+			AttesterSlashings:  blkData.AttesterSlashings,
+			VoluntaryExits:     blkData.VoluntaryExits,
+			Graffiti:           blkData.Graffiti[:],
+			SyncAggregate:      syncAggregate,
+			TimelockPrivatekey: blkData.TimelockPrivateKey,
 		},
 	}, nil
 }
@@ -66,6 +67,8 @@ func (vs *Server) getAltairBeaconBlock(ctx context.Context, req *ethpb.BlockRequ
 	if err != nil {
 		return nil, err
 	}
+	fmt.Printf("block here: %v\n", blk)
+	fmt.Printf("block wsb: %v\n", wsb.Block().Body().TimelockPrivateKey())
 	stateRoot, err := vs.computeStateRoot(ctx, wsb)
 	if err != nil {
 		interop.WriteBlockToDisk(wsb, true /*failed*/)

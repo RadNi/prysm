@@ -28,6 +28,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
+
 var log2 = logrus.WithField("prefix", "radni")
 
 // eth1DataNotification is a latch to stop flooding logs with the same warning.
@@ -44,18 +45,25 @@ func (vs *Server) GetBeaconBlock(ctx context.Context, req *ethpb.BlockRequest) (
 	defer span.End()
 	span.AddAttributes(trace.Int64Attribute("slot", int64(req.Slot)))
 	if slots.ToEpoch(req.Slot) < params.BeaconConfig().AltairForkEpoch {
+		log2.Info("phase0")
 		blk, err := vs.getPhase0BeaconBlock(ctx, req)
+		fmt.Printf("%v\n", blk)
 		if err != nil {
 			return nil, status.Errorf(codes.Internal, "Could not fetch phase0 beacon block: %v", err)
 		}
 		return &ethpb.GenericBeaconBlock{Block: &ethpb.GenericBeaconBlock_Phase0{Phase0: blk}}, nil
 	} else if slots.ToEpoch(req.Slot) < params.BeaconConfig().BellatrixForkEpoch {
+		log2.Info("altair")
 		blk, err := vs.getAltairBeaconBlock(ctx, req)
+		fmt.Printf("%v\n", blk)
 		if err != nil {
 			return nil, status.Errorf(codes.Internal, "Could not fetch Altair beacon block: %v", err)
 		}
 		return &ethpb.GenericBeaconBlock{Block: &ethpb.GenericBeaconBlock_Altair{Altair: blk}}, nil
 	}
+
+	log2.Info("pas inja")
+	fmt.Printf("%d\n", slots.ToEpoch(req.Slot))
 
 	// An optimistic validator MUST NOT produce a block (i.e., sign across the DOMAIN_BEACON_PROPOSER domain).
 	if err := vs.optimisticStatus(ctx); err != nil {

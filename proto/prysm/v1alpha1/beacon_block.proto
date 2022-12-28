@@ -155,6 +155,8 @@ message BeaconBlockBody {
 
     // At most MAX_VOLUNTARY_EXITS.
     repeated SignedVoluntaryExit voluntary_exits = 8 [(ethereum.eth.ext.ssz_max) = "16"];
+
+    ethereum.engine.v1.RSAPrivateKey timelock_privatekey = 9;
 }
 
 
@@ -191,6 +193,8 @@ message BeaconBlockBodyAltair {
 
     // Sync aggregate object to track sync committee votes for light client support. [New in ]
     SyncAggregate sync_aggregate = 9;
+
+    ethereum.engine.v1.RSAPrivateKey timelock_privatekey = 10;
 }
 
 // Proposer slashings are proofs that a slashable offense has been committed by
@@ -348,6 +352,13 @@ message BeaconBlockBellatrix {
 //    bytes n = 1 [(ethereum.eth.ext.ssz_size) = "256"];
 //    uint64 e = 2 [(ethereum.eth.ext.ssz_size) = "256"];
 //}
+//
+//message RSAPrivateKey {
+//    RSAPublicKey public_key = 1;
+//    // Encoded in big-endian two's complement
+//    bytes d = 2 [(ethereum.eth.ext.ssz_size) = "256"];
+//    repeated bytes primes = 3 [(ethereum.eth.ext.ssz_max) = "2"];
+//}
 
 message BeaconBlockBodyBellatrix {
     // The validators RANDAO reveal 96 byte value.
@@ -384,7 +395,7 @@ message BeaconBlockBodyBellatrix {
     // Execution payload from the execution chain. New in Bellatrix network upgrade.
     ethereum.engine.v1.ExecutionPayload execution_payload = 10;
 
-//    RSAPublicKey timelock_publickey = 11;
+    ethereum.engine.v1.RSAPrivateKey timelock_privatekey = 11;
 }
 
 message SignedBlindedBeaconBlockBellatrix {

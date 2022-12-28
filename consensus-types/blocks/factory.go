@@ -32,28 +32,40 @@ func NewSignedBeaconBlock(i interface{}) (interfaces.SignedBeaconBlock, error) {
 	case nil:
 		return nil, ErrNilObject
 	case *eth.GenericSignedBeaconBlock_Phase0:
+		fmt.Printf("block type: x1\n")
 		return initSignedBlockFromProtoPhase0(b.Phase0)
 	case *eth.SignedBeaconBlock:
+		fmt.Printf("block type: x2\n")
 		return initSignedBlockFromProtoPhase0(b)
 	case *eth.GenericSignedBeaconBlock_Altair:
+		fmt.Printf("block type: x3\n")
 		return initSignedBlockFromProtoAltair(b.Altair)
 	case *eth.SignedBeaconBlockAltair:
+		fmt.Printf("block type: x4\n")
 		return initSignedBlockFromProtoAltair(b)
 	case *eth.GenericSignedBeaconBlock_Bellatrix:
+		fmt.Printf("block type: x5\n")
 		return initSignedBlockFromProtoBellatrix(b.Bellatrix)
 	case *eth.SignedBeaconBlockBellatrix:
+		fmt.Printf("block type: x6\n")
 		return initSignedBlockFromProtoBellatrix(b)
 	case *eth.GenericSignedBeaconBlock_BlindedBellatrix:
+		fmt.Printf("block type: x7\n")
 		return initBlindedSignedBlockFromProtoBellatrix(b.BlindedBellatrix)
 	case *eth.SignedBlindedBeaconBlockBellatrix:
+		fmt.Printf("block type: x8\n")
 		return initBlindedSignedBlockFromProtoBellatrix(b)
 	case *eth.GenericSignedBeaconBlock_Capella:
+		fmt.Printf("block type: x9\n")
 		return initSignedBlockFromProtoCapella(b.Capella)
 	case *eth.SignedBeaconBlockCapella:
+		fmt.Printf("block type: x10\n")
 		return initSignedBlockFromProtoCapella(b)
 	case *eth.GenericSignedBeaconBlock_BlindedCapella:
+		fmt.Printf("block type: x11\n")
 		return initBlindedSignedBlockFromProtoCapella(b.BlindedCapella)
 	case *eth.SignedBlindedBeaconBlockCapella:
+		fmt.Printf("block type: x12\n")
 		return initBlindedSignedBlockFromProtoCapella(b)
 	default:
 		return nil, errors.Wrapf(ErrUnsupportedSignedBeaconBlock, "unable to create block from type %T", i)
@@ -66,28 +78,40 @@ func NewBeaconBlock(i interface{}) (interfaces.BeaconBlock, error) {
 	case nil:
 		return nil, ErrNilObject
 	case *eth.GenericBeaconBlock_Phase0:
+		fmt.Printf("block type: 1\n")
 		return initBlockFromProtoPhase0(b.Phase0)
 	case *eth.BeaconBlock:
+		fmt.Printf("block type: 2\n")
 		return initBlockFromProtoPhase0(b)
 	case *eth.GenericBeaconBlock_Altair:
+		fmt.Printf("block type: 3\n")
 		return initBlockFromProtoAltair(b.Altair)
 	case *eth.BeaconBlockAltair:
+		fmt.Printf("block type: 4\n")
 		return initBlockFromProtoAltair(b)
 	case *eth.GenericBeaconBlock_Bellatrix:
+		fmt.Printf("block type: 5\n")
 		return initBlockFromProtoBellatrix(b.Bellatrix)
 	case *eth.BeaconBlockBellatrix:
+		fmt.Printf("block type: 6\n")
 		return initBlockFromProtoBellatrix(b)
 	case *eth.GenericBeaconBlock_BlindedBellatrix:
+		fmt.Printf("block type: 7\n")
 		return initBlindedBlockFromProtoBellatrix(b.BlindedBellatrix)
 	case *eth.BlindedBeaconBlockBellatrix:
+		fmt.Printf("block type: 8\n")
 		return initBlindedBlockFromProtoBellatrix(b)
 	case *eth.GenericBeaconBlock_Capella:
+		fmt.Printf("block type: 9\n")
 		return initBlockFromProtoCapella(b.Capella)
 	case *eth.BeaconBlockCapella:
+		fmt.Printf("block type: 10\n")
 		return initBlockFromProtoCapella(b)
 	case *eth.GenericBeaconBlock_BlindedCapella:
+		fmt.Printf("block type: 11\n")
 		return initBlindedBlockFromProtoCapella(b.BlindedCapella)
 	case *eth.BlindedBeaconBlockCapella:
+		fmt.Printf("block type: 12\n")
 		return initBlindedBlockFromProtoCapella(b)
 	default:
 		return nil, errors.Wrapf(errUnsupportedBeaconBlock, "unable to create block from type %T", i)

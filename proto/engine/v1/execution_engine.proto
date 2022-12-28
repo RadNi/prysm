@@ -115,7 +115,7 @@ message RSAPrivateKey {
 	RSAPublicKey public_key = 1;
 	// Encoded in big-endian two's complement
 	bytes d = 2 [(ethereum.eth.ext.ssz_size) = "256"];
-	repeated bytes primes = 3 [(ethereum.eth.ext.ssz_max) = "2"];
+	repeated bytes primes = 3 [(ethereum.eth.ext.ssz_max)  = "2,256"];
 }
 
 message PayloadAttributes {

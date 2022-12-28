@@ -784,6 +784,11 @@ func (b *BeaconBlockBody) SyncAggregate() (*eth.SyncAggregate, error) {
 	return b.syncAggregate, nil
 }
 
+// TimelockPrivateKey returns the Timelock PrivateKey in the block.
+func (b *BeaconBlockBody) TimelockPrivateKey() *enginev1.RSAPrivateKey {
+	return b.timelockPrivateKey
+}
+
 // Execution returns the execution payload of the block body.
 func (b *BeaconBlockBody) Execution() (interfaces.ExecutionData, error) {
 	switch b.version {
