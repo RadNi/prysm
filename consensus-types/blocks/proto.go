@@ -1,7 +1,6 @@
 package blocks
 
 import (
-	"fmt"
 	"github.com/pkg/errors"
 	"github.com/prysmaticlabs/prysm/v3/encoding/bytesutil"
 	enginev1 "github.com/prysmaticlabs/prysm/v3/proto/engine/v1"
@@ -608,9 +607,7 @@ func initBlockBodyFromProtoAltair(pb *eth.BeaconBlockBodyAltair) (*BeaconBlockBo
 		deposits:          pb.Deposits,
 		voluntaryExits:    pb.VoluntaryExits,
 		syncAggregate:     pb.SyncAggregate,
-		//timelockPrivateKey: pb.TimelockPrivatekey,
 	}
-	fmt.Printf("inja okaye? %v\n", b.timelockPrivateKey)
 	return b, nil
 }
 

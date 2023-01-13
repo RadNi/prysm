@@ -63,6 +63,7 @@ type ReadOnlyBeaconState interface {
 	IsNil() bool
 	Version() int
 	LatestExecutionPayloadHeader() (interfaces.ExecutionData, error)
+	LatestTimelockPrivatekey() (*enginev1.RSAPrivateKey, error)
 	LastWithdrawalValidatorIndex() (types.ValidatorIndex, error)
 	ExpectedWithdrawals() ([]*enginev1.Withdrawal, error)
 }
@@ -87,6 +88,7 @@ type WriteOnlyBeaconState interface {
 	UpdateSlashingsAtIndex(idx, val uint64) error
 	AppendHistoricalRoots(root [32]byte) error
 	SetLatestExecutionPayloadHeader(payload interfaces.ExecutionData) error
+	SetTimelockPrivatekey(val *enginev1.RSAPrivateKey) error
 	SetNextWithdrawalIndex(i uint64) error
 	SetLastWithdrawalValidatorIndex(i types.ValidatorIndex) error
 }

@@ -129,7 +129,6 @@ func CalculateStateRoot(
 	// Copy state to avoid mutating the state reference.
 	state = state.Copy()
 
-	fmt.Printf("arer these equal? %v %v %v\n", state.StateRoots()[1], state.StateRoots()[0], signed.Block().ParentRoot())
 	// Execute per slots transition.
 	var err error
 	parentRoot := signed.Block().ParentRoot()
@@ -347,6 +346,15 @@ func ProcessBlockForStateRoot(
 		return nil, errors.Wrap(err, "process_sync_aggregate failed")
 	}
 
+	if signed.Block().Version() == version.Bellatrix {
+		err = state.SetTimelockPrivatekey(signed.Block().Body().TimelockPrivatekey())
+		fmt.Printf("settid\n")
+		if err != nil {
+			return nil, errors.Wrap(err, "SetTimelockPrivatekey failed")
+		}
+		prv, _ := state.LatestTimelockPrivatekey()
+		fmt.Printf("inja hastam %v\n", prv)
+	}
 	return state, nil
 }
 

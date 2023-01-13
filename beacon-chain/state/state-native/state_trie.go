@@ -76,7 +76,11 @@ var altairFields = []nativetypes.FieldIndex{
 	nativetypes.NextSyncCommittee,
 }
 
-var bellatrixFields = append(altairFields, nativetypes.LatestExecutionPayloadHeader)
+var bellatrixFields = append(
+	altairFields,
+	nativetypes.LatestExecutionPayloadHeader,
+	nativetypes.TimelockPrivateKey,
+)
 
 var capellaFields = append(
 	altairFields,
@@ -88,7 +92,7 @@ var capellaFields = append(
 const (
 	phase0SharedFieldRefCount    = 10
 	altairSharedFieldRefCount    = 11
-	bellatrixSharedFieldRefCount = 12
+	bellatrixSharedFieldRefCount = 13
 	capellaSharedFieldRefCount   = 13
 )
 
@@ -195,13 +199,13 @@ func InitializeFromProtoUnsafePhase0(st *ethpb.BeaconState) (state.BeaconState, 
 	state.StateCount.Inc()
 	// Finalizer runs when dst is being destroyed in garbage collection.
 	runtime.SetFinalizer(b, finalizerCleanup)
-	if b.latestBlockHeader != nil {
-		//x, _ := b.latestBlockHeader.HashTreeRoot()
-		//fmt.Printf("InitializeFromProtoUnsafePhase0 %v %v\n", x, b.latestBlockHeader.StateRoot)
-		//fmt.Printf("%v\n", b)
-	} else {
-		fmt.Printf("InitializeFromProtoUnsafePhase0\n")
-	}
+	//if b.latestBlockHeader != nil {
+	//	x, _ := b.latestBlockHeader.HashTreeRoot()
+	//	fmt.Printf("InitializeFromProtoUnsafePhase0 %v %v\n", x, b.latestBlockHeader.StateRoot)
+	//	fmt.Printf("%v\n", b)
+	//} else {
+	fmt.Printf("InitializeFromProtoUnsafePhase0\n")
+	//}
 	return b, nil
 }
 
@@ -351,6 +355,7 @@ func InitializeFromProtoUnsafeBellatrix(st *ethpb.BeaconStateBellatrix) (state.B
 		currentSyncCommittee:         st.CurrentSyncCommittee,
 		nextSyncCommittee:            st.NextSyncCommittee,
 		latestExecutionPayloadHeader: st.LatestExecutionPayloadHeader,
+		latestTimelockPrivateKey:     st.TimelockPrivatekey,
 
 		dirtyFields:           make(map[nativetypes.FieldIndex]bool, fieldCount),
 		dirtyIndices:          make(map[nativetypes.FieldIndex][]uint64, fieldCount),
@@ -384,14 +389,15 @@ func InitializeFromProtoUnsafeBellatrix(st *ethpb.BeaconStateBellatrix) (state.B
 	b.sharedFieldReferences[nativetypes.CurrentEpochParticipationBits] = stateutil.NewRef(1)
 	b.sharedFieldReferences[nativetypes.InactivityScores] = stateutil.NewRef(1)
 	b.sharedFieldReferences[nativetypes.LatestExecutionPayloadHeader] = stateutil.NewRef(1) // New in Bellatrix.
+	b.sharedFieldReferences[nativetypes.TimelockPrivateKey] = stateutil.NewRef(1)
 
 	state.StateCount.Inc()
 	// Finalizer runs when dst is being destroyed in garbage collection.
 	runtime.SetFinalizer(b, finalizerCleanup)
-	if b.latestBlockHeader != nil {
-		//x, _ := b.latestBlockHeader.HashTreeRoot()
-		//fmt.Printf("InitializeFromProtoUnsafeBellatrix %v %v\n", x, b.latestBlockHeader)
-	}
+	//if b.latestBlockHeader != nil {
+	//x, _ := b.latestBlockHeader.HashTreeRoot()
+	fmt.Printf("InitializeFromProtoUnsafeBellatrix\n")
+	//}
 	return b, nil
 }
 
@@ -545,6 +551,7 @@ func (b *BeaconState) Copy() state.BeaconState {
 		currentSyncCommittee:                b.currentSyncCommitteeVal(),
 		nextSyncCommittee:                   b.nextSyncCommitteeVal(),
 		latestExecutionPayloadHeader:        b.latestExecutionPayloadHeaderVal(),
+		latestTimelockPrivateKey:            b.latestTimelockPrivatekeyVal(),
 		latestExecutionPayloadHeaderCapella: b.latestExecutionPayloadHeaderCapellaVal(),
 
 		dirtyFields:      make(map[nativetypes.FieldIndex]bool, fieldCount),
@@ -848,6 +855,8 @@ func (b *BeaconState) rootSelector(ctx context.Context, field nativetypes.FieldI
 		return stateutil.SyncCommitteeRoot(b.nextSyncCommittee)
 	case nativetypes.LatestExecutionPayloadHeader:
 		return b.latestExecutionPayloadHeader.HashTreeRoot()
+	case nativetypes.TimelockPrivateKey:
+		return b.latestTimelockPrivateKey.HashTreeRoot()
 	case nativetypes.LatestExecutionPayloadHeaderCapella:
 		return b.latestExecutionPayloadHeaderCapella.HashTreeRoot()
 	case nativetypes.NextWithdrawalIndex:

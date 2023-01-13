@@ -67,8 +67,6 @@ func (vs *Server) getAltairBeaconBlock(ctx context.Context, req *ethpb.BlockRequ
 	if err != nil {
 		return nil, err
 	}
-	fmt.Printf("block here: %v\n", blk)
-	fmt.Printf("block wsb: %v\n", wsb.Block().Body().TimelockPrivatekey())
 	stateRoot, err := vs.computeStateRoot(ctx, wsb)
 	if err != nil {
 		interop.WriteBlockToDisk(wsb, true /*failed*/)

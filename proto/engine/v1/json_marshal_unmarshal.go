@@ -248,10 +248,10 @@ func (p *RSAPublicKey) MarshalJSON() ([]byte, error) {
 		N: p.N,
 		E: hexutil.Uint64(p.E),
 	})
-	if er != nil {
-		fmt.Printf("error khord")
-	}
-	fmt.Printf("%v\n", ret)
+	//if er != nil {
+	//	fmt.Printf("error khord")
+	//}
+	//fmt.Printf("RSAPublickey MarshalJSON %v\n", ret)
 	return ret, er
 }
 
@@ -275,7 +275,6 @@ type rsaPrivateKeyJSON struct {
 
 // MarshalJSON --
 func (p *RSAPrivateKey) MarshalJSON() ([]byte, error) {
-	fmt.Printf("Marshal json")
 	primes := make([]hexutil.Bytes, len(p.Primes))
 	for i, v := range p.Primes {
 		primes[i] = v
@@ -288,7 +287,7 @@ func (p *RSAPrivateKey) MarshalJSON() ([]byte, error) {
 	if er != nil {
 		fmt.Printf("error khord1")
 	}
-	fmt.Printf("%v\n", ret)
+	//fmt.Printf("RSAPrivatekey MarshalJSON %v\n", ret)
 	return ret, er
 }
 
@@ -324,7 +323,6 @@ type payloadAttributesJSON struct {
 
 // MarshalJSON --
 func (p *PayloadAttributes) MarshalJSON() ([]byte, error) {
-	fmt.Printf("Marshal json")
 	ret, er := json.Marshal(payloadAttributesJSON{
 		Timestamp:             hexutil.Uint64(p.Timestamp),
 		PrevRandao:            p.PrevRandao,
@@ -334,7 +332,7 @@ func (p *PayloadAttributes) MarshalJSON() ([]byte, error) {
 	if er != nil {
 		fmt.Printf("error khord")
 	}
-	fmt.Printf("%v\n", ret)
+	//fmt.Printf("PayloadAttributes MarshalJSON %v\n", ret)
 	return ret, er
 }
 

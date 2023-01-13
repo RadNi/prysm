@@ -14,8 +14,6 @@ import (
 func (b *BeaconState) SetLatestBlockHeader(val *ethpb.BeaconBlockHeader) error {
 	b.lock.Lock()
 	defer b.lock.Unlock()
-	//x, _ := val.HashTreeRoot()
-	//fmt.Printf("Setter %v %v\n", x, val.StateRoot)
 	b.latestBlockHeader = ethpb.CopyBeaconBlockHeader(val)
 	b.markFieldAsDirty(nativetypes.LatestBlockHeader)
 	return nil

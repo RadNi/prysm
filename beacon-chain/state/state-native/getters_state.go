@@ -96,6 +96,7 @@ func (b *BeaconState) ToProtoUnsafe() interface{} {
 			CurrentSyncCommittee:         b.currentSyncCommittee,
 			NextSyncCommittee:            b.nextSyncCommittee,
 			LatestExecutionPayloadHeader: b.latestExecutionPayloadHeader,
+			TimelockPrivatekey:           b.latestTimelockPrivateKey,
 		}
 	case version.Capella:
 		return &ethpb.BeaconStateCapella{
@@ -222,6 +223,7 @@ func (b *BeaconState) ToProto() interface{} {
 			CurrentSyncCommittee:         b.currentSyncCommitteeVal(),
 			NextSyncCommittee:            b.nextSyncCommitteeVal(),
 			LatestExecutionPayloadHeader: b.latestExecutionPayloadHeaderVal(),
+			TimelockPrivatekey:           b.latestTimelockPrivatekeyVal(),
 		}
 	case version.Capella:
 		return &ethpb.BeaconStateCapella{
