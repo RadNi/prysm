@@ -352,8 +352,6 @@ func ProcessBlockForStateRoot(
 		if err != nil {
 			return nil, errors.Wrap(err, "SetTimelockPrivatekey failed")
 		}
-		prv, _ := state.LatestTimelockPrivatekey()
-		fmt.Printf("inja hastam %v\n", prv)
 	}
 	return state, nil
 }

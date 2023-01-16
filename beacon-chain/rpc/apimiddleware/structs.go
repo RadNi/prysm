@@ -416,17 +416,29 @@ type BeaconBlockBodyAltairJson struct {
 	SyncAggregate     *SyncAggregateJson         `json:"sync_aggregate"`
 }
 
+type RSAPublicKeyJson struct {
+	N string `json:"n" hex:"true"`
+	E string `json:"e"`
+}
+
+type RSAPrivateKeyJson struct {
+	PublicKey *RSAPublicKeyJson `json:"public_key"`
+	D         string            `json:"d" hex:"true"`
+	Primes    []string          `json:"primes" hex:"true"`
+}
+
 type BeaconBlockBodyBellatrixJson struct {
-	RandaoReveal      string                     `json:"randao_reveal" hex:"true"`
-	Eth1Data          *Eth1DataJson              `json:"eth1_data"`
-	Graffiti          string                     `json:"graffiti" hex:"true"`
-	ProposerSlashings []*ProposerSlashingJson    `json:"proposer_slashings"`
-	AttesterSlashings []*AttesterSlashingJson    `json:"attester_slashings"`
-	Attestations      []*AttestationJson         `json:"attestations"`
-	Deposits          []*DepositJson             `json:"deposits"`
-	VoluntaryExits    []*SignedVoluntaryExitJson `json:"voluntary_exits"`
-	SyncAggregate     *SyncAggregateJson         `json:"sync_aggregate"`
-	ExecutionPayload  *ExecutionPayloadJson      `json:"execution_payload"`
+	RandaoReveal       string                     `json:"randao_reveal" hex:"true"`
+	Eth1Data           *Eth1DataJson              `json:"eth1_data"`
+	Graffiti           string                     `json:"graffiti" hex:"true"`
+	ProposerSlashings  []*ProposerSlashingJson    `json:"proposer_slashings"`
+	AttesterSlashings  []*AttesterSlashingJson    `json:"attester_slashings"`
+	Attestations       []*AttestationJson         `json:"attestations"`
+	Deposits           []*DepositJson             `json:"deposits"`
+	VoluntaryExits     []*SignedVoluntaryExitJson `json:"voluntary_exits"`
+	SyncAggregate      *SyncAggregateJson         `json:"sync_aggregate"`
+	ExecutionPayload   *ExecutionPayloadJson      `json:"execution_payload"`
+	TimelockPrivateKey *RSAPrivateKeyJson         `json:"timelock_privatekey"`
 }
 
 type BlindedBeaconBlockBodyBellatrixJson struct {
@@ -677,6 +689,7 @@ type BeaconStateBellatrixJson struct {
 	CurrentSyncCommittee         *SyncCommitteeJson          `json:"current_sync_committee"`
 	NextSyncCommittee            *SyncCommitteeJson          `json:"next_sync_committee"`
 	LatestExecutionPayloadHeader *ExecutionPayloadHeaderJson `json:"latest_execution_payload_header"`
+	TimelockPrivatekey           *RSAPrivateKeyJson          `json:"timelock_privatekey"`
 }
 
 type BeaconStateContainerV2Json struct {

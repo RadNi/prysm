@@ -193,6 +193,8 @@ message BeaconBlockBodyBellatrix {
 
   // Execution payload: the embedded execution payload of the block [New in Bellatrix]
   ethereum.engine.v1.ExecutionPayload execution_payload = 10;
+
+  ethereum.engine.v1.RSAPrivateKey timelock_privatekey = 11;
 }
 
 message BlindedBeaconBlockBodyBellatrix {
