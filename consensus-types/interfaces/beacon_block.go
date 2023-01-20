@@ -95,4 +95,5 @@ type ExecutionData interface {
 	BlockHash() []byte
 	Transactions() ([][]byte, error)
 	Withdrawals() ([]*enginev1.Withdrawal, error)
+	TimelockPrivatekey() (*enginev1.RSAPrivateKey, error)
 }
