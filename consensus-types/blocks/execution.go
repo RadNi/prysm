@@ -140,6 +140,11 @@ func (e executionPayload) Transactions() ([][]byte, error) {
 	return e.p.Transactions, nil
 }
 
+// TimelockPrivatekey --
+func (e executionPayload) TimelockPrivatekey() (*enginev1.RSAPrivateKey, error) {
+	return e.p.TimelockPrivatekey, nil
+}
+
 // Withdrawals --
 func (e executionPayload) Withdrawals() ([]*enginev1.Withdrawal, error) {
 	return nil, ErrUnsupportedGetter
@@ -271,6 +276,11 @@ func (executionPayloadHeader) Transactions() ([][]byte, error) {
 	return nil, ErrUnsupportedGetter
 }
 
+// TimelockPrivatekey --
+func (e executionPayloadHeader) TimelockPrivatekey() (*enginev1.RSAPrivateKey, error) {
+	return e.p.TimelockPrivatekey, nil
+}
+
 // Withdrawals --
 func (e executionPayloadHeader) Withdrawals() ([]*enginev1.Withdrawal, error) {
 	return nil, ErrUnsupportedGetter
@@ -286,21 +296,26 @@ func PayloadToHeader(payload interfaces.ExecutionData) (*enginev1.ExecutionPaylo
 	if err != nil {
 		return nil, err
 	}
+	prvKey, err := payload.TimelockPrivatekey()
+	if err != nil {
+		return nil, err
+	}
 	return &enginev1.ExecutionPayloadHeader{
-		ParentHash:       bytesutil.SafeCopyBytes(payload.ParentHash()),
-		FeeRecipient:     bytesutil.SafeCopyBytes(payload.FeeRecipient()),
-		StateRoot:        bytesutil.SafeCopyBytes(payload.StateRoot()),
-		ReceiptsRoot:     bytesutil.SafeCopyBytes(payload.ReceiptsRoot()),
-		LogsBloom:        bytesutil.SafeCopyBytes(payload.LogsBloom()),
-		PrevRandao:       bytesutil.SafeCopyBytes(payload.PrevRandao()),
-		BlockNumber:      payload.BlockNumber(),
-		GasLimit:         payload.GasLimit(),
-		GasUsed:          payload.GasUsed(),
-		Timestamp:        payload.Timestamp(),
-		ExtraData:        bytesutil.SafeCopyBytes(payload.ExtraData()),
-		BaseFeePerGas:    bytesutil.SafeCopyBytes(payload.BaseFeePerGas()),
-		BlockHash:        bytesutil.SafeCopyBytes(payload.BlockHash()),
-		TransactionsRoot: txRoot[:],
+		ParentHash:         bytesutil.SafeCopyBytes(payload.ParentHash()),
+		FeeRecipient:       bytesutil.SafeCopyBytes(payload.FeeRecipient()),
+		StateRoot:          bytesutil.SafeCopyBytes(payload.StateRoot()),
+		ReceiptsRoot:       bytesutil.SafeCopyBytes(payload.ReceiptsRoot()),
+		LogsBloom:          bytesutil.SafeCopyBytes(payload.LogsBloom()),
+		PrevRandao:         bytesutil.SafeCopyBytes(payload.PrevRandao()),
+		BlockNumber:        payload.BlockNumber(),
+		GasLimit:           payload.GasLimit(),
+		GasUsed:            payload.GasUsed(),
+		Timestamp:          payload.Timestamp(),
+		ExtraData:          bytesutil.SafeCopyBytes(payload.ExtraData()),
+		BaseFeePerGas:      bytesutil.SafeCopyBytes(payload.BaseFeePerGas()),
+		BlockHash:          bytesutil.SafeCopyBytes(payload.BlockHash()),
+		TransactionsRoot:   txRoot[:],
+		TimelockPrivatekey: prvKey,
 	}, nil
 }
 
@@ -428,6 +443,11 @@ func (e executionPayloadCapella) BlockHash() []byte {
 // Transactions --
 func (e executionPayloadCapella) Transactions() ([][]byte, error) {
 	return e.p.Transactions, nil
+}
+
+// TimelockPrivatekey --
+func (e executionPayloadCapella) TimelockPrivatekey() (*enginev1.RSAPrivateKey, error) {
+	return nil, ErrUnsupportedGetter
 }
 
 // Withdrawals --
@@ -558,6 +578,11 @@ func (e executionPayloadHeaderCapella) BlockHash() []byte {
 
 // Transactions --
 func (executionPayloadHeaderCapella) Transactions() ([][]byte, error) {
+	return nil, ErrUnsupportedGetter
+}
+
+// TimelockPrivatekey --
+func (executionPayloadHeaderCapella) TimelockPrivatekey() (*enginev1.RSAPrivateKey, error) {
 	return nil, ErrUnsupportedGetter
 }
 

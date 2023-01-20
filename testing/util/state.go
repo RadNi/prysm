@@ -219,6 +219,14 @@ func NewBeaconStateBellatrix(options ...func(state *ethpb.BeaconStateBellatrix) 
 			BaseFeePerGas:    make([]byte, 32),
 			BlockHash:        make([]byte, 32),
 			TransactionsRoot: make([]byte, 32),
+			TimelockPrivatekey: &enginev1.RSAPrivateKey{
+				PublicKey: &enginev1.RSAPublicKey{
+					N: make([]byte, 256),
+					E: 0,
+				},
+				Primes: make([][]byte, 2),
+				D:      make([]byte, 256),
+			},
 		},
 	}
 

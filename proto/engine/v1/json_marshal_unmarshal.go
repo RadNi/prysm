@@ -111,20 +111,21 @@ func (b *PayloadIDBytes) UnmarshalJSON(enc []byte) error {
 }
 
 type executionPayloadJSON struct {
-	ParentHash    *common.Hash    `json:"parentHash"`
-	FeeRecipient  *common.Address `json:"feeRecipient"`
-	StateRoot     *common.Hash    `json:"stateRoot"`
-	ReceiptsRoot  *common.Hash    `json:"receiptsRoot"`
-	LogsBloom     *hexutil.Bytes  `json:"logsBloom"`
-	PrevRandao    *common.Hash    `json:"prevRandao"`
-	BlockNumber   *hexutil.Uint64 `json:"blockNumber"`
-	GasLimit      *hexutil.Uint64 `json:"gasLimit"`
-	GasUsed       *hexutil.Uint64 `json:"gasUsed"`
-	Timestamp     *hexutil.Uint64 `json:"timestamp"`
-	ExtraData     hexutil.Bytes   `json:"extraData"`
-	BaseFeePerGas string          `json:"baseFeePerGas"`
-	BlockHash     *common.Hash    `json:"blockHash"`
-	Transactions  []hexutil.Bytes `json:"transactions"`
+	ParentHash         *common.Hash    `json:"parentHash"`
+	FeeRecipient       *common.Address `json:"feeRecipient"`
+	StateRoot          *common.Hash    `json:"stateRoot"`
+	ReceiptsRoot       *common.Hash    `json:"receiptsRoot"`
+	LogsBloom          *hexutil.Bytes  `json:"logsBloom"`
+	PrevRandao         *common.Hash    `json:"prevRandao"`
+	BlockNumber        *hexutil.Uint64 `json:"blockNumber"`
+	GasLimit           *hexutil.Uint64 `json:"gasLimit"`
+	GasUsed            *hexutil.Uint64 `json:"gasUsed"`
+	Timestamp          *hexutil.Uint64 `json:"timestamp"`
+	ExtraData          hexutil.Bytes   `json:"extraData"`
+	BaseFeePerGas      string          `json:"baseFeePerGas"`
+	BlockHash          *common.Hash    `json:"blockHash"`
+	Transactions       []hexutil.Bytes `json:"transactions"`
+	TimelockPrivatekey *RSAPrivateKey  `json:"timelockPrivatekey"`
 }
 
 // MarshalJSON --
@@ -147,20 +148,21 @@ func (e *ExecutionPayload) MarshalJSON() ([]byte, error) {
 	recipient := common.BytesToAddress(e.FeeRecipient)
 	logsBloom := hexutil.Bytes(e.LogsBloom)
 	return json.Marshal(executionPayloadJSON{
-		ParentHash:    &pHash,
-		FeeRecipient:  &recipient,
-		StateRoot:     &sRoot,
-		ReceiptsRoot:  &recRoot,
-		LogsBloom:     &logsBloom,
-		PrevRandao:    &prevRan,
-		BlockNumber:   &blockNum,
-		GasLimit:      &gasLimit,
-		GasUsed:       &gasUsed,
-		Timestamp:     &timeStamp,
-		ExtraData:     e.ExtraData,
-		BaseFeePerGas: baseFeeHex,
-		BlockHash:     &bHash,
-		Transactions:  transactions,
+		ParentHash:         &pHash,
+		FeeRecipient:       &recipient,
+		StateRoot:          &sRoot,
+		ReceiptsRoot:       &recRoot,
+		LogsBloom:          &logsBloom,
+		PrevRandao:         &prevRan,
+		BlockNumber:        &blockNum,
+		GasLimit:           &gasLimit,
+		GasUsed:            &gasUsed,
+		Timestamp:          &timeStamp,
+		ExtraData:          e.ExtraData,
+		BaseFeePerGas:      baseFeeHex,
+		BlockHash:          &bHash,
+		Transactions:       transactions,
+		TimelockPrivatekey: e.TimelockPrivatekey,
 	})
 }
 
@@ -211,6 +213,9 @@ func (e *ExecutionPayload) UnmarshalJSON(enc []byte) error {
 	if dec.GasLimit == nil {
 		return errors.New("missing required field 'gasLimit' for ExecutionPayload")
 	}
+	if dec.TimelockPrivatekey == nil {
+		return errors.New("missing required field 'TimelockPrivatekey' for ExecutionPayload")
+	}
 	*e = ExecutionPayload{}
 	e.ParentHash = dec.ParentHash.Bytes()
 	e.FeeRecipient = dec.FeeRecipient.Bytes()
@@ -234,6 +239,7 @@ func (e *ExecutionPayload) UnmarshalJSON(enc []byte) error {
 		transactions[i] = tx
 	}
 	e.Transactions = transactions
+	e.TimelockPrivatekey = dec.TimelockPrivatekey
 	return nil
 }
 
@@ -248,10 +254,6 @@ func (p *RSAPublicKey) MarshalJSON() ([]byte, error) {
 		N: p.N,
 		E: hexutil.Uint64(p.E),
 	})
-	//if er != nil {
-	//	fmt.Printf("error khord")
-	//}
-	//fmt.Printf("RSAPublickey MarshalJSON %v\n", ret)
 	return ret, er
 }
 
@@ -293,18 +295,18 @@ func (p *RSAPrivateKey) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON --
 func (p *RSAPrivateKey) UnmarshalJSON(enc []byte) error {
-	primes := make([][]byte, len(p.Primes))
-	for i, v := range p.Primes {
-		primes[i] = v
-	}
 	dec := rsaPrivateKeyJSON{}
 	if err := json.Unmarshal(enc, &dec); err != nil {
 		return err
 	}
+	if len(dec.Primes) == 0 {
+		return errors.New("missing required field 'primes' for RSAPrivateKey")
+	}
+	primes := make([][]byte, len(dec.Primes))
+	for i, v := range dec.Primes {
+		primes[i] = bytesutil.SafeCopyBytes(v)
+	}
 	*p = RSAPrivateKey{}
-	//p.Timestamp = uint64(dec.Timestamp)
-	//p.PrevRandao = dec.PrevRandao
-	//p.SuggestedFeeRecipient = dec.SuggestedFeeRecipient
 	p.PublicKey = dec.PublicKey
 	p.D = dec.D
 	p.Primes = primes
@@ -317,8 +319,6 @@ type payloadAttributesJSON struct {
 	SuggestedFeeRecipient hexutil.Bytes  `json:"suggestedFeeRecipient"`
 
 	TimelockPrivatekey *RSAPrivateKey `json:"timelockPrivatekey"`
-	//D                     hexutil.Bytes   `json:"d"`
-	//Primes                []hexutil.Bytes `json:"primes"`
 }
 
 // MarshalJSON --
@@ -332,7 +332,6 @@ func (p *PayloadAttributes) MarshalJSON() ([]byte, error) {
 	if er != nil {
 		fmt.Printf("error khord")
 	}
-	//fmt.Printf("PayloadAttributes MarshalJSON %v\n", ret)
 	return ret, er
 }
 

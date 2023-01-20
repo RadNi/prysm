@@ -35,6 +35,12 @@ func UpgradeToBellatrix(state state.BeaconState) (state.BeaconState, error) {
 		return nil, err
 	}
 
+	primes1 := make([][]byte, 2)
+	primes1[0] = make([]byte, 256)
+	primes1[1] = make([]byte, 256)
+	primes2 := make([][]byte, 2)
+	primes2[0] = make([]byte, 256)
+	primes2[1] = make([]byte, 256)
 	s := &ethpb.BeaconStateBellatrix{
 		GenesisTime:           state.GenesisTime(),
 		GenesisValidatorsRoot: state.GenesisValidatorsRoot(),
@@ -78,6 +84,22 @@ func UpgradeToBellatrix(state state.BeaconState) (state.BeaconState, error) {
 			BaseFeePerGas:    make([]byte, 32),
 			BlockHash:        make([]byte, 32),
 			TransactionsRoot: make([]byte, 32),
+			TimelockPrivatekey: &enginev1.RSAPrivateKey{
+				PublicKey: &enginev1.RSAPublicKey{
+					N: make([]byte, 256),
+					E: 0,
+				},
+				Primes: primes1,
+				D:      make([]byte, 256),
+			},
+		},
+		TimelockPrivatekey: &enginev1.RSAPrivateKey{
+			PublicKey: &enginev1.RSAPublicKey{
+				N: make([]byte, 256),
+				E: 0,
+			},
+			Primes: primes2,
+			D:      make([]byte, 256),
 		},
 	}
 

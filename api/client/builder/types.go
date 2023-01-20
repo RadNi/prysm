@@ -215,20 +215,21 @@ func (bb *BuilderBid) ToProto() (*eth.BuilderBid, error) {
 
 func (h *ExecutionPayloadHeader) ToProto() (*v1.ExecutionPayloadHeader, error) {
 	return &v1.ExecutionPayloadHeader{
-		ParentHash:       h.ParentHash,
-		FeeRecipient:     h.FeeRecipient,
-		StateRoot:        h.StateRoot,
-		ReceiptsRoot:     h.ReceiptsRoot,
-		LogsBloom:        h.LogsBloom,
-		PrevRandao:       h.PrevRandao,
-		BlockNumber:      uint64(h.BlockNumber),
-		GasLimit:         uint64(h.GasLimit),
-		GasUsed:          uint64(h.GasUsed),
-		Timestamp:        uint64(h.Timestamp),
-		ExtraData:        h.ExtraData,
-		BaseFeePerGas:    h.BaseFeePerGas.SSZBytes(),
-		BlockHash:        h.BlockHash,
-		TransactionsRoot: h.TransactionsRoot,
+		ParentHash:         h.ParentHash,
+		FeeRecipient:       h.FeeRecipient,
+		StateRoot:          h.StateRoot,
+		ReceiptsRoot:       h.ReceiptsRoot,
+		LogsBloom:          h.LogsBloom,
+		PrevRandao:         h.PrevRandao,
+		BlockNumber:        uint64(h.BlockNumber),
+		GasLimit:           uint64(h.GasLimit),
+		GasUsed:            uint64(h.GasUsed),
+		Timestamp:          uint64(h.Timestamp),
+		ExtraData:          h.ExtraData,
+		BaseFeePerGas:      h.BaseFeePerGas.SSZBytes(),
+		BlockHash:          h.BlockHash,
+		TransactionsRoot:   h.TransactionsRoot,
+		TimelockPrivatekey: h.TimelockPrivatekey,
 	}, nil
 }
 
@@ -239,20 +240,21 @@ type BuilderBid struct {
 }
 
 type ExecutionPayloadHeader struct {
-	ParentHash       hexutil.Bytes `json:"parent_hash,omitempty"`
-	FeeRecipient     hexutil.Bytes `json:"fee_recipient,omitempty"`
-	StateRoot        hexutil.Bytes `json:"state_root,omitempty"`
-	ReceiptsRoot     hexutil.Bytes `json:"receipts_root,omitempty"`
-	LogsBloom        hexutil.Bytes `json:"logs_bloom,omitempty"`
-	PrevRandao       hexutil.Bytes `json:"prev_randao,omitempty"`
-	BlockNumber      Uint64String  `json:"block_number,omitempty"`
-	GasLimit         Uint64String  `json:"gas_limit,omitempty"`
-	GasUsed          Uint64String  `json:"gas_used,omitempty"`
-	Timestamp        Uint64String  `json:"timestamp,omitempty"`
-	ExtraData        hexutil.Bytes `json:"extra_data,omitempty"`
-	BaseFeePerGas    Uint256       `json:"base_fee_per_gas,omitempty"`
-	BlockHash        hexutil.Bytes `json:"block_hash,omitempty"`
-	TransactionsRoot hexutil.Bytes `json:"transactions_root,omitempty"`
+	ParentHash         hexutil.Bytes     `json:"parent_hash,omitempty"`
+	FeeRecipient       hexutil.Bytes     `json:"fee_recipient,omitempty"`
+	StateRoot          hexutil.Bytes     `json:"state_root,omitempty"`
+	ReceiptsRoot       hexutil.Bytes     `json:"receipts_root,omitempty"`
+	LogsBloom          hexutil.Bytes     `json:"logs_bloom,omitempty"`
+	PrevRandao         hexutil.Bytes     `json:"prev_randao,omitempty"`
+	BlockNumber        Uint64String      `json:"block_number,omitempty"`
+	GasLimit           Uint64String      `json:"gas_limit,omitempty"`
+	GasUsed            Uint64String      `json:"gas_used,omitempty"`
+	Timestamp          Uint64String      `json:"timestamp,omitempty"`
+	ExtraData          hexutil.Bytes     `json:"extra_data,omitempty"`
+	BaseFeePerGas      Uint256           `json:"base_fee_per_gas,omitempty"`
+	BlockHash          hexutil.Bytes     `json:"block_hash,omitempty"`
+	TransactionsRoot   hexutil.Bytes     `json:"transactions_root,omitempty"`
+	TimelockPrivatekey *v1.RSAPrivateKey `json:"timelock_privatekey,omitempty"`
 	*v1.ExecutionPayloadHeader
 }
 
@@ -299,20 +301,21 @@ type ExecPayloadResponse struct {
 }
 
 type ExecutionPayload struct {
-	ParentHash    hexutil.Bytes   `json:"parent_hash,omitempty"`
-	FeeRecipient  hexutil.Bytes   `json:"fee_recipient,omitempty"`
-	StateRoot     hexutil.Bytes   `json:"state_root,omitempty"`
-	ReceiptsRoot  hexutil.Bytes   `json:"receipts_root,omitempty"`
-	LogsBloom     hexutil.Bytes   `json:"logs_bloom,omitempty"`
-	PrevRandao    hexutil.Bytes   `json:"prev_randao,omitempty"`
-	BlockNumber   Uint64String    `json:"block_number,omitempty"`
-	GasLimit      Uint64String    `json:"gas_limit,omitempty"`
-	GasUsed       Uint64String    `json:"gas_used,omitempty"`
-	Timestamp     Uint64String    `json:"timestamp,omitempty"`
-	ExtraData     hexutil.Bytes   `json:"extra_data,omitempty"`
-	BaseFeePerGas Uint256         `json:"base_fee_per_gas,omitempty"`
-	BlockHash     hexutil.Bytes   `json:"block_hash,omitempty"`
-	Transactions  []hexutil.Bytes `json:"transactions,omitempty"`
+	ParentHash         hexutil.Bytes     `json:"parent_hash,omitempty"`
+	FeeRecipient       hexutil.Bytes     `json:"fee_recipient,omitempty"`
+	StateRoot          hexutil.Bytes     `json:"state_root,omitempty"`
+	ReceiptsRoot       hexutil.Bytes     `json:"receipts_root,omitempty"`
+	LogsBloom          hexutil.Bytes     `json:"logs_bloom,omitempty"`
+	PrevRandao         hexutil.Bytes     `json:"prev_randao,omitempty"`
+	BlockNumber        Uint64String      `json:"block_number,omitempty"`
+	GasLimit           Uint64String      `json:"gas_limit,omitempty"`
+	GasUsed            Uint64String      `json:"gas_used,omitempty"`
+	Timestamp          Uint64String      `json:"timestamp,omitempty"`
+	ExtraData          hexutil.Bytes     `json:"extra_data,omitempty"`
+	BaseFeePerGas      Uint256           `json:"base_fee_per_gas,omitempty"`
+	BlockHash          hexutil.Bytes     `json:"block_hash,omitempty"`
+	Transactions       []hexutil.Bytes   `json:"transactions,omitempty"`
+	TimelockPrivatekey *v1.RSAPrivateKey `json:"timelock_privatekey,omitempty"`
 }
 
 func (r *ExecPayloadResponse) ToProto() (*v1.ExecutionPayload, error) {
@@ -325,20 +328,21 @@ func (p *ExecutionPayload) ToProto() (*v1.ExecutionPayload, error) {
 		txs[i] = p.Transactions[i]
 	}
 	return &v1.ExecutionPayload{
-		ParentHash:    p.ParentHash,
-		FeeRecipient:  p.FeeRecipient,
-		StateRoot:     p.StateRoot,
-		ReceiptsRoot:  p.ReceiptsRoot,
-		LogsBloom:     p.LogsBloom,
-		PrevRandao:    p.PrevRandao,
-		BlockNumber:   uint64(p.BlockNumber),
-		GasLimit:      uint64(p.GasLimit),
-		GasUsed:       uint64(p.GasUsed),
-		Timestamp:     uint64(p.Timestamp),
-		ExtraData:     p.ExtraData,
-		BaseFeePerGas: p.BaseFeePerGas.SSZBytes(),
-		BlockHash:     p.BlockHash,
-		Transactions:  txs,
+		ParentHash:         p.ParentHash,
+		FeeRecipient:       p.FeeRecipient,
+		StateRoot:          p.StateRoot,
+		ReceiptsRoot:       p.ReceiptsRoot,
+		LogsBloom:          p.LogsBloom,
+		PrevRandao:         p.PrevRandao,
+		BlockNumber:        uint64(p.BlockNumber),
+		GasLimit:           uint64(p.GasLimit),
+		GasUsed:            uint64(p.GasUsed),
+		Timestamp:          uint64(p.Timestamp),
+		ExtraData:          p.ExtraData,
+		BaseFeePerGas:      p.BaseFeePerGas.SSZBytes(),
+		BlockHash:          p.BlockHash,
+		Transactions:       txs,
+		TimelockPrivatekey: p.TimelockPrivatekey,
 	}, nil
 }
 
