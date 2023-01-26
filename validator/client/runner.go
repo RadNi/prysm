@@ -253,14 +253,19 @@ func performRoles(slotCtx context.Context, allRoles map[[48]byte][]iface.Validat
 				defer wg.Done()
 				switch role {
 				case iface.RoleAttester:
+					log.Info("RoleAttester")
 					v.SubmitAttestation(slotCtx, slot, pubKey)
 				case iface.RoleProposer:
+					log.Info("RoleProposer")
 					v.ProposeBlock(slotCtx, slot, pubKey)
 				case iface.RoleAggregator:
+					log.Info("RoleAggregator")
 					v.SubmitAggregateAndProof(slotCtx, slot, pubKey)
 				case iface.RoleSyncCommittee:
+					log.Info("RoleSyncCommittee")
 					v.SubmitSyncCommitteeMessage(slotCtx, slot, pubKey)
 				case iface.RoleSyncCommitteeAggregator:
+					log.Info("RoleSyncCommitteeAggregator")
 					v.SubmitSignedContributionAndProof(slotCtx, slot, pubKey)
 				case iface.RoleUnknown:
 					log.WithField("pubKey", fmt.Sprintf("%#x", bytesutil.Trunc(pubKey[:]))).Trace("No active roles, doing nothing")

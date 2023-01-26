@@ -5,6 +5,7 @@ import (
 	"github.com/prysmaticlabs/prysm/v3/beacon-chain/state"
 	"github.com/prysmaticlabs/prysm/v3/consensus-types/interfaces"
 	"github.com/prysmaticlabs/prysm/v3/encoding/bytesutil"
+	enginev1 "github.com/prysmaticlabs/prysm/v3/proto/engine/v1"
 	ethpbv1 "github.com/prysmaticlabs/prysm/v3/proto/eth/v1"
 	ethpbalpha "github.com/prysmaticlabs/prysm/v3/proto/prysm/v1alpha1"
 	"google.golang.org/protobuf/proto"
@@ -150,6 +151,10 @@ func V1Alpha1AttDataToV1(v1alpha1AttData *ethpbalpha.AttestationData) *ethpbv1.A
 			Root:  v1alpha1AttData.Target.Root,
 			Epoch: v1alpha1AttData.Target.Epoch,
 		},
+		TimelockPublickey: &ethpbv1.RSAPublicKey{
+			N: v1alpha1AttData.TimelockPublickey.N,
+			E: v1alpha1AttData.TimelockPublickey.E,
+		},
 	}
 }
 
@@ -277,6 +282,10 @@ func V1AttDataToV1Alpha1(v1AttData *ethpbv1.AttestationData) *ethpbalpha.Attesta
 		Target: &ethpbalpha.Checkpoint{
 			Root:  v1AttData.Target.Root,
 			Epoch: v1AttData.Target.Epoch,
+		},
+		TimelockPublickey: &enginev1.RSAPublicKey{
+			N: v1AttData.TimelockPublickey.N,
+			E: v1AttData.TimelockPublickey.E,
 		},
 	}
 }
@@ -413,6 +422,10 @@ func BeaconStateToProto(state state.BeaconState) (*ethpbv1.BeaconState, error) {
 					Epoch: data.Target.Epoch,
 					Root:  data.Target.Root,
 				},
+				TimelockPublickey: &ethpbv1.RSAPublicKey{
+					N: data.TimelockPublickey.N,
+					E: data.TimelockPublickey.E,
+				},
 			},
 			InclusionDelay: att.InclusionDelay,
 			ProposerIndex:  att.ProposerIndex,
@@ -434,6 +447,10 @@ func BeaconStateToProto(state state.BeaconState) (*ethpbv1.BeaconState, error) {
 				Target: &ethpbv1.Checkpoint{
 					Epoch: data.Target.Epoch,
 					Root:  data.Target.Root,
+				},
+				TimelockPublickey: &ethpbv1.RSAPublicKey{
+					N: data.TimelockPublickey.N,
+					E: data.TimelockPublickey.E,
 				},
 			},
 			InclusionDelay: att.InclusionDelay,

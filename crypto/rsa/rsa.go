@@ -1,4 +1,5 @@
 package rsa
+
 import (
 	"crypto/rand"
 	"crypto/rsa"
@@ -7,10 +8,14 @@ import (
 	"encoding/pem"
 	"errors"
 	"fmt"
+	enginev1 "github.com/prysmaticlabs/prysm/v3/proto/engine/v1"
+	"math/big"
 	"os"
+
+	"github.com/ethereum/go-ethereum/log"
 )
 
-func ExportRsaPublicKeyAsPemStr(pubkey *rsa.PublicKey) (string) {
+func ExportRsaPublicKeyAsPemStr(pubkey *rsa.PublicKey) string {
 	pubkey_bytes, err := x509.MarshalPKIXPublicKey(pubkey)
 	if err != nil {
 		return ""
@@ -102,18 +107,19 @@ func ExportPublickey(pub *rsa.PublicKey) {
 	fmt.Printf("Wrote %d bytes\n", num)
 }
 
-func ImportPublicKey() (*rsa.PublicKey) {
+func ImportPublicKey() *rsa.PublicKey {
 	b, err := os.ReadFile("pub.pem") // just pass the file name
 	if err != nil {
 		fmt.Print(err)
 	}
 	pubPEM := string(b)
+	log.Info("rsa:")
+	log.Info(pubPEM)
 	pub, _ := ParseRsaPublicKeyFromPemStr(pubPEM)
 	return pub
 }
 
-
-func ImportPrivateKey() (*rsa.PrivateKey) {
+func ImportPrivateKey() *rsa.PrivateKey {
 	b, err := os.ReadFile("prv.pem") // just pass the file name
 	if err != nil {
 		fmt.Print(err)
@@ -121,6 +127,70 @@ func ImportPrivateKey() (*rsa.PrivateKey) {
 	prvPEM := string(b)
 	prv, _ := ParseRsaPrivateKeyFromPemStr(prvPEM)
 	return prv
+}
+
+func ToProtoRSAPrivatekey(prv *rsa.PrivateKey) *enginev1.RSAPrivateKey {
+	return NewProtoPrivateKey(prv.D, prv.Primes, prv.PublicKey.N, prv.PublicKey.E)
+}
+
+func ToProtoRSAPublickey(pub *rsa.PublicKey) *enginev1.RSAPublicKey {
+	return NewProtoPublicKey(pub.N, pub.E)
+}
+
+func NewProtoPublicKey(n *big.Int, e int) *enginev1.RSAPublicKey {
+	return &enginev1.RSAPublicKey{
+		N: n.Bytes(),
+		E: uint64(e),
+	}
+}
+
+func NewProtoPrivateKey(d *big.Int, p []*big.Int, n *big.Int, e int) *enginev1.RSAPrivateKey {
+	primes := make([][]byte, len(p))
+	for i, prime := range p {
+		primes[i] = prime.Bytes()
+	}
+	return &enginev1.RSAPrivateKey{
+		PublicKey: NewProtoPublicKey(n, e),
+		D:         d.Bytes(),
+		Primes:    primes,
+	}
+}
+
+func FromProtoRSAPrivatekey(prv *enginev1.RSAPrivateKey) *rsa.PrivateKey {
+	return NewPrivateKey(prv.D, prv.Primes, prv.PublicKey.N, prv.PublicKey.E)
+}
+
+func FromProtoRSAPublickey(pub *enginev1.RSAPublicKey) *rsa.PublicKey {
+	return NewPublicKey(pub.N, pub.E)
+}
+
+func NewPublicKey(n []byte, e uint64) *rsa.PublicKey {
+	return &rsa.PublicKey{
+		N: new(big.Int).SetBytes(n),
+		E: int(e),
+	}
+}
+
+func NewPrivateKey(d []byte, p [][]byte, n []byte, e uint64) *rsa.PrivateKey {
+	D := new(big.Int).SetBytes(d)
+	primes := make([]*big.Int, len(p))
+	for i, prime := range p {
+		primes[i] = new(big.Int).SetBytes(prime)
+	}
+	return &rsa.PrivateKey{
+		PublicKey: rsa.PublicKey{
+			N: new(big.Int).SetBytes(n),
+			E: int(e),
+		},
+		D:      D,
+		Primes: primes,
+		Precomputed: rsa.PrecomputedValues{
+			Dp:        nil,
+			Dq:        nil,
+			Qinv:      nil,
+			CRTValues: nil,
+		},
+	}
 }
 
 func KeyGen() (*rsa.PrivateKey, error) {
@@ -136,7 +206,7 @@ func KeyGen() (*rsa.PrivateKey, error) {
 	return prv, nil
 }
 
-func Encrypt(message []byte, pk *rsa.PublicKey) ([]byte, error){
+func Encrypt(message []byte, pk *rsa.PublicKey) ([]byte, error) {
 	label := []byte("orders")
 
 	// crypto/rand.Reader is a good source of entropy for randomizing the
@@ -155,8 +225,8 @@ func Encrypt(message []byte, pk *rsa.PublicKey) ([]byte, error){
 	return ciphertext, nil
 }
 
-
-func Decrypt(ciphertext []byte, sk *rsa.PrivateKey) ([]byte, error) {
+func Decrypt(ciphertext []byte, skt *enginev1.RSAPrivateKey) ([]byte, error) {
+	sk := FromProtoRSAPrivatekey(skt)
 	rng := rand.Reader
 	label := []byte("orders")
 	plaintext, err := rsa.DecryptOAEP(sha256.New(), rng, sk, ciphertext, label)
@@ -189,9 +259,9 @@ func EncryptMulti(msg []byte, pk *rsa.PublicKey) ([]byte, error) {
 	return encryptedBytes, nil
 }
 
-func DecryptMulti(ciphertext []byte, sk *rsa.PrivateKey) ([]byte, error) {
+func DecryptMulti(ciphertext []byte, sk *enginev1.RSAPrivateKey) ([]byte, error) {
 	msgLen := len(ciphertext)
-	step := sk.PublicKey.Size()
+	step := FromProtoRSAPublickey(sk.PublicKey).Size()
 	var decryptedBytes []byte
 
 	for start := 0; start < msgLen; start += step {

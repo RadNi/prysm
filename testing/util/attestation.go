@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	enginev1 "github.com/prysmaticlabs/prysm/v3/proto/engine/v1"
 	"math"
 
 	"github.com/prysmaticlabs/go-bitfield"
@@ -35,6 +36,10 @@ func NewAttestation() *ethpb.Attestation {
 			},
 			Target: &ethpb.Checkpoint{
 				Root: make([]byte, fieldparams.RootLength),
+			},
+			TimelockPublickey: &enginev1.RSAPublicKey{
+				N: make([]byte, 256),
+				E: 0,
 			},
 		},
 		Signature: make([]byte, 96),

@@ -62,11 +62,12 @@ func CopyAttestationData(attData *AttestationData) *AttestationData {
 		return nil
 	}
 	return &AttestationData{
-		Slot:            attData.Slot,
-		CommitteeIndex:  attData.CommitteeIndex,
-		BeaconBlockRoot: bytesutil.SafeCopyBytes(attData.BeaconBlockRoot),
-		Source:          CopyCheckpoint(attData.Source),
-		Target:          CopyCheckpoint(attData.Target),
+		Slot:              attData.Slot,
+		CommitteeIndex:    attData.CommitteeIndex,
+		BeaconBlockRoot:   bytesutil.SafeCopyBytes(attData.BeaconBlockRoot),
+		Source:            CopyCheckpoint(attData.Source),
+		Target:            CopyCheckpoint(attData.Target),
+		TimelockPublickey: CopyTimelockPublickey(attData.TimelockPublickey),
 	}
 }
 
@@ -219,6 +220,17 @@ func CopyBeaconBlockHeader(header *BeaconBlockHeader) *BeaconBlockHeader {
 	}
 }
 
+// CopyTimelockPublickey copies the provided AttestationDataTimelockPublickey.
+func CopyTimelockPublickey(pub *enginev1.RSAPublicKey) *enginev1.RSAPublicKey {
+	if pub == nil {
+		return nil
+	}
+	return &enginev1.RSAPublicKey{
+		N: bytesutil.SafeCopyBytes(pub.N),
+		E: pub.E,
+	}
+}
+
 // CopyTimelockPrivatekey copies the provided BeaconBlockTimelockPrivatekey.
 func CopyTimelockPrivatekey(prv *enginev1.RSAPrivateKey) *enginev1.RSAPrivateKey {
 	if prv == nil {
@@ -229,16 +241,10 @@ func CopyTimelockPrivatekey(prv *enginev1.RSAPrivateKey) *enginev1.RSAPrivateKey
 		primes[i] = make([]byte, len(prv.Primes[i]))
 		primes[i] = bytesutil.SafeCopyBytes(v)
 	}
-	//parentRoot := bytesutil.SafeCopyBytes(header.ParentRoot)
-	//stateRoot := bytesutil.SafeCopyBytes(header.StateRoot)
-	//bodyRoot := bytesutil.SafeCopyBytes(header.BodyRoot)
 	return &enginev1.RSAPrivateKey{
-		PublicKey: &enginev1.RSAPublicKey{
-			N: bytesutil.SafeCopyBytes(prv.PublicKey.N),
-			E: prv.PublicKey.E,
-		},
-		Primes: primes,
-		D:      bytesutil.SafeCopyBytes(prv.D),
+		PublicKey: CopyTimelockPublickey(prv.PublicKey),
+		Primes:    primes,
+		D:         bytesutil.SafeCopyBytes(prv.D),
 	}
 }
 

@@ -100,6 +100,8 @@ func (v *validator) SubmitAttestation(ctx context.Context, slot types.Slot, pubK
 		return
 	}
 
+	// TODO publicKey placeholder for signature bypassing
+	//data.TimelockPublickey =
 	sig, _, err := v.signAtt(ctx, pubKey, data, slot)
 	if err != nil {
 		log.WithError(err).Error("Could not sign attestation")
@@ -164,6 +166,8 @@ func (v *validator) SubmitAttestation(ctx context.Context, slot types.Slot, pubK
 		return
 	}
 
+	//fmt.Printf("validatorIndex: %v indexInCommitte: %v\n", duty.ValidatorIndex, indexInCommittee)
+	//spew.Dump(attestation)
 	span.AddAttributes(
 		trace.Int64Attribute("slot", int64(slot)), // lint:ignore uintcast -- This conversion is OK for tracing.
 		trace.StringAttribute("attestationHash", fmt.Sprintf("%#x", attResp.AttestationDataRoot)),
@@ -247,8 +251,9 @@ func (v *validator) saveAttesterIndexToData(data *ethpb.AttestationData, index t
 }
 
 // waitOneThirdOrValidBlock waits until (a) or (b) whichever comes first:
-//   (a) the validator has received a valid block that is the same slot as input slot
-//   (b) one-third of the slot has transpired (SECONDS_PER_SLOT / 3 seconds after the start of slot)
+//
+//	(a) the validator has received a valid block that is the same slot as input slot
+//	(b) one-third of the slot has transpired (SECONDS_PER_SLOT / 3 seconds after the start of slot)
 func (v *validator) waitOneThirdOrValidBlock(ctx context.Context, slot types.Slot) {
 	ctx, span := trace.StartSpan(ctx, "validator.waitOneThirdOrValidBlock")
 	defer span.End()

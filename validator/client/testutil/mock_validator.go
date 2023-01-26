@@ -3,6 +3,7 @@ package testutil
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"time"
 
 	fieldparams "github.com/prysmaticlabs/prysm/v3/config/fieldparams"
@@ -164,6 +165,7 @@ func (fv *FakeValidator) RolesAt(_ context.Context, slot types.Slot) (map[[field
 
 // SubmitAttestation for mocking.
 func (fv *FakeValidator) SubmitAttestation(_ context.Context, slot types.Slot, _ [fieldparams.BLSPubkeyLength]byte) {
+	fmt.Printf("in ke shero vere !!\n")
 	fv.AttestToBlockHeadCalled = true
 	fv.AttestToBlockHeadArg1 = uint64(slot)
 }

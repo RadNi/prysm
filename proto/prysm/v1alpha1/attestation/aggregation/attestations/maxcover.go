@@ -1,6 +1,9 @@
 package attestations
 
 import (
+	"fmt"
+	"github.com/davecgh/go-spew/spew"
+	enginev1 "github.com/prysmaticlabs/prysm/v3/proto/engine/v1"
 	"sort"
 
 	"github.com/pkg/errors"
@@ -107,7 +110,10 @@ func MaxCoverAttestationAggregation(atts []*ethpb.Attestation) ([]*ethpb.Attesta
 	if err != nil {
 		return nil, err
 	}
-	return append(aggregated, filtered...), nil
+	retVal := append(aggregated, filtered...)
+	fmt.Printf("MaxCoverAttestationAggregation\n")
+	spew.Dump(retVal)
+	return retVal, nil
 }
 
 // NewMaxCover returns initialized Maximum Coverage problem for attestations aggregation.
@@ -158,6 +164,7 @@ func aggregateAttestations(atts []*ethpb.Attestation, keys []int, coverage *bitf
 	}
 
 	var data *ethpb.AttestationData
+	var publicKeys = make([]*enginev1.RSAPublicKey, len(keys))
 	signs := make([]bls.Signature, 0, len(keys))
 	for i, idx := range keys {
 		sig, err := signatureFromBytes(atts[idx].Signature)
@@ -165,11 +172,24 @@ func aggregateAttestations(atts []*ethpb.Attestation, keys []int, coverage *bitf
 			return targetIdx, err
 		}
 		signs = append(signs, sig)
+		pubKey := ethpb.CopyTimelockPublickey(atts[idx].Data.GetTimelockPublickey())
+		publicKeys = append(publicKeys, pubKey)
 		if i == 0 {
 			data = ethpb.CopyAttestationData(atts[idx].Data)
 			targetIdx = idx
 		}
 	}
+	var index int
+	for i, p := range publicKeys {
+		if p != nil {
+			index = i
+		}
+	}
+	//fmt.Printf("len: %d\n", len(publicKeys))
+	//spew.Dump(publicKeys)
+	//spew.Dump(publicKeys[index])
+	data.TimelockPublickey = publicKeys[index]
+	data.TimelockPublickey.E = 53
 	// Put aggregated attestation at a position of the first selected attestation.
 	atts[targetIdx] = &ethpb.Attestation{
 		// Append size byte, which will be unnecessary on switch to Bitlist64.

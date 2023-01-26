@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-
 	"github.com/prysmaticlabs/prysm/v3/beacon-chain/cache"
 	"github.com/prysmaticlabs/prysm/v3/beacon-chain/core/feed"
 	"github.com/prysmaticlabs/prysm/v3/beacon-chain/core/feed/operation"
@@ -14,6 +13,7 @@ import (
 	"github.com/prysmaticlabs/prysm/v3/config/params"
 	types "github.com/prysmaticlabs/prysm/v3/consensus-types/primitives"
 	"github.com/prysmaticlabs/prysm/v3/crypto/bls"
+	"github.com/prysmaticlabs/prysm/v3/crypto/rsa"
 	"github.com/prysmaticlabs/prysm/v3/encoding/bytesutil"
 	ethpb "github.com/prysmaticlabs/prysm/v3/proto/prysm/v1alpha1"
 	"github.com/prysmaticlabs/prysm/v3/time/slots"
@@ -53,6 +53,8 @@ func (vs *Server) GetAttestationData(ctx context.Context, req *ethpb.Attestation
 	}
 	if res != nil {
 		res.CommitteeIndex = req.CommitteeIndex
+		//fmt.Printf("res not nil in cache\n")
+		//spew.Dump(res)
 		return res, nil
 	}
 
@@ -66,6 +68,8 @@ func (vs *Server) GetAttestationData(ctx context.Context, req *ethpb.Attestation
 				return nil, status.Error(codes.DataLoss, "A request was in progress and resolved to nil")
 			}
 			res.CommitteeIndex = req.CommitteeIndex
+			//fmt.Printf("in progress\n")
+			//spew.Dump(res)
 			return res, nil
 		}
 		return nil, status.Errorf(codes.Internal, "Could not mark attestation as in-progress: %v", err)
@@ -125,6 +129,8 @@ func (vs *Server) GetAttestationData(ctx context.Context, req *ethpb.Attestation
 		}
 	}
 
+	log.Info("radni: inja bayad ye publickey ezafe konam be AttestationData obj.")
+	pk := rsa.ImportPublicKey()
 	res = &ethpb.AttestationData{
 		Slot:            req.Slot,
 		CommitteeIndex:  req.CommitteeIndex,
@@ -134,7 +140,10 @@ func (vs *Server) GetAttestationData(ctx context.Context, req *ethpb.Attestation
 			Epoch: targetEpoch,
 			Root:  targetRoot,
 		},
+		TimelockPublickey: rsa.ToProtoRSAPublickey(pk),
 	}
+	//fmt.Printf("before\n")
+	//spew.Dump(res)
 
 	if err := vs.AttestationCache.Put(ctx, req, res); err != nil {
 		return nil, status.Errorf(codes.Internal, "Could not store attestation data in cache: %v", err)
