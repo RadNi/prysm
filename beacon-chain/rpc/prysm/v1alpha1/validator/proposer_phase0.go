@@ -161,20 +161,6 @@ func (vs *Server) buildPhase0BlockData(ctx context.Context, req *ethpb.BlockRequ
 		validExits = append(validExits, exit)
 	}
 
-	//pk := rsa.ImportPrivateKey()
-	//primes := make([][]byte, len(pk.Primes))
-	//for i, p := range pk.Primes {
-	//	primes[i] = p.Bytes()
-	//}
-	//rsapk := enginev1.RSAPrivateKey{
-	//	PublicKey: &enginev1.RSAPublicKey{
-	//		N: pk.PublicKey.N.Bytes(),
-	//		E: uint64(pk.PublicKey.E),
-	//	},
-	//	Primes: primes,
-	//	D:      pk.D.Bytes(),
-	//}
-
 	return &blockData{
 		ParentRoot:        parentRoot,
 		Graffiti:          graffiti,
@@ -185,13 +171,5 @@ func (vs *Server) buildPhase0BlockData(ctx context.Context, req *ethpb.BlockRequ
 		ProposerSlashings: validProposerSlashings,
 		AttesterSlashings: validAttSlashings,
 		VoluntaryExits:    validExits,
-		//TimelockPrivatekey: &enginev1.RSAPrivateKey{
-		//	PublicKey: &enginev1.RSAPublicKey{
-		//		N: make([]byte, 256),
-		//		E: 0,
-		//	},
-		//	Primes: make([][]byte, 2),
-		//	D:      make([]byte, 256),
-		//},
 	}, nil
 }

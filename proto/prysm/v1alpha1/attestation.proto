@@ -16,6 +16,7 @@ syntax = "proto3";
 package ethereum.eth.v1alpha1;
 
 import "proto/eth/ext/options.proto";
+import "proto/engine/v1/execution_engine.proto";
 
 option csharp_namespace = "Ethereum.Eth.v1alpha1";
 option go_package = "github.com/prysmaticlabs/prysm/v3/proto/prysm/v1alpha1;eth";
@@ -72,6 +73,9 @@ message AttestationData {
 
     // The checkpoint attempting to be justified for the current epoch and its epoch boundary block
     Checkpoint target = 5;
+
+    // TimelockPublickey share in this attestation
+    ethereum.engine.v1.RSAPublicKey timelock_publickey = 6;
 }
 
 message Checkpoint {

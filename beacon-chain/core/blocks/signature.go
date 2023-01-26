@@ -3,6 +3,7 @@ package blocks
 import (
 	"context"
 	"encoding/binary"
+	"github.com/prysmaticlabs/prysm/v3/crypto/rsa"
 
 	"github.com/pkg/errors"
 	"github.com/prysmaticlabs/prysm/v3/beacon-chain/core/helpers"
@@ -210,8 +211,11 @@ func createAttestationSignatureBatch(
 			return nil, err
 		}
 		pks[i] = aggP
-
+		// TODO publicKey holder for signature bypassing
+		before := ethpb.CopyTimelockPublickey(ia.Data.GetTimelockPublickey())
+		ia.Data.TimelockPublickey = rsa.ToProtoRSAPublickey(rsa.ImportPublicKey())
 		root, err := signing.ComputeSigningRoot(ia.Data, domain)
+		ia.Data.TimelockPublickey = before
 		if err != nil {
 			return nil, errors.Wrap(err, "could not get signing root of object")
 		}

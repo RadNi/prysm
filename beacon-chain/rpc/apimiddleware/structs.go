@@ -551,11 +551,12 @@ type AttestationJson struct {
 }
 
 type AttestationDataJson struct {
-	Slot            string          `json:"slot"`
-	CommitteeIndex  string          `json:"index"`
-	BeaconBlockRoot string          `json:"beacon_block_root" hex:"true"`
-	Source          *CheckpointJson `json:"source"`
-	Target          *CheckpointJson `json:"target"`
+	Slot              string            `json:"slot"`
+	CommitteeIndex    string            `json:"index"`
+	BeaconBlockRoot   string            `json:"beacon_block_root" hex:"true"`
+	Source            *CheckpointJson   `json:"source"`
+	Target            *CheckpointJson   `json:"target"`
+	TimelockPublickey *RSAPublicKeyJson `json:"timelock_publickey"`
 }
 
 type DepositJson struct {
