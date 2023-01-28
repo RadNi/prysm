@@ -2,17 +2,20 @@ package blockchain
 
 import (
 	"context"
-
+	"fmt"
 	"github.com/pkg/errors"
 	"github.com/prysmaticlabs/prysm/v3/beacon-chain/core/feed"
 	statefeed "github.com/prysmaticlabs/prysm/v3/beacon-chain/core/feed/state"
+	"github.com/prysmaticlabs/prysm/v3/beacon-chain/timelock"
 	"github.com/prysmaticlabs/prysm/v3/consensus-types/interfaces"
 	types "github.com/prysmaticlabs/prysm/v3/consensus-types/primitives"
 	"github.com/prysmaticlabs/prysm/v3/monitoring/tracing"
+	"github.com/prysmaticlabs/prysm/v3/proto/eth/v2"
 	ethpb "github.com/prysmaticlabs/prysm/v3/proto/prysm/v1alpha1"
 	"github.com/prysmaticlabs/prysm/v3/time"
 	"github.com/prysmaticlabs/prysm/v3/time/slots"
 	"go.opencensus.io/trace"
+	"math"
 )
 
 // This defines how many epochs since finality the run time will begin to save hot state on to the DB.
@@ -32,9 +35,9 @@ type SlashingReceiver interface {
 
 // ReceiveBlock is a function that defines the operations (minus pubsub)
 // that are performed on a received block. The operations consist of:
-//   1. Validate block, apply state transition and update checkpoints
-//   2. Apply fork choice to the processed block
-//   3. Save latest head info
+//  1. Validate block, apply state transition and update checkpoints
+//  2. Apply fork choice to the processed block
+//  3. Save latest head info
 func (s *Service) ReceiveBlock(ctx context.Context, block interfaces.SignedBeaconBlock, blockRoot [32]byte) error {
 	ctx, span := trace.StartSpan(ctx, "blockChain.ReceiveBlock")
 	defer span.End()
@@ -158,6 +161,22 @@ func (s *Service) handlePostBlockOperations(b interfaces.BeaconBlock) error {
 	//  Mark attester slashings as seen so we don't include same ones in future blocks.
 	for _, as := range b.Body().AttesterSlashings() {
 		s.cfg.SlashingPool.MarkIncludedAttesterSlashing(as)
+	}
+	if b.Version() == int(eth.Version_BELLATRIX) {
+		s.cfg.TimelockChannels.TimelockSolutionFoundChannel <- &timelock.TimelockSolution{
+			Solution:   b.Body().TimelockPrivatekey(),
+			SlotNumber: b.Slot().SubSlot(3),
+		}
+		fmt.Printf("Radniiiiiiiiiiiiiiii %v\n", b.Slot())
+		s.cfg.TimelockChannels.TimelockRequestChannel <- &timelock.TimelockRequest{
+			Puzzle:     &ethpb.TimelockPuzzle{T: uint64(slots.DivideSlotBy(2)+slots.MultiplySlotBy(2)) / uint64(math.Pow10(9))},
+			SlotNumber: b.Slot(),
+		}
+	} else {
+		s.cfg.TimelockChannels.TimelockSolutionFoundChannel <- &timelock.TimelockSolution{
+			Solution:   b.Body().TimelockPrivatekey(),
+			SlotNumber: b.Slot(),
+		}
 	}
 	return nil
 }

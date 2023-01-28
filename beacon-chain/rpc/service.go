@@ -5,6 +5,7 @@ package rpc
 import (
 	"context"
 	"fmt"
+	"github.com/prysmaticlabs/prysm/v3/beacon-chain/timelock"
 	"net"
 	"sync"
 
@@ -115,6 +116,7 @@ type Config struct {
 	ProposerIdsCache              *cache.ProposerPayloadIDsCache
 	OptimisticModeFetcher         blockchain.OptimisticModeFetcher
 	BlockBuilder                  builder.BlockBuilder
+	TimelockChannels              *timelock.Channels
 }
 
 // NewService instantiates a new RPC service instance that will
@@ -221,6 +223,7 @@ func (s *Service) Start() {
 		BeaconDB:               s.cfg.BeaconDB,
 		ProposerSlotIndexCache: s.cfg.ProposerIdsCache,
 		BlockBuilder:           s.cfg.BlockBuilder,
+		TimelockChannels:       s.cfg.TimelockChannels,
 	}
 	validatorServerV1 := &validator.Server{
 		HeadFetcher:           s.cfg.HeadFetcher,

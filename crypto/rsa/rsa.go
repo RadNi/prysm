@@ -8,11 +8,13 @@ import (
 	"encoding/pem"
 	"errors"
 	"fmt"
+	"github.com/prysmaticlabs/prysm/v3/math"
+
+	//"fmt"
 	enginev1 "github.com/prysmaticlabs/prysm/v3/proto/engine/v1"
 	"math/big"
 	"os"
-
-	"github.com/ethereum/go-ethereum/log"
+	//"github.com/ethereum/go-ethereum/log"
 )
 
 func ExportRsaPublicKeyAsPemStr(pubkey *rsa.PublicKey) string {
@@ -87,7 +89,10 @@ func ExportPrivatekey(prv *rsa.PrivateKey) {
 		}
 	}()
 	prvPEM := ExportRsaPrivateKeyAsPemStr(prv)
-	num, _ := fi.WriteString(prvPEM)
+	num, er := fi.WriteString(prvPEM)
+	if er != nil {
+		fmt.Printf("Error while exporting RSA private key: %v\n", er)
+	}
 	fmt.Printf("Wrote %d bytes\n", num)
 }
 
@@ -103,7 +108,11 @@ func ExportPublickey(pub *rsa.PublicKey) {
 		}
 	}()
 	pubPEM := ExportRsaPublicKeyAsPemStr(pub)
-	num, _ := fi.WriteString(pubPEM)
+	num, err := fi.WriteString(pubPEM)
+	if err != nil {
+		fmt.Printf("Error while exporting RSA private key: %v\n", err)
+	}
+
 	fmt.Printf("Wrote %d bytes\n", num)
 }
 
@@ -113,9 +122,12 @@ func ImportPublicKey() *rsa.PublicKey {
 		fmt.Print(err)
 	}
 	pubPEM := string(b)
-	log.Info("rsa:")
-	log.Info(pubPEM)
-	pub, _ := ParseRsaPublicKeyFromPemStr(pubPEM)
+	//log.Info("rsa:")
+	//log.Info(pubPEM)
+	pub, err := ParseRsaPublicKeyFromPemStr(pubPEM)
+	if err != nil {
+		fmt.Printf("Error while importing RSA public key: %v\n", err)
+	}
 	return pub
 }
 
@@ -125,7 +137,10 @@ func ImportPrivateKey() *rsa.PrivateKey {
 		fmt.Print(err)
 	}
 	prvPEM := string(b)
-	prv, _ := ParseRsaPrivateKeyFromPemStr(prvPEM)
+	prv, err := ParseRsaPrivateKeyFromPemStr(prvPEM)
+	if err != nil {
+		fmt.Printf("Error while importing RSA private key: %v\n", err)
+	}
 	return prv
 }
 
@@ -165,9 +180,13 @@ func FromProtoRSAPublickey(pub *enginev1.RSAPublicKey) *rsa.PublicKey {
 }
 
 func NewPublicKey(n []byte, e uint64) *rsa.PublicKey {
+	unsafeE, err := math.Int(e)
+	if err != nil {
+		fmt.Printf("Cast from uint64 to int overflow %v\n", err)
+	}
 	return &rsa.PublicKey{
 		N: new(big.Int).SetBytes(n),
-		E: int(e),
+		E: unsafeE,
 	}
 }
 
@@ -177,10 +196,14 @@ func NewPrivateKey(d []byte, p [][]byte, n []byte, e uint64) *rsa.PrivateKey {
 	for i, prime := range p {
 		primes[i] = new(big.Int).SetBytes(prime)
 	}
+	unsafeE, err := math.Int(e)
+	if err != nil {
+		fmt.Printf("cast from uint64 to int overflow %v\n", unsafeE)
+	}
 	return &rsa.PrivateKey{
 		PublicKey: rsa.PublicKey{
 			N: new(big.Int).SetBytes(n),
-			E: int(e),
+			E: unsafeE,
 		},
 		D:      D,
 		Primes: primes,
@@ -199,7 +222,7 @@ func KeyGen() (*rsa.PrivateKey, error) {
 	rng := rand.Reader
 	prv, err := rsa.GenerateKey(rng, 2048)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error from keygen: %s\n", err)
+		fmt.Printf("Error from keygen: %s\n", err)
 		return nil, err
 	}
 	fmt.Printf("PrivateKey: %v\nPublicKey: %v\nPrimes: %v\n Precomputed.Dp: %v\n Precomputed.Dq: %v\n Precomputed.Qinv: %v\n", prv.D, prv.PublicKey, prv.Primes, &prv.Precomputed.Dp, &prv.Precomputed.Dq, &prv.Precomputed.Qinv)
@@ -215,7 +238,7 @@ func Encrypt(message []byte, pk *rsa.PublicKey) ([]byte, error) {
 	fmt.Printf("%d\n", pk.Size()-2*sha256.New().Size()-2)
 	ciphertext, err := rsa.EncryptOAEP(sha256.New(), rng, pk, message, label)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error from encryption: %s\n", err)
+		fmt.Printf("Error from encryption: %s\n", err)
 		return nil, err
 	}
 
@@ -231,7 +254,7 @@ func Decrypt(ciphertext []byte, skt *enginev1.RSAPrivateKey) ([]byte, error) {
 	label := []byte("orders")
 	plaintext, err := rsa.DecryptOAEP(sha256.New(), rng, sk, ciphertext, label)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error from decryption: %s\n", err)
+		fmt.Printf("Error from decryption: %s\n", err)
 		return nil, err
 	}
 	return plaintext, nil

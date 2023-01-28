@@ -6,6 +6,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"github.com/prysmaticlabs/prysm/v3/beacon-chain/timelock"
 	"runtime"
 	"sync"
 	"time"
@@ -81,6 +82,7 @@ type config struct {
 	BlockFetcher            execution.POWBlockFetcher
 	FinalizedStateAtStartUp state.BeaconState
 	ExecutionEngineCaller   execution.EngineCaller
+	TimelockChannels        *timelock.Channels
 }
 
 // NewService instantiates a new block service instance that will

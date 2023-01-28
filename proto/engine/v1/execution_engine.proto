@@ -39,7 +39,7 @@ message ExecutionPayload {
 	bytes base_fee_per_gas      = 12 [(ethereum.eth.ext.ssz_size) = "32"];
 	bytes block_hash            = 13 [(ethereum.eth.ext.ssz_size) = "32"];
 	repeated bytes transactions = 14 [(ethereum.eth.ext.ssz_size) = "?,?", (ethereum.eth.ext.ssz_max)  = "1048576,1073741824"];
-	ethereum.engine.v1.RSAPrivateKey timelock_privatekey = 15;
+	RSAPrivateKey timelock_privatekey = 15;
 }
 
 message ExecutionPayloadCapella {
@@ -76,7 +76,7 @@ message ExecutionPayloadHeader {
 	bytes base_fee_per_gas  = 12 [(ethereum.eth.ext.ssz_size) = "32"];
 	bytes block_hash        = 13 [(ethereum.eth.ext.ssz_size) = "32"];
 	bytes transactions_root = 14 [(ethereum.eth.ext.ssz_size) = "32"];
-	ethereum.engine.v1.RSAPrivateKey timelock_privatekey = 15;
+	RSAPrivateKey timelock_privatekey = 15;
 }
 
 message ExecutionPayloadHeaderCapella {

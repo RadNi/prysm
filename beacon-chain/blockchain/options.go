@@ -14,6 +14,7 @@ import (
 	"github.com/prysmaticlabs/prysm/v3/beacon-chain/p2p"
 	"github.com/prysmaticlabs/prysm/v3/beacon-chain/state"
 	"github.com/prysmaticlabs/prysm/v3/beacon-chain/state/stategen"
+	"github.com/prysmaticlabs/prysm/v3/beacon-chain/timelock"
 	ethpb "github.com/prysmaticlabs/prysm/v3/proto/prysm/v1alpha1"
 )
 
@@ -31,6 +32,14 @@ func WithMaxGoroutines(x int) Option {
 func WithWeakSubjectivityCheckpoint(c *ethpb.Checkpoint) Option {
 	return func(s *Service) error {
 		s.cfg.WeakSubjectivityCheckpt = c
+		return nil
+	}
+}
+
+// WithTimelockChannels to call execution engine.
+func WithTimelockChannels(c *timelock.Channels) Option {
+	return func(s *Service) error {
+		s.cfg.TimelockChannels = c
 		return nil
 	}
 }

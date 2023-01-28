@@ -8,7 +8,6 @@ package validatorpb
 
 import (
 	context "context"
-	"fmt"
 	reflect "reflect"
 	sync "sync"
 
@@ -226,7 +225,6 @@ func (x *SignRequest) GetBlock() *v1alpha1.BeaconBlock {
 }
 
 func (x *SignRequest) GetAttestationData() *v1alpha1.AttestationData {
-	fmt.Printf("in yeki?\n")
 	if x, ok := x.GetObject().(*SignRequest_AttestationData); ok {
 		return x.AttestationData
 	}
