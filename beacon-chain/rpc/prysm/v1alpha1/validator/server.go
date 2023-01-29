@@ -5,6 +5,7 @@ package validator
 
 import (
 	"context"
+	"github.com/prysmaticlabs/prysm/v3/beacon-chain/timelock"
 	"time"
 
 	"github.com/pkg/errors"
@@ -72,6 +73,7 @@ type Server struct {
 	BeaconDB               db.HeadAccessDatabase
 	ExecutionEngineCaller  execution.EngineCaller
 	BlockBuilder           builder.BlockBuilder
+	TimelockChannels       *timelock.Channels
 }
 
 // WaitForActivation checks if a validator public key exists in the active validator registry of the current

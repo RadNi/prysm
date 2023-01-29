@@ -48,6 +48,7 @@ import (
 	"github.com/prysmaticlabs/prysm/v3/beacon-chain/sync/checkpoint"
 	"github.com/prysmaticlabs/prysm/v3/beacon-chain/sync/genesis"
 	initialsync "github.com/prysmaticlabs/prysm/v3/beacon-chain/sync/initial-sync"
+	"github.com/prysmaticlabs/prysm/v3/beacon-chain/timelock"
 	"github.com/prysmaticlabs/prysm/v3/cmd"
 	"github.com/prysmaticlabs/prysm/v3/cmd/beacon-chain/flags"
 	"github.com/prysmaticlabs/prysm/v3/config/features"
@@ -108,6 +109,7 @@ type BeaconNode struct {
 	GenesisInitializer      genesis.Initializer
 	CheckpointInitializer   checkpoint.Initializer
 	forkChoicer             forkchoice.ForkChoicer
+	timelockChannels        *timelock.Channels
 }
 
 // New creates a new node instance, sets up configuration options, and registers
@@ -225,6 +227,11 @@ func New(cliCtx *cli.Context, opts ...Option) (*BeaconNode, error) {
 
 	log.Debugln("Registering Determinstic Genesis Service")
 	if err := beacon.registerDeterminsticGenesisService(); err != nil {
+		return nil, err
+	}
+
+	log.Debugln("Registering Timelock Service")
+	if err := beacon.registerTimelockService(); err != nil {
 		return nil, err
 	}
 
@@ -564,6 +571,15 @@ func (b *BeaconNode) fetchBuilderService() *builder.Service {
 	return s
 }
 
+func (b *BeaconNode) registerTimelockService() error {
+	s, err := timelock.NewService(b.ctx)
+	if err != nil {
+		return errors.Wrap(err, "could not register atts pool service")
+	}
+	b.timelockChannels = s.Channels()
+	return b.services.RegisterService(s)
+}
+
 func (b *BeaconNode) registerAttestationPool() error {
 	s, err := attestations.NewService(b.ctx, &attestations.Config{
 		Pool: b.attestationPool,
@@ -603,6 +619,7 @@ func (b *BeaconNode) registerBlockchainService(fc forkchoice.ForkChoicer) error 
 		blockchain.WithSlasherAttestationsFeed(b.slasherAttestationsFeed),
 		blockchain.WithFinalizedStateAtStartUp(b.finalizedStateAtStartUp),
 		blockchain.WithProposerIdsCache(b.proposerIdsCache),
+		blockchain.WithTimelockChannels(b.timelockChannels),
 	)
 
 	blockchainService, err := blockchain.NewService(b.ctx, opts...)
@@ -827,6 +844,7 @@ func (b *BeaconNode) registerRPCService() error {
 		MaxMsgSize:                    maxMsgSize,
 		ProposerIdsCache:              b.proposerIdsCache,
 		BlockBuilder:                  b.fetchBuilderService(),
+		TimelockChannels:              b.timelockChannels,
 	})
 
 	return b.services.RegisterService(rpcService)

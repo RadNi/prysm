@@ -88,14 +88,12 @@ func run(ctx context.Context, v iface.Validator) {
 			close(accountsChangedChan)
 			return // Exit if context is canceled.
 		case blocksError := <-connectionErrorChannel:
-			log.Info("in blocksError?")
 			if blocksError != nil {
 				log.WithError(blocksError).Warn("block stream interrupted")
 				go v.ReceiveBlocks(ctx, connectionErrorChannel)
 				continue
 			}
 		case newKeys := <-accountsChangedChan:
-			log.Info("in yeki newKeys")
 			anyActive, err := v.HandleKeyReload(ctx, newKeys)
 			if err != nil {
 				log.WithError(err).Error("Could not properly handle reloaded keys")
@@ -108,7 +106,8 @@ func run(ctx context.Context, v iface.Validator) {
 				}
 			}
 		case slot := <-v.NextSlot():
-			log.Info("vaaa next slot. OooO")
+			log.Info("vaaa next slot. O_/|\\_O")
+
 			span.AddAttributes(trace.Int64Attribute("slot", int64(slot))) // lint:ignore uintcast -- This conversion is OK for tracing.
 			reloadRemoteKeys(ctx, km)
 			allExited, err := v.AllValidatorsAreExited(ctx)

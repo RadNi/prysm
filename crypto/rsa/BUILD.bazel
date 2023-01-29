@@ -1,0 +1,12 @@
+load("@prysm//tools/go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "go_default_library",
+    srcs = ["rsa.go"],
+    importpath = "github.com/prysmaticlabs/prysm/v3/crypto/rsa",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//proto/engine/v1:go_default_library",
+        "//math:go_default_library",
+        ]
+)

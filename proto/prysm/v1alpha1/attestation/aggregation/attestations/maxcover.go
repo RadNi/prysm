@@ -1,10 +1,9 @@
 package attestations
 
 import (
-	"fmt"
-	"github.com/davecgh/go-spew/spew"
-	enginev1 "github.com/prysmaticlabs/prysm/v3/proto/engine/v1"
 	"sort"
+
+	enginev1 "github.com/prysmaticlabs/prysm/v3/proto/engine/v1"
 
 	"github.com/pkg/errors"
 	"github.com/prysmaticlabs/go-bitfield"
@@ -110,10 +109,7 @@ func MaxCoverAttestationAggregation(atts []*ethpb.Attestation) ([]*ethpb.Attesta
 	if err != nil {
 		return nil, err
 	}
-	retVal := append(aggregated, filtered...)
-	fmt.Printf("MaxCoverAttestationAggregation\n")
-	spew.Dump(retVal)
-	return retVal, nil
+	return append(aggregated, filtered...), nil
 }
 
 // NewMaxCover returns initialized Maximum Coverage problem for attestations aggregation.
@@ -185,9 +181,6 @@ func aggregateAttestations(atts []*ethpb.Attestation, keys []int, coverage *bitf
 			index = i
 		}
 	}
-	//fmt.Printf("len: %d\n", len(publicKeys))
-	//spew.Dump(publicKeys)
-	//spew.Dump(publicKeys[index])
 	data.TimelockPublickey = publicKeys[index]
 	data.TimelockPublickey.E = 53
 	// Put aggregated attestation at a position of the first selected attestation.
