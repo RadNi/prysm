@@ -2,9 +2,9 @@ package timelock
 
 import (
 	"context"
-	"fmt"
 	types "github.com/prysmaticlabs/prysm/v3/consensus-types/primitives"
 	"github.com/prysmaticlabs/prysm/v3/crypto/rsa"
+	log "github.com/sirupsen/logrus"
 	"time"
 )
 
@@ -41,6 +41,7 @@ func NewService(ctx context.Context, opts ...Option) (*Service, error) {
 			TimelockSolutionFoundChannel: make(chan *TimelockSolution),
 			TimelockRequestChannel:       make(chan *TimelockRequest),
 		},
+		stop: make(chan bool),
 	}, nil
 }
 
@@ -55,11 +56,9 @@ func (s *Service) Start() {
 		case <-time.After(time.Second * 1):
 			newRequests := make([]*TimelockRequest, 0)
 			for _, r := range s.requests {
-				fmt.Printf("Attempting to solve the puzzle: %v %v\n", r.Puzzle.T, r.SlotNumber)
 				r.Puzzle.T -= 1
-				fmt.Printf("negated\n")
 				if r.Puzzle.T == 0 {
-					fmt.Printf("zero?\n")
+					log.Info("Solved a timelock puzzle for slot")
 					sol := &TimelockSolution{
 						Solution:   rsa.ToProtoRSAPrivatekey(rsa.ImportPrivateKey()),
 						SlotNumber: r.SlotNumber,
@@ -83,17 +82,14 @@ func (s *Service) Start() {
 		}
 		select {
 		case x := <-s.channels.TimelockRequestChannel:
-			fmt.Printf("New request arrived: %v %v\n", x.Puzzle.T, x.SlotNumber)
 			if x.SlotNumber <= 7 {
 				if x.Res != nil {
-					fmt.Printf("Request less than 3: %v %v\n", x.Puzzle.T, x.SlotNumber)
 					x.Res <- &TimelockSolution{
 						Solution:   rsa.ToProtoRSAPrivatekey(rsa.ImportPrivateKey()),
 						SlotNumber: x.SlotNumber,
 					}
 				}
 			} else {
-				fmt.Printf("Request over 3: %v %v\n", x.Puzzle.T, x.SlotNumber)
 				sol, prs := s.solutions[x.SlotNumber]
 				if prs {
 					x.Res <- sol
@@ -102,7 +98,6 @@ func (s *Service) Start() {
 				}
 			}
 		case x := <-s.channels.TimelockSolutionFoundChannel:
-			fmt.Printf("New solution found %v %v\n", x.Solution, x.SlotNumber)
 			newRequests := make([]*TimelockRequest, 0)
 			for _, r := range s.requests {
 				if r.SlotNumber == x.SlotNumber {
@@ -116,7 +111,6 @@ func (s *Service) Start() {
 			s.requests = newRequests
 			s.solutions[x.SlotNumber] = x
 		case <-s.stop:
-			fmt.Printf("Stopping channel\n")
 			close(s.channels.TimelockRequestChannel)
 			close(s.channels.TimelockSolutionFoundChannel)
 			close(s.stop)
