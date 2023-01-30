@@ -2,7 +2,6 @@ package blockchain
 
 import (
 	"context"
-	"fmt"
 	"github.com/pkg/errors"
 	"github.com/prysmaticlabs/prysm/v3/beacon-chain/core/feed"
 	statefeed "github.com/prysmaticlabs/prysm/v3/beacon-chain/core/feed/state"
@@ -167,7 +166,6 @@ func (s *Service) handlePostBlockOperations(b interfaces.BeaconBlock) error {
 			Solution:   b.Body().TimelockPrivatekey(),
 			SlotNumber: b.Slot().SubSlot(3),
 		}
-		fmt.Printf("Radniiiiiiiiiiiiiiii %v\n", b.Slot())
 		s.cfg.TimelockChannels.TimelockRequestChannel <- &timelock.TimelockRequest{
 			Puzzle:     &ethpb.TimelockPuzzle{T: uint64(slots.DivideSlotBy(2)+slots.MultiplySlotBy(2)) / uint64(math.Pow10(9))},
 			SlotNumber: b.Slot(),
