@@ -7,7 +7,7 @@ import (
 )
 
 // LatestTimelockPrivatekey corresponding to timelockPrivatekey on the beacon chain.
-func (b *BeaconState) LatestTimelockPrivatekey() (*enginev1.RSAPrivateKey, error) {
+func (b *BeaconState) LatestTimelockPrivatekey() (*enginev1.ElgamalPrivateKey, error) {
 	if b.version != version.Bellatrix {
 		return nil, errNotSupported("LatestTimelockPrivatekey", b.version)
 	}
@@ -24,6 +24,6 @@ func (b *BeaconState) LatestTimelockPrivatekey() (*enginev1.RSAPrivateKey, error
 
 // latestTimelockPrivatekeyVal of the beacon state.
 // This assumes that a lock is already held on BeaconState.
-func (b *BeaconState) latestTimelockPrivatekeyVal() *enginev1.RSAPrivateKey {
+func (b *BeaconState) latestTimelockPrivatekeyVal() *enginev1.ElgamalPrivateKey {
 	return ethpb.CopyTimelockPrivatekey(b.latestTimelockPrivateKey)
 }

@@ -13,7 +13,7 @@ import (
 	"github.com/prysmaticlabs/prysm/v3/config/params"
 	types "github.com/prysmaticlabs/prysm/v3/consensus-types/primitives"
 	"github.com/prysmaticlabs/prysm/v3/crypto/bls"
-	"github.com/prysmaticlabs/prysm/v3/crypto/rsa"
+	"github.com/prysmaticlabs/prysm/v3/crypto/elgamal"
 	"github.com/prysmaticlabs/prysm/v3/encoding/bytesutil"
 	ethpb "github.com/prysmaticlabs/prysm/v3/proto/prysm/v1alpha1"
 	"github.com/prysmaticlabs/prysm/v3/time/slots"
@@ -130,7 +130,7 @@ func (vs *Server) GetAttestationData(ctx context.Context, req *ethpb.Attestation
 	}
 
 	log.Info("radni: inja bayad ye publickey ezafe konam be AttestationData obj.")
-	pk := rsa.ImportPublicKey()
+	pk := elgamal.ImportPublicKey()
 	res = &ethpb.AttestationData{
 		Slot:            req.Slot,
 		CommitteeIndex:  req.CommitteeIndex,
@@ -140,7 +140,7 @@ func (vs *Server) GetAttestationData(ctx context.Context, req *ethpb.Attestation
 			Epoch: targetEpoch,
 			Root:  targetRoot,
 		},
-		TimelockPublickey: rsa.ToProtoRSAPublickey(pk),
+		TimelockPublickey: pk,
 	}
 	//fmt.Printf("before\n")
 	//spew.Dump(res)

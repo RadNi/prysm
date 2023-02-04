@@ -75,7 +75,7 @@ message AttestationData {
     Checkpoint target = 5;
 
     // TimelockPublickey share in this attestation
-    ethereum.engine.v1.RSAPublicKey timelock_publickey = 6;
+    ethereum.engine.v1.ElgamalPublicKey timelock_publickey = 6;
 }
 
 message Checkpoint {

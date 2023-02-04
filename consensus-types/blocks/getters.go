@@ -785,7 +785,7 @@ func (b *BeaconBlockBody) SyncAggregate() (*eth.SyncAggregate, error) {
 }
 
 // TimelockPrivatekey returns the Timelock PrivateKey in the block.
-func (b *BeaconBlockBody) TimelockPrivatekey() *enginev1.RSAPrivateKey {
+func (b *BeaconBlockBody) TimelockPrivatekey() *enginev1.ElgamalPrivateKey {
 	return b.timelockPrivateKey
 }
 

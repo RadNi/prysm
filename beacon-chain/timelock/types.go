@@ -17,5 +17,5 @@ type TimelockNewPuzzle struct {
 }
 type TimelockSolution struct {
 	SlotNumber types.Slot
-	Solution   *enginev1.RSAPrivateKey
+	Solution   *enginev1.ElgamalPrivateKey
 }

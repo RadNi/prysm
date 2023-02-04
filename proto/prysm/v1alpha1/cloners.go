@@ -221,30 +221,25 @@ func CopyBeaconBlockHeader(header *BeaconBlockHeader) *BeaconBlockHeader {
 }
 
 // CopyTimelockPublickey copies the provided AttestationDataTimelockPublickey.
-func CopyTimelockPublickey(pub *enginev1.RSAPublicKey) *enginev1.RSAPublicKey {
+func CopyTimelockPublickey(pub *enginev1.ElgamalPublicKey) *enginev1.ElgamalPublicKey {
 	if pub == nil {
 		return nil
 	}
-	return &enginev1.RSAPublicKey{
-		N: bytesutil.SafeCopyBytes(pub.N),
-		E: pub.E,
+	return &enginev1.ElgamalPublicKey{
+		P: bytesutil.SafeCopyBytes(pub.P),
+		G: bytesutil.SafeCopyBytes(pub.G),
+		Y: bytesutil.SafeCopyBytes(pub.Y),
 	}
 }
 
 // CopyTimelockPrivatekey copies the provided BeaconBlockTimelockPrivatekey.
-func CopyTimelockPrivatekey(prv *enginev1.RSAPrivateKey) *enginev1.RSAPrivateKey {
+func CopyTimelockPrivatekey(prv *enginev1.ElgamalPrivateKey) *enginev1.ElgamalPrivateKey {
 	if prv == nil {
 		return nil
 	}
-	primes := make([][]byte, len(prv.Primes))
-	for i, v := range prv.Primes {
-		primes[i] = make([]byte, len(prv.Primes[i]))
-		primes[i] = bytesutil.SafeCopyBytes(v)
-	}
-	return &enginev1.RSAPrivateKey{
+	return &enginev1.ElgamalPrivateKey{
 		PublicKey: CopyTimelockPublickey(prv.PublicKey),
-		Primes:    primes,
-		D:         bytesutil.SafeCopyBytes(prv.D),
+		X:         bytesutil.SafeCopyBytes(prv.X),
 	}
 }
 

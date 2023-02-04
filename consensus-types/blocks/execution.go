@@ -141,7 +141,7 @@ func (e executionPayload) Transactions() ([][]byte, error) {
 }
 
 // TimelockPrivatekey --
-func (e executionPayload) TimelockPrivatekey() (*enginev1.RSAPrivateKey, error) {
+func (e executionPayload) TimelockPrivatekey() (*enginev1.ElgamalPrivateKey, error) {
 	return e.p.TimelockPrivatekey, nil
 }
 
@@ -277,7 +277,7 @@ func (executionPayloadHeader) Transactions() ([][]byte, error) {
 }
 
 // TimelockPrivatekey --
-func (e executionPayloadHeader) TimelockPrivatekey() (*enginev1.RSAPrivateKey, error) {
+func (e executionPayloadHeader) TimelockPrivatekey() (*enginev1.ElgamalPrivateKey, error) {
 	return e.p.TimelockPrivatekey, nil
 }
 
@@ -446,7 +446,7 @@ func (e executionPayloadCapella) Transactions() ([][]byte, error) {
 }
 
 // TimelockPrivatekey --
-func (e executionPayloadCapella) TimelockPrivatekey() (*enginev1.RSAPrivateKey, error) {
+func (e executionPayloadCapella) TimelockPrivatekey() (*enginev1.ElgamalPrivateKey, error) {
 	return nil, ErrUnsupportedGetter
 }
 
@@ -582,7 +582,7 @@ func (executionPayloadHeaderCapella) Transactions() ([][]byte, error) {
 }
 
 // TimelockPrivatekey --
-func (executionPayloadHeaderCapella) TimelockPrivatekey() (*enginev1.RSAPrivateKey, error) {
+func (executionPayloadHeaderCapella) TimelockPrivatekey() (*enginev1.ElgamalPrivateKey, error) {
 	return nil, ErrUnsupportedGetter
 }
 

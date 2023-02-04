@@ -7,7 +7,7 @@ import (
 )
 
 // SetTimelockPrivatekey for the beacon state.
-func (b *BeaconState) SetTimelockPrivatekey(val *enginev1.RSAPrivateKey) error {
+func (b *BeaconState) SetTimelockPrivatekey(val *enginev1.ElgamalPrivateKey) error {
 	b.lock.Lock()
 	defer b.lock.Unlock()
 

@@ -1,0 +1,355 @@
+package timelock
+
+import (
+	"crypto/rand"
+	"crypto/sha512"
+	"encoding/pem"
+	"fmt"
+	"math/big"
+	"os"
+)
+
+func readPEM(filename string) (*pem.Block, []byte) {
+	b, err := os.ReadFile(filename) // just pass the file name
+	if err != nil {
+		fmt.Print(err)
+	}
+	return pem.Decode(b)
+}
+
+func ModExpWithSquaringPow2(gen, t, modulus *big.Int) *big.Int {
+	i := new(big.Int).SetInt64(0)
+	two := new(big.Int).SetInt64(2)
+	one := new(big.Int).SetInt64(1)
+	for {
+		gen = ModExpWithSquaring(gen, two, modulus)
+		i.Add(i, one)
+		if i.Cmp(t) == 0 {
+			return gen
+		}
+	}
+}
+
+// ModExpWithSquaring calculates modular exponentiation with exponentiation by squaring, O(log exponent).
+func ModExpWithSquaring(_base, _exponent, _modulus *big.Int) *big.Int {
+	base := new(big.Int).SetBytes(_base.Bytes())
+	exponent := new(big.Int).SetBytes(_exponent.Bytes())
+	modulus := new(big.Int).SetBytes(_modulus.Bytes())
+	zero := new(big.Int)
+	one := new(big.Int)
+	two := new(big.Int)
+	zero.SetInt64(0)
+	one.SetInt64(1)
+	two.SetInt64(2)
+	if exponent.Cmp(one) == 0 {
+		ret := new(big.Int).SetBytes(base.Bytes())
+		return ret
+	}
+	newExp := new(big.Int)
+	newExp.Div(exponent, two)
+	res := new(big.Int)
+	res = ModExpWithSquaring(base, newExp, modulus)
+	res.Mul(res, res)
+	res.Mod(res, modulus)
+	and := new(big.Int)
+	and.And(exponent, one)
+	if and.Cmp(zero) != 0 {
+		mod := new(big.Int)
+		mod.Mod(base, modulus)
+		res.Mul(res, mod)
+		res.Mod(res, modulus)
+		return res
+	}
+	res.Mod(res, modulus)
+	return res
+}
+
+func inv(x, n *big.Int) *big.Int {
+	zero := new(big.Int).SetInt64(0)
+	inv := new(big.Int)
+	y := new(big.Int)
+	gcd := new(big.Int)
+	gcd.GCD(inv, y, x, n)
+	// fmt.Printf("x: %v n: %v, inv: %v gcd: %v\n", x, n, inv, gcd)
+	if inv.Cmp(zero) < 0 {
+		inv.Add(inv, n)
+		return inv
+	}
+	return inv
+}
+
+func genUV(_s, _r, _n, _g, _t, _h *big.Int) (*big.Int, *big.Int) {
+	s := new(big.Int).SetBytes(_s.Bytes())
+	r := new(big.Int).SetBytes(_r.Bytes())
+	n := new(big.Int).SetBytes(_n.Bytes())
+	g := new(big.Int).SetBytes(_g.Bytes())
+	//    t := new(big.Int).SetBytes(_t.Bytes())
+	h := new(big.Int).SetBytes(_h.Bytes())
+	one := new(big.Int).SetInt64(1)
+	u := ModExpWithSquaring(g, s, n)
+	sn := new(big.Int).Mul(s, n)
+	n2 := new(big.Int).Mul(n, n)
+	hsn := ModExpWithSquaring(h, sn, n2)
+	n.Add(n, one)
+	v := ModExpWithSquaring(n, r, n2)
+	v = v.Mul(v, hsn)
+	v.Mod(v, n2)
+
+	return u, v
+
+}
+
+func PuzzleGen(_s, _n, _g, _time, _h *big.Int) (*big.Int, *big.Int, *big.Int, *big.Int, *big.Int, *big.Int, *big.Int) {
+	s := new(big.Int).SetBytes(_s.Bytes())
+	n := new(big.Int).SetBytes(_n.Bytes())
+	g := new(big.Int).SetBytes(_g.Bytes())
+	time := new(big.Int).SetBytes(_time.Bytes())
+	h := new(big.Int).SetBytes(_h.Bytes())
+	u, v := genUV(_s, _s, _n, _g, _time, _h)
+	x, _ := rand.Int(rand.Reader, n)
+	t, _ := rand.Int(rand.Reader, n)
+
+	x.SetInt64(966)
+	t.SetInt64(988)
+
+	a, b := genUV(x, t, _n, _g, _time, _h)
+
+	n_2 := new(big.Int).SetBytes(n.Bytes())
+	two := new(big.Int).SetInt64(2)
+	n_2.Div(n_2, two)
+
+	sha := sha512.New()
+	sha.Write(n.Bytes())
+	sha.Write(g.Bytes())
+	sha.Write(time.Bytes())
+	sha.Write(h.Bytes())
+	sha.Write(a.Bytes())
+	sha.Write(b.Bytes())
+	hsh := sha.Sum(nil)
+	e := new(big.Int).SetBytes(hsh)
+	e.Mod(e, n_2)
+
+	alpha := new(big.Int).SetBytes(s.Bytes())
+	alpha.Mul(alpha, e)
+	alpha.Add(alpha, x)
+
+	beta := new(big.Int).SetBytes(s.Bytes())
+	beta.Mul(beta, e)
+	beta.Add(beta, t)
+	beta.Mod(beta, n)
+
+	tau := new(big.Int).SetBytes(g.Bytes())
+	tau = ModExpWithSquaring(tau, t, n)
+
+	return u, v, a, b, alpha, beta, tau
+}
+
+func PuzzleSolve(_u, _v, _n, _g, _t, _h *big.Int) *big.Int {
+	u := new(big.Int).SetBytes(_u.Bytes())
+	v := new(big.Int).SetBytes(_v.Bytes())
+	n := new(big.Int).SetBytes(_n.Bytes())
+	//h := new(big.Int).SetBytes(_h.Bytes())
+	t := new(big.Int).SetBytes(_t.Bytes())
+	one := new(big.Int).SetInt64(1)
+	n2 := new(big.Int)
+	n2.Mul(n, n)
+	w := ModExpWithSquaringPow2(u, t, n)
+	// fmt.Printf("w: %v\n", w)
+	winv := inv(w, n)
+	winvn := ModExpWithSquaring(winv, n, n2)
+	// fmt.Printf("winv: %v winvn: %v\n", winv, winvn)
+	s := new(big.Int)
+	s = s.Mul(v, winvn)
+	s = s.Mod(s, n2)
+	s.Sub(s, one)
+	s.Div(s, n)
+	return s
+}
+
+func sample(n *big.Int) (*big.Int, *big.Int) {
+	var nBig *big.Int
+	one := new(big.Int).SetInt64(1)
+	zero := new(big.Int).SetInt64(0)
+	x := new(big.Int)
+	inv := new(big.Int)
+	gcd := new(big.Int)
+	for {
+		nBig, _ = rand.Int(rand.Reader, n)
+		gcd.GCD(inv, x, nBig, n)
+		if one.Cmp(gcd) == 0 {
+			break
+		}
+	}
+	two := new(big.Int).SetInt64(2)
+	nBig = ModExpWithSquaring(nBig, two, n)
+	// nBig = new(big.Int).SetBytes([]byte{0x02, 0x21})
+	gcd.GCD(inv, x, nBig, n)
+	if inv.Cmp(zero) <= 0 {
+		inv.Add(inv, n)
+	}
+	return nBig, inv
+}
+
+//
+//// callerName returns the name of the function skip frames up the call stack.
+//func callerName(skip int) string {
+//	const unknown = "unknown"
+//	pcs := make([]uintptr, 1)
+//	n := runtime.Callers(skip+2, pcs)
+//	if n < 1 {
+//		return unknown
+//	}
+//	frame, _ := runtime.CallersFrames(pcs).Next()
+//	if frame.Function == "" {
+//		return unknown
+//	}
+//	return frame.Function
+//}
+
+// timer returns a function that prints the name of the calling
+// function and the elapsed time between the call to timer and
+// the call to the returned function. The returned function is
+// intended to be used in a defer statement:
+//
+//	defer timer()()
+//func timer() func() {
+//	name := callerName(1)
+//	start := time.Now()
+//	return func() {
+//		fmt.Printf("%s took %v\n", name, time.Since(start))
+//	}
+//}
+
+func PuzzleEval(_u1, _v1, _u2, _v2, n *big.Int) (*big.Int, *big.Int) {
+	u1 := new(big.Int).SetBytes(_u1.Bytes())
+	v1 := new(big.Int).SetBytes(_v1.Bytes())
+	u2 := new(big.Int).SetBytes(_u2.Bytes())
+	v2 := new(big.Int).SetBytes(_v2.Bytes())
+
+	v := new(big.Int)
+	u := new(big.Int)
+	n2 := new(big.Int)
+
+	n2 = n2.Mul(n, n)
+
+	v.Mul(v1, v2)
+	v.Mod(v, n2)
+
+	u.Mul(u1, u2)
+	u.Mod(u, n)
+
+	return u, v
+}
+
+func PuzzleVerify(_u, _v, _a, _b, _alpha, _beta, _tau, _g, _h, _n, _t *big.Int) bool {
+	// TODO u \in J_n
+	// TODO a \in J_n
+	// TODO t \in J_n
+	// TODO b \in Z_n^2
+	// TODO \alpha \in Z_{n^2/4+n}
+	// TODO \beta \in Z_n
+	u := new(big.Int).SetBytes(_u.Bytes())
+	v := new(big.Int).SetBytes(_v.Bytes())
+	a := new(big.Int).SetBytes(_a.Bytes())
+	b := new(big.Int).SetBytes(_b.Bytes())
+	alpha := new(big.Int).SetBytes(_alpha.Bytes())
+	beta := new(big.Int).SetBytes(_beta.Bytes())
+	tau := new(big.Int).SetBytes(_tau.Bytes())
+	g := new(big.Int).SetBytes(_g.Bytes())
+	h := new(big.Int).SetBytes(_h.Bytes())
+	n := new(big.Int).SetBytes(_n.Bytes())
+	t := new(big.Int).SetBytes(_t.Bytes())
+
+	two := new(big.Int).SetInt64(2)
+	n_2 := new(big.Int).SetBytes(n.Bytes())
+	n_2.Div(n_2, two)
+	sha := sha512.New()
+	sha.Write(n.Bytes())
+	sha.Write(g.Bytes())
+	sha.Write(t.Bytes())
+	sha.Write(h.Bytes())
+	sha.Write(a.Bytes())
+	sha.Write(b.Bytes())
+	hsh := sha.Sum(nil)
+	e := new(big.Int).SetBytes(hsh)
+	e.Mod(e, n_2)
+
+	uagg, vagg := genUV(alpha, beta, n, g, t, h)
+
+	uea := ModExpWithSquaring(u, e, n)
+	uea.Mul(uea, a)
+	uea.Mod(uea, n)
+	if uea.Cmp(uagg) != 0 {
+		return false
+	}
+	n2 := new(big.Int)
+	n2.Mul(n, n)
+
+	veb := ModExpWithSquaring(v, e, n2)
+	veb.Mul(veb, b)
+	veb.Mod(veb, n2)
+
+	if veb.Cmp(vagg) != 0 {
+		return false
+	}
+
+	gbeta := ModExpWithSquaring(g, beta, n)
+	uetau := ModExpWithSquaring(u, e, n)
+	uetau.Mul(uetau, tau)
+	uetau.Mod(uetau, n)
+
+	if gbeta.Cmp(uetau) != 0 {
+		return false
+	}
+
+	return true
+}
+
+/*
+func main() {
+
+	p1 := []byte{00, 0x99, 0x00, 0x0d, 0xd4, 0xc8, 0x77, 0xe9, 0xbe, 0x0a, 0xef, 0x2c, 0x61, 0xa7, 0x25, 0x18, 0x1f, 0xcd, 0xa9, 0x1b, 0x83, 0x70, 0xc3, 0xe6, 0xb0, 0x2d, 0x3e, 0x3b, 0x20, 0xf2, 0x29, 0x9f, 0x2b, 0x9a, 0x91, 0x9b, 0x9d, 0x21, 0xf6, 0xbe, 0xfe, 0x2c, 0xbf, 0xae, 0x38, 0x89, 0x0b, 0xe1, 0x0a, 0x11, 0x17, 0x29, 0x8d, 0xa7, 0x4d, 0x8b, 0x07, 0x35, 0x77, 0x74, 0xa3, 0xcd, 0x04, 0x93, 0x12, 0x09, 0x8a, 0x83, 0xae, 0xeb, 0x01, 0x36, 0x2c, 0x1c, 0xdb, 0x7d, 0x0f, 0x5d, 0x94, 0xc9, 0x6b, 0x99, 0xb8, 0x88, 0xce, 0xbe, 0xfc, 0x69, 0xc2, 0x2d, 0xb0, 0x16, 0xdd, 0xa2, 0x8b, 0x20, 0xef, 0x7b, 0x94, 0xd4, 0x5e, 0x32, 0x4a, 0x88, 0x04, 0x2e, 0x3f, 0xd8, 0xb4, 0x2c, 0x1f, 0x2e, 0xdb, 0x8e, 0x7f, 0x6e, 0x4f, 0xf8, 0x39, 0xee, 0xef, 0x47, 0x92, 0x28, 0xfa, 0x45, 0x9e, 0x37, 0x19, 0xc0, 0x62, 0x5d, 0x95, 0x99, 0xdf, 0xde, 0xa5, 0x57, 0xba, 0x9c, 0x56, 0xf8, 0x1b, 0x1e, 0x7b, 0xcd, 0xdf, 0x9c, 0xd0, 0x3f, 0x21, 0x3c, 0x42, 0xd9, 0xeb, 0xb0, 0x33, 0x64, 0x82, 0xf6, 0xdc, 0xaf, 0x38, 0x2e, 0xbc, 0xed, 0x01, 0x4a, 0xe2, 0x35, 0x88, 0x01, 0x71, 0x3e, 0x6e, 0x4a, 0x96, 0x86, 0x9d, 0x7b, 0x9c, 0xba, 0xe1, 0x78, 0x86, 0x5f, 0x88, 0x15, 0xab, 0x88, 0xa5, 0x2a, 0xa6, 0x34, 0x3f, 0xa0, 0xf7, 0x2d, 0xcb, 0x00, 0xbc, 0x45, 0x9f, 0xb7, 0x4a, 0x9b, 0x49, 0x34, 0x65, 0x46, 0x59, 0xbf, 0x73, 0x37, 0xf5, 0x73, 0xe4, 0xc0, 0x47, 0x76, 0x59, 0x6a, 0x44, 0xad, 0x1b, 0x2d, 0x7e, 0x5a, 0x69, 0x44, 0x27, 0x97, 0xd6, 0xdd, 0xb5, 0xfa, 0xad, 0x4a, 0x7c, 0x56, 0xae, 0x3b, 0x96, 0x01, 0x05, 0x85, 0xfd, 0x6a, 0x47, 0xc3, 0x57, 0x67, 0xdf, 0x60, 0x15, 0xf0, 0x93}
+	p2 := []byte{00, 0x97, 0xd7, 0x15, 0x44, 0x90, 0xe9, 0xfb, 0x8f, 0x69, 0xca, 0xf0, 0x7a, 0x6f, 0xbf, 0x9c, 0x79, 0xef, 0x30, 0xb6, 0xf0, 0x17, 0xf5, 0x73, 0xab, 0x92, 0x7b, 0xcb, 0x5a, 0xb8, 0xf2, 0x54, 0x54, 0x4c, 0x60, 0x20, 0x4d, 0x09, 0xb8, 0xa9, 0x5a, 0xdf, 0x3c, 0xb6, 0x2e, 0xb0, 0x6c, 0x51, 0x43, 0xb5, 0xf3, 0x2b, 0x1a, 0xdb, 0x69, 0x4e, 0x29, 0x2b, 0xc5, 0x4d, 0x4b, 0x58, 0x9f, 0x49, 0x2e, 0x13, 0xcc, 0xb4, 0x2c, 0x94, 0xe6, 0x31, 0xb6, 0xc1, 0x38, 0x64, 0x6d, 0x4f, 0x29, 0xd9, 0x14, 0x7b, 0xa0, 0x73, 0x44, 0xed, 0x85, 0xb9, 0xee, 0x33, 0x5d, 0x0f, 0x40, 0x79, 0xc4, 0xd5, 0xd5, 0x20, 0xf5, 0x1d, 0xd1, 0x13, 0xf1, 0x21, 0x59, 0x98, 0x96, 0x27, 0xc9, 0x42, 0x23, 0x1c, 0xb0, 0xd6, 0xb6, 0x44, 0x03, 0x26, 0xf2, 0xe4, 0xf4, 0x54, 0xa5, 0x83, 0x64, 0x2b, 0x56, 0x13, 0xba, 0x20, 0x4c, 0x32, 0xda, 0xee, 0xdd, 0x78, 0x1d, 0x67, 0xe2, 0x8a, 0x59, 0x30, 0x3f, 0xc0, 0x93, 0x10, 0x94, 0xe5, 0xff, 0xfa, 0x9d, 0x44, 0xb7, 0xc7, 0xf7, 0xe8, 0x8c, 0x93, 0xb5, 0x96, 0x2b, 0xb1, 0xc6, 0xce, 0xc1, 0x89, 0x2e, 0xa8, 0x2c, 0x26, 0xca, 0x17, 0xe0, 0xfa, 0x5f, 0x51, 0x29, 0xa7, 0x58, 0xb3, 0xe2, 0xf0, 0x8e, 0xc9, 0x78, 0xec, 0x48, 0xa8, 0x99, 0x16, 0xfc, 0xe9, 0x54, 0x04, 0xba, 0x65, 0x8e, 0xef, 0x0c, 0xcf, 0xce, 0x3a, 0x34, 0x10, 0x21, 0xa3, 0xbb, 0x86, 0x4e, 0x75, 0xf4, 0x44, 0x3f, 0xa5, 0x15, 0xfe, 0xca, 0x17, 0x97, 0x9d, 0x8d, 0xa1, 0x25, 0x77, 0xbc, 0x27, 0xff, 0xff, 0x40, 0xe0, 0x52, 0x79, 0x7f, 0x94, 0x09, 0x32, 0x99, 0x15, 0xb4, 0x42, 0xdc, 0x8a, 0xa7, 0x5f, 0x49, 0x0d, 0x17, 0x93, 0x88, 0xa6, 0xb2, 0xbe, 0x54, 0xbd, 0xed, 0x40, 0x63}
+	// aa := new(big.Int).SetBytes(a)
+	// fmt.Printf("%v %v\n", a, aa)
+	// b1, _ := readPEM("prime1.pem")
+	// p1 = []byte{0x2f}
+	// p2 = []byte{0x17}
+	prime1 := new(big.Int)
+	prime1.SetBytes(p1)
+
+	// b2, _ := readPEM("prime2.pem")
+	prime2 := new(big.Int)
+	prime2.SetBytes(p2)
+
+	// fmt.Printf("%v %v\n", prime1, prime2)
+
+	n := new(big.Int)
+	n.Mul(prime1, prime2)
+	// base := new(big.Int).SetInt64(2312412412)
+	// exp := new(big.Int).SetInt64(4812984914)
+	// fmt.Printf("%v\n", ModExpWithSquaring(base, exp, n))
+	gen, _ := sample(n)
+	t := new(big.Int).SetBytes([]byte{0x17, 0x32, 0x26}) //, 0x02})
+	fmt.Printf("generating puzzle with t: %v\n", t.Int64())
+	// fmt.Printf("gen: %v\ninv: %v n: %v\n", gen, inv, n)
+	gt := ModExpWithSquaringPow2(gen, t, n)
+	// fmt.Printf("gt: %v n: %v\n", gt, n)
+	s1 := new(big.Int).SetInt64(53)
+	u1, v1, a1, b1, alpha1, beta1, tau1 := PuzzleGen(s1, n, gen, t, gt)
+
+	s2 := new(big.Int).SetInt64(487)
+	u2, v2, a2, b2, alpha2, beta2, tau2 := PuzzleGen(s2, n, gen, t, gt)
+
+	s3 := new(big.Int).SetInt64(1000)
+	u3, v3, _, _, _, _, _ := PuzzleGen(s3, n, gen, t, gt)
+	u12, v12 := PuzzleEval(u1, v1, u2, v2, n)
+	u, v := PuzzleEval(u12, v12, u3, v3, n)
+	fmt.Printf("solving the puzzle\n")
+	// fmt.Printf("u: %v v: %v n: %v\n", u, v, n)
+	PuzzleVerify(u1, v1, a1, b1, alpha1, beta1, tau1, gen, gt, n, t)
+	PuzzleVerify(u2, v2, a2, b2, alpha2, beta2, tau2, gen, gt, n, t)
+	defer timer()()
+	fmt.Printf("%v\n", PuzzleSolve(u, v, n, gen, t, gt))
+}
+*/

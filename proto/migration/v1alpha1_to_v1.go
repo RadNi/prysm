@@ -151,9 +151,10 @@ func V1Alpha1AttDataToV1(v1alpha1AttData *ethpbalpha.AttestationData) *ethpbv1.A
 			Root:  v1alpha1AttData.Target.Root,
 			Epoch: v1alpha1AttData.Target.Epoch,
 		},
-		TimelockPublickey: &ethpbv1.RSAPublicKey{
-			N: v1alpha1AttData.TimelockPublickey.N,
-			E: v1alpha1AttData.TimelockPublickey.E,
+		TimelockPublickey: &ethpbv1.ElgamalPublicKey{
+			G: v1alpha1AttData.TimelockPublickey.G,
+			P: v1alpha1AttData.TimelockPublickey.P,
+			Y: v1alpha1AttData.TimelockPublickey.Y,
 		},
 	}
 }
@@ -283,9 +284,10 @@ func V1AttDataToV1Alpha1(v1AttData *ethpbv1.AttestationData) *ethpbalpha.Attesta
 			Root:  v1AttData.Target.Root,
 			Epoch: v1AttData.Target.Epoch,
 		},
-		TimelockPublickey: &enginev1.RSAPublicKey{
-			N: v1AttData.TimelockPublickey.N,
-			E: v1AttData.TimelockPublickey.E,
+		TimelockPublickey: &enginev1.ElgamalPublicKey{
+			G: v1AttData.TimelockPublickey.G,
+			Y: v1AttData.TimelockPublickey.Y,
+			P: v1AttData.TimelockPublickey.P,
 		},
 	}
 }
@@ -422,9 +424,10 @@ func BeaconStateToProto(state state.BeaconState) (*ethpbv1.BeaconState, error) {
 					Epoch: data.Target.Epoch,
 					Root:  data.Target.Root,
 				},
-				TimelockPublickey: &ethpbv1.RSAPublicKey{
-					N: data.TimelockPublickey.N,
-					E: data.TimelockPublickey.E,
+				TimelockPublickey: &ethpbv1.ElgamalPublicKey{
+					G: data.TimelockPublickey.G,
+					Y: data.TimelockPublickey.Y,
+					P: data.TimelockPublickey.P,
 				},
 			},
 			InclusionDelay: att.InclusionDelay,
@@ -448,9 +451,10 @@ func BeaconStateToProto(state state.BeaconState) (*ethpbv1.BeaconState, error) {
 					Epoch: data.Target.Epoch,
 					Root:  data.Target.Root,
 				},
-				TimelockPublickey: &ethpbv1.RSAPublicKey{
-					N: data.TimelockPublickey.N,
-					E: data.TimelockPublickey.E,
+				TimelockPublickey: &ethpbv1.ElgamalPublicKey{
+					G: data.TimelockPublickey.G,
+					Y: data.TimelockPublickey.Y,
+					P: data.TimelockPublickey.P,
 				},
 			},
 			InclusionDelay: att.InclusionDelay,

@@ -57,7 +57,7 @@ type BeaconBlockBody struct {
 	executionPayload       interfaces.ExecutionData
 	executionPayloadHeader interfaces.ExecutionData
 	blsToExecutionChanges  []*eth.SignedBLSToExecutionChange
-	timelockPrivateKey     *enginev1.RSAPrivateKey
+	timelockPrivateKey     *enginev1.ElgamalPrivateKey
 }
 
 // BeaconBlock is the main beacon block structure. It can represent any block type.

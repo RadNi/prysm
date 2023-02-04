@@ -288,7 +288,6 @@ func ProcessBlockForStateRoot(
 		return nil, errors.Wrap(err, "could not hash tree root beacon block body")
 	}
 	parentRoot := blk.ParentRoot()
-	fmt.Printf("block here2: %v\n", blk)
 	state, err = b.ProcessBlockHeaderNoVerify(ctx, state, blk.Slot(), blk.ProposerIndex(), parentRoot[:], bodyRoot[:])
 	if err != nil {
 		tracing.AnnotateError(span, err)
@@ -348,7 +347,6 @@ func ProcessBlockForStateRoot(
 
 	if signed.Block().Version() == version.Bellatrix {
 		err = state.SetTimelockPrivatekey(signed.Block().Body().TimelockPrivatekey())
-		fmt.Printf("settid\n")
 		if err != nil {
 			return nil, errors.Wrap(err, "SetTimelockPrivatekey failed")
 		}

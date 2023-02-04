@@ -3,8 +3,6 @@ package blocks
 import (
 	"context"
 	"encoding/binary"
-	"github.com/prysmaticlabs/prysm/v3/crypto/rsa"
-
 	"github.com/pkg/errors"
 	"github.com/prysmaticlabs/prysm/v3/beacon-chain/core/helpers"
 	"github.com/prysmaticlabs/prysm/v3/beacon-chain/core/signing"
@@ -13,6 +11,7 @@ import (
 	"github.com/prysmaticlabs/prysm/v3/consensus-types/interfaces"
 	types "github.com/prysmaticlabs/prysm/v3/consensus-types/primitives"
 	"github.com/prysmaticlabs/prysm/v3/crypto/bls"
+	"github.com/prysmaticlabs/prysm/v3/crypto/elgamal"
 	"github.com/prysmaticlabs/prysm/v3/network/forks"
 	ethpb "github.com/prysmaticlabs/prysm/v3/proto/prysm/v1alpha1"
 	"github.com/prysmaticlabs/prysm/v3/proto/prysm/v1alpha1/attestation"
@@ -213,7 +212,7 @@ func createAttestationSignatureBatch(
 		pks[i] = aggP
 		// TODO publicKey holder for signature bypassing
 		before := ethpb.CopyTimelockPublickey(ia.Data.GetTimelockPublickey())
-		ia.Data.TimelockPublickey = rsa.ToProtoRSAPublickey(rsa.ImportPublicKey())
+		ia.Data.TimelockPublickey = elgamal.ImportPublicKey()
 		root, err := signing.ComputeSigningRoot(ia.Data, domain)
 		ia.Data.TimelockPublickey = before
 		if err != nil {

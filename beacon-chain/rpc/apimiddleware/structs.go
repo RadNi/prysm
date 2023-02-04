@@ -416,15 +416,15 @@ type BeaconBlockBodyAltairJson struct {
 	SyncAggregate     *SyncAggregateJson         `json:"sync_aggregate"`
 }
 
-type RSAPublicKeyJson struct {
-	N string `json:"n" hex:"true"`
-	E string `json:"e"`
+type ElgamalPublicKeyJson struct {
+	P string `json:"p" hex:"true"`
+	G string `json:"g" hex:"true"`
+	Y string `json:"y" hex:"true"`
 }
 
-type RSAPrivateKeyJson struct {
-	PublicKey *RSAPublicKeyJson `json:"public_key"`
-	D         string            `json:"d" hex:"true"`
-	Primes    []string          `json:"primes" hex:"true"`
+type ElgamalPrivateKeyJson struct {
+	PublicKey *ElgamalPublicKeyJson `json:"public_key"`
+	X         string                `json:"x" hex:"true"`
 }
 
 type BeaconBlockBodyBellatrixJson struct {
@@ -438,7 +438,7 @@ type BeaconBlockBodyBellatrixJson struct {
 	VoluntaryExits     []*SignedVoluntaryExitJson `json:"voluntary_exits"`
 	SyncAggregate      *SyncAggregateJson         `json:"sync_aggregate"`
 	ExecutionPayload   *ExecutionPayloadJson      `json:"execution_payload"`
-	TimelockPrivateKey *RSAPrivateKeyJson         `json:"timelock_privatekey"`
+	TimelockPrivateKey *ElgamalPrivateKeyJson     `json:"timelock_privatekey"`
 }
 
 type BlindedBeaconBlockBodyBellatrixJson struct {
@@ -551,12 +551,12 @@ type AttestationJson struct {
 }
 
 type AttestationDataJson struct {
-	Slot              string            `json:"slot"`
-	CommitteeIndex    string            `json:"index"`
-	BeaconBlockRoot   string            `json:"beacon_block_root" hex:"true"`
-	Source            *CheckpointJson   `json:"source"`
-	Target            *CheckpointJson   `json:"target"`
-	TimelockPublickey *RSAPublicKeyJson `json:"timelock_publickey"`
+	Slot              string                `json:"slot"`
+	CommitteeIndex    string                `json:"index"`
+	BeaconBlockRoot   string                `json:"beacon_block_root" hex:"true"`
+	Source            *CheckpointJson       `json:"source"`
+	Target            *CheckpointJson       `json:"target"`
+	TimelockPublickey *ElgamalPublicKeyJson `json:"timelock_publickey"`
 }
 
 type DepositJson struct {
@@ -690,7 +690,7 @@ type BeaconStateBellatrixJson struct {
 	CurrentSyncCommittee         *SyncCommitteeJson          `json:"current_sync_committee"`
 	NextSyncCommittee            *SyncCommitteeJson          `json:"next_sync_committee"`
 	LatestExecutionPayloadHeader *ExecutionPayloadHeaderJson `json:"latest_execution_payload_header"`
-	TimelockPrivatekey           *RSAPrivateKeyJson          `json:"timelock_privatekey"`
+	TimelockPrivatekey           *ElgamalPrivateKeyJson      `json:"timelock_privatekey"`
 }
 
 type BeaconStateContainerV2Json struct {
