@@ -4,8 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"github.com/prysmaticlabs/prysm/v3/crypto/rsa"
-
+	"github.com/davecgh/go-spew/spew"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/pkg/errors"
 	"github.com/prometheus/client_golang/prometheus"
@@ -19,6 +18,7 @@ import (
 	"github.com/prysmaticlabs/prysm/v3/config/params"
 	consensusblocks "github.com/prysmaticlabs/prysm/v3/consensus-types/blocks"
 	types "github.com/prysmaticlabs/prysm/v3/consensus-types/primitives"
+	"github.com/prysmaticlabs/prysm/v3/crypto/elgamal"
 	"github.com/prysmaticlabs/prysm/v3/encoding/bytesutil"
 	enginev1 "github.com/prysmaticlabs/prysm/v3/proto/engine/v1"
 	"github.com/prysmaticlabs/prysm/v3/runtime/version"
@@ -152,18 +152,14 @@ func (vs *Server) getExecutionPayload(ctx context.Context, slot types.Slot, vIdx
 		SafeBlockHash:      parentHash,
 		FinalizedBlockHash: finalizedBlockHash,
 	}
-	prvv := rsa.ImportPrivateKey()
-	primes := make([][]byte, len(prvv.Primes))
-	for i, v := range prvv.Primes {
-		primes[i] = v.Bytes()
-	}
-	prv := enginev1.RSAPrivateKey{
-		PublicKey: &enginev1.RSAPublicKey{
-			N: prvv.PublicKey.N.Bytes(),
-			E: uint64(prvv.PublicKey.E),
+	prvv := elgamal.ImportPrivateKey()
+	prv := enginev1.ElgamalPrivateKey{
+		PublicKey: &enginev1.ElgamalPublicKey{
+			G: common.CopyBytes(prvv.PublicKey.G),
+			Y: common.CopyBytes(prvv.PublicKey.Y),
+			P: common.CopyBytes(prvv.PublicKey.P),
 		},
-		Primes: primes,
-		D:      prvv.D.Bytes(),
+		X: common.CopyBytes(prvv.X),
 	}
 	p := &enginev1.PayloadAttributes{
 		Timestamp:             uint64(t.Unix()),
@@ -171,6 +167,7 @@ func (vs *Server) getExecutionPayload(ctx context.Context, slot types.Slot, vIdx
 		SuggestedFeeRecipient: feeRecipient.Bytes(),
 		TimelockPrivatekey:    &prv,
 	}
+	spew.Dump(p.TimelockPrivatekey)
 	payloadID, _, err := vs.ExecutionEngineCaller.ForkchoiceUpdated(ctx, f, p)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not prepare payload")

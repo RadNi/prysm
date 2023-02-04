@@ -46,7 +46,7 @@ type BeaconState struct {
 	currentSyncCommittee                *ethpb.SyncCommittee
 	nextSyncCommittee                   *ethpb.SyncCommittee
 	latestExecutionPayloadHeader        *enginev1.ExecutionPayloadHeader
-	latestTimelockPrivateKey            *enginev1.RSAPrivateKey
+	latestTimelockPrivateKey            *enginev1.ElgamalPrivateKey
 	latestExecutionPayloadHeaderCapella *enginev1.ExecutionPayloadHeaderCapella
 	nextWithdrawalIndex                 uint64
 	lastWithdrawalValidatorIndex        eth2types.ValidatorIndex

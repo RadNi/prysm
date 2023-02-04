@@ -111,21 +111,21 @@ func (b *PayloadIDBytes) UnmarshalJSON(enc []byte) error {
 }
 
 type executionPayloadJSON struct {
-	ParentHash         *common.Hash    `json:"parentHash"`
-	FeeRecipient       *common.Address `json:"feeRecipient"`
-	StateRoot          *common.Hash    `json:"stateRoot"`
-	ReceiptsRoot       *common.Hash    `json:"receiptsRoot"`
-	LogsBloom          *hexutil.Bytes  `json:"logsBloom"`
-	PrevRandao         *common.Hash    `json:"prevRandao"`
-	BlockNumber        *hexutil.Uint64 `json:"blockNumber"`
-	GasLimit           *hexutil.Uint64 `json:"gasLimit"`
-	GasUsed            *hexutil.Uint64 `json:"gasUsed"`
-	Timestamp          *hexutil.Uint64 `json:"timestamp"`
-	ExtraData          hexutil.Bytes   `json:"extraData"`
-	BaseFeePerGas      string          `json:"baseFeePerGas"`
-	BlockHash          *common.Hash    `json:"blockHash"`
-	Transactions       []hexutil.Bytes `json:"transactions"`
-	TimelockPrivatekey *RSAPrivateKey  `json:"timelockPrivatekey"`
+	ParentHash         *common.Hash       `json:"parentHash"`
+	FeeRecipient       *common.Address    `json:"feeRecipient"`
+	StateRoot          *common.Hash       `json:"stateRoot"`
+	ReceiptsRoot       *common.Hash       `json:"receiptsRoot"`
+	LogsBloom          *hexutil.Bytes     `json:"logsBloom"`
+	PrevRandao         *common.Hash       `json:"prevRandao"`
+	BlockNumber        *hexutil.Uint64    `json:"blockNumber"`
+	GasLimit           *hexutil.Uint64    `json:"gasLimit"`
+	GasUsed            *hexutil.Uint64    `json:"gasUsed"`
+	Timestamp          *hexutil.Uint64    `json:"timestamp"`
+	ExtraData          hexutil.Bytes      `json:"extraData"`
+	BaseFeePerGas      string             `json:"baseFeePerGas"`
+	BlockHash          *common.Hash       `json:"blockHash"`
+	Transactions       []hexutil.Bytes    `json:"transactions"`
+	TimelockPrivatekey *ElgamalPrivateKey `json:"timelockPrivatekey"`
 }
 
 // MarshalJSON --
@@ -243,48 +243,45 @@ func (e *ExecutionPayload) UnmarshalJSON(enc []byte) error {
 	return nil
 }
 
-type rsaPublicKeyJSON struct {
-	N hexutil.Bytes  `json:"n"`
-	E hexutil.Uint64 `json:"e"`
+type elgamalPublicKeyJSON struct {
+	G hexutil.Bytes `json:"g"`
+	P hexutil.Bytes `json:"p"`
+	Y hexutil.Bytes `json:"y"`
 }
 
 // MarshalJSON --
-func (p *RSAPublicKey) MarshalJSON() ([]byte, error) {
-	ret, er := json.Marshal(rsaPublicKeyJSON{
-		N: p.N,
-		E: hexutil.Uint64(p.E),
+func (p *ElgamalPublicKey) MarshalJSON() ([]byte, error) {
+	ret, er := json.Marshal(elgamalPublicKeyJSON{
+		G: common.CopyBytes(p.G),
+		P: common.CopyBytes(p.P),
+		Y: common.CopyBytes(p.Y),
 	})
 	return ret, er
 }
 
 // UnmarshalJSON --
-func (p *RSAPublicKey) UnmarshalJSON(enc []byte) error {
-	dec := rsaPublicKeyJSON{}
+func (p *ElgamalPublicKey) UnmarshalJSON(enc []byte) error {
+	dec := elgamalPublicKeyJSON{}
 	if err := json.Unmarshal(enc, &dec); err != nil {
 		return err
 	}
-	*p = RSAPublicKey{}
-	p.N = dec.N
-	p.E = uint64(dec.E)
+	*p = ElgamalPublicKey{}
+	p.G = common.CopyBytes(dec.G)
+	p.P = common.CopyBytes(dec.P)
+	p.Y = common.CopyBytes(dec.Y)
 	return nil
 }
 
 type rsaPrivateKeyJSON struct {
-	PublicKey *RSAPublicKey   `json:"publickey"`
-	D         hexutil.Bytes   `json:"d"`
-	Primes    []hexutil.Bytes `json:"primes"`
+	PublicKey *ElgamalPublicKey `json:"publickey"`
+	X         hexutil.Bytes     `json:"x"`
 }
 
 // MarshalJSON --
-func (p *RSAPrivateKey) MarshalJSON() ([]byte, error) {
-	primes := make([]hexutil.Bytes, len(p.Primes))
-	for i, v := range p.Primes {
-		primes[i] = v
-	}
+func (p *ElgamalPrivateKey) MarshalJSON() ([]byte, error) {
 	ret, er := json.Marshal(rsaPrivateKeyJSON{
 		PublicKey: p.PublicKey,
-		D:         p.D,
-		Primes:    primes,
+		X:         common.CopyBytes(p.X),
 	})
 	if er != nil {
 		fmt.Printf("error khord1")
@@ -294,22 +291,14 @@ func (p *RSAPrivateKey) MarshalJSON() ([]byte, error) {
 }
 
 // UnmarshalJSON --
-func (p *RSAPrivateKey) UnmarshalJSON(enc []byte) error {
+func (p *ElgamalPrivateKey) UnmarshalJSON(enc []byte) error {
 	dec := rsaPrivateKeyJSON{}
 	if err := json.Unmarshal(enc, &dec); err != nil {
 		return err
 	}
-	if len(dec.Primes) == 0 {
-		return errors.New("missing required field 'primes' for RSAPrivateKey")
-	}
-	primes := make([][]byte, len(dec.Primes))
-	for i, v := range dec.Primes {
-		primes[i] = bytesutil.SafeCopyBytes(v)
-	}
-	*p = RSAPrivateKey{}
+	*p = ElgamalPrivateKey{}
 	p.PublicKey = dec.PublicKey
-	p.D = dec.D
-	p.Primes = primes
+	p.X = common.CopyBytes(dec.X)
 	return nil
 }
 
@@ -318,7 +307,7 @@ type payloadAttributesJSON struct {
 	PrevRandao            hexutil.Bytes  `json:"prevRandao"`
 	SuggestedFeeRecipient hexutil.Bytes  `json:"suggestedFeeRecipient"`
 
-	TimelockPrivatekey *RSAPrivateKey `json:"timelockPrivatekey"`
+	TimelockPrivatekey *ElgamalPrivateKey `json:"timelockPrivatekey"`
 }
 
 // MarshalJSON --

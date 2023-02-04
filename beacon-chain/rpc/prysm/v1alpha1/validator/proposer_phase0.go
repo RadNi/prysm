@@ -30,7 +30,7 @@ type blockData struct {
 	ProposerSlashings  []*ethpb.ProposerSlashing
 	AttesterSlashings  []*ethpb.AttesterSlashing
 	VoluntaryExits     []*ethpb.SignedVoluntaryExit
-	TimelockPrivatekey *enginev1.RSAPrivateKey
+	TimelockPrivatekey *enginev1.ElgamalPrivateKey
 }
 
 func (vs *Server) getPhase0BeaconBlock(ctx context.Context, req *ethpb.BlockRequest) (*ethpb.BeaconBlock, error) {

@@ -55,11 +55,24 @@ message SignedAggregateAttestationAndProof {
     bytes signature = 2 [(ethereum.eth.ext.ssz_size) = "96"];
 }
 
-message RSAPublicKey {
+message ElgamalPublicKey {
     // Encoded in big-endian two's complement
-    bytes n = 1 [(ethereum.eth.ext.ssz_size) = "256"];
-    uint64 e = 2 [(ethereum.eth.ext.ssz_size) = "256"];
+    bytes g = 1 [(ethereum.eth.ext.ssz_size) = "512"];
+    bytes p = 2 [(ethereum.eth.ext.ssz_size) = "512"];
+    bytes y = 3 [(ethereum.eth.ext.ssz_size) = "512"];
 }
+
+//message RSAPublicKey {
+//    // Encoded in big-endian two's complement
+//    bytes n = 1 [(ethereum.eth.ext.ssz_size) = "256"];
+//    uint64 e = 2 [(ethereum.eth.ext.ssz_size) = "256"];
+//}
+
+//message ElgamalPublicKey {
+//    // Encoded in big-endian two's complement
+//    bytes n = 1 [(ethereum.eth.ext.ssz_size) = "256"];
+//    uint64 e = 2 [(ethereum.eth.ext.ssz_size) = "256"];
+//}
 
 message AttestationData {
     // Attestation data includes information on Casper the Friendly Finality Gadget's votes
@@ -81,7 +94,7 @@ message AttestationData {
     Checkpoint target = 5;
 
     // TimelockPublickey share in this attestation
-    RSAPublicKey timelock_publickey = 6;
+    ElgamalPublicKey timelock_publickey = 6;
 }
 
 message Checkpoint {

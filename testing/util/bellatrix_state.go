@@ -238,13 +238,13 @@ func buildGenesisBeaconStateBellatrix(genesisTime uint64, preState state.BeaconS
 		BaseFeePerGas:    make([]byte, 32),
 		BlockHash:        make([]byte, 32),
 		TransactionsRoot: make([]byte, 32),
-		TimelockPrivatekey: &enginev1.RSAPrivateKey{
-			PublicKey: &enginev1.RSAPublicKey{
-				N: make([]byte, 256),
-				E: 0,
+		TimelockPrivatekey: &enginev1.ElgamalPrivateKey{
+			PublicKey: &enginev1.ElgamalPublicKey{
+				P: make([]byte, 512),
+				G: make([]byte, 512),
+				Y: make([]byte, 512),
 			},
-			Primes: make([][]byte, 2),
-			D:      make([]byte, 256),
+			X: make([]byte, 512),
 		},
 	}
 

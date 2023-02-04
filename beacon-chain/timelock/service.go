@@ -3,7 +3,7 @@ package timelock
 import (
 	"context"
 	types "github.com/prysmaticlabs/prysm/v3/consensus-types/primitives"
-	"github.com/prysmaticlabs/prysm/v3/crypto/rsa"
+	"github.com/prysmaticlabs/prysm/v3/crypto/elgamal"
 	"time"
 )
 
@@ -70,7 +70,7 @@ func (s *Service) Start() {
 			if req.SlotNumber <= 7 {
 				if req.Res != nil {
 					req.Res <- &TimelockSolution{
-						Solution:   rsa.ToProtoRSAPrivatekey(rsa.ImportPrivateKey()),
+						Solution:   elgamal.ImportPrivateKey(),
 						SlotNumber: req.SlotNumber,
 					}
 				}
@@ -136,7 +136,7 @@ func solve(solver *timelockSolver, ch chan *TimelockSolution) {
 
 	case <-time.After(time.Second * time.Duration(solver.request.Puzzle.T)):
 		ch <- &TimelockSolution{
-			Solution:   rsa.ToProtoRSAPrivatekey(rsa.ImportPrivateKey()),
+			Solution:   elgamal.ImportPrivateKey(),
 			SlotNumber: solver.request.SlotNumber,
 		}
 		return

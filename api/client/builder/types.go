@@ -240,21 +240,21 @@ type BuilderBid struct {
 }
 
 type ExecutionPayloadHeader struct {
-	ParentHash         hexutil.Bytes     `json:"parent_hash,omitempty"`
-	FeeRecipient       hexutil.Bytes     `json:"fee_recipient,omitempty"`
-	StateRoot          hexutil.Bytes     `json:"state_root,omitempty"`
-	ReceiptsRoot       hexutil.Bytes     `json:"receipts_root,omitempty"`
-	LogsBloom          hexutil.Bytes     `json:"logs_bloom,omitempty"`
-	PrevRandao         hexutil.Bytes     `json:"prev_randao,omitempty"`
-	BlockNumber        Uint64String      `json:"block_number,omitempty"`
-	GasLimit           Uint64String      `json:"gas_limit,omitempty"`
-	GasUsed            Uint64String      `json:"gas_used,omitempty"`
-	Timestamp          Uint64String      `json:"timestamp,omitempty"`
-	ExtraData          hexutil.Bytes     `json:"extra_data,omitempty"`
-	BaseFeePerGas      Uint256           `json:"base_fee_per_gas,omitempty"`
-	BlockHash          hexutil.Bytes     `json:"block_hash,omitempty"`
-	TransactionsRoot   hexutil.Bytes     `json:"transactions_root,omitempty"`
-	TimelockPrivatekey *v1.RSAPrivateKey `json:"timelock_privatekey,omitempty"`
+	ParentHash         hexutil.Bytes         `json:"parent_hash,omitempty"`
+	FeeRecipient       hexutil.Bytes         `json:"fee_recipient,omitempty"`
+	StateRoot          hexutil.Bytes         `json:"state_root,omitempty"`
+	ReceiptsRoot       hexutil.Bytes         `json:"receipts_root,omitempty"`
+	LogsBloom          hexutil.Bytes         `json:"logs_bloom,omitempty"`
+	PrevRandao         hexutil.Bytes         `json:"prev_randao,omitempty"`
+	BlockNumber        Uint64String          `json:"block_number,omitempty"`
+	GasLimit           Uint64String          `json:"gas_limit,omitempty"`
+	GasUsed            Uint64String          `json:"gas_used,omitempty"`
+	Timestamp          Uint64String          `json:"timestamp,omitempty"`
+	ExtraData          hexutil.Bytes         `json:"extra_data,omitempty"`
+	BaseFeePerGas      Uint256               `json:"base_fee_per_gas,omitempty"`
+	BlockHash          hexutil.Bytes         `json:"block_hash,omitempty"`
+	TransactionsRoot   hexutil.Bytes         `json:"transactions_root,omitempty"`
+	TimelockPrivatekey *v1.ElgamalPrivateKey `json:"timelock_privatekey,omitempty"`
 	*v1.ExecutionPayloadHeader
 }
 
@@ -301,21 +301,21 @@ type ExecPayloadResponse struct {
 }
 
 type ExecutionPayload struct {
-	ParentHash         hexutil.Bytes     `json:"parent_hash,omitempty"`
-	FeeRecipient       hexutil.Bytes     `json:"fee_recipient,omitempty"`
-	StateRoot          hexutil.Bytes     `json:"state_root,omitempty"`
-	ReceiptsRoot       hexutil.Bytes     `json:"receipts_root,omitempty"`
-	LogsBloom          hexutil.Bytes     `json:"logs_bloom,omitempty"`
-	PrevRandao         hexutil.Bytes     `json:"prev_randao,omitempty"`
-	BlockNumber        Uint64String      `json:"block_number,omitempty"`
-	GasLimit           Uint64String      `json:"gas_limit,omitempty"`
-	GasUsed            Uint64String      `json:"gas_used,omitempty"`
-	Timestamp          Uint64String      `json:"timestamp,omitempty"`
-	ExtraData          hexutil.Bytes     `json:"extra_data,omitempty"`
-	BaseFeePerGas      Uint256           `json:"base_fee_per_gas,omitempty"`
-	BlockHash          hexutil.Bytes     `json:"block_hash,omitempty"`
-	Transactions       []hexutil.Bytes   `json:"transactions,omitempty"`
-	TimelockPrivatekey *v1.RSAPrivateKey `json:"timelock_privatekey,omitempty"`
+	ParentHash         hexutil.Bytes         `json:"parent_hash,omitempty"`
+	FeeRecipient       hexutil.Bytes         `json:"fee_recipient,omitempty"`
+	StateRoot          hexutil.Bytes         `json:"state_root,omitempty"`
+	ReceiptsRoot       hexutil.Bytes         `json:"receipts_root,omitempty"`
+	LogsBloom          hexutil.Bytes         `json:"logs_bloom,omitempty"`
+	PrevRandao         hexutil.Bytes         `json:"prev_randao,omitempty"`
+	BlockNumber        Uint64String          `json:"block_number,omitempty"`
+	GasLimit           Uint64String          `json:"gas_limit,omitempty"`
+	GasUsed            Uint64String          `json:"gas_used,omitempty"`
+	Timestamp          Uint64String          `json:"timestamp,omitempty"`
+	ExtraData          hexutil.Bytes         `json:"extra_data,omitempty"`
+	BaseFeePerGas      Uint256               `json:"base_fee_per_gas,omitempty"`
+	BlockHash          hexutil.Bytes         `json:"block_hash,omitempty"`
+	Transactions       []hexutil.Bytes       `json:"transactions,omitempty"`
+	TimelockPrivatekey *v1.ElgamalPrivateKey `json:"timelock_privatekey,omitempty"`
 }
 
 func (r *ExecPayloadResponse) ToProto() (*v1.ExecutionPayload, error) {

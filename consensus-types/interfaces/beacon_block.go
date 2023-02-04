@@ -69,7 +69,7 @@ type BeaconBlockBody interface {
 	Proto() (proto.Message, error)
 	Execution() (ExecutionData, error)
 	BLSToExecutionChanges() ([]*ethpb.SignedBLSToExecutionChange, error)
-	TimelockPrivatekey() *enginev1.RSAPrivateKey
+	TimelockPrivatekey() *enginev1.ElgamalPrivateKey
 }
 
 // ExecutionData represents execution layer information that is contained
@@ -95,5 +95,5 @@ type ExecutionData interface {
 	BlockHash() []byte
 	Transactions() ([][]byte, error)
 	Withdrawals() ([]*enginev1.Withdrawal, error)
-	TimelockPrivatekey() (*enginev1.RSAPrivateKey, error)
+	TimelockPrivatekey() (*enginev1.ElgamalPrivateKey, error)
 }

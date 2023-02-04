@@ -37,9 +37,10 @@ func NewAttestation() *ethpb.Attestation {
 			Target: &ethpb.Checkpoint{
 				Root: make([]byte, fieldparams.RootLength),
 			},
-			TimelockPublickey: &enginev1.RSAPublicKey{
-				N: make([]byte, 256),
-				E: 0,
+			TimelockPublickey: &enginev1.ElgamalPublicKey{
+				G: make([]byte, 512),
+				P: make([]byte, 512),
+				Y: make([]byte, 512),
 			},
 		},
 		Signature: make([]byte, 96),

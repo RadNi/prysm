@@ -123,7 +123,7 @@ message BeaconStateBellatrix {
   // Bellatrix fields [10001-11000]
    engine.v1.ExecutionPayloadHeader latest_execution_payload_header = 10001; // [New in Bellatrix]
 
-  ethereum.engine.v1.RSAPrivateKey timelock_privatekey = 11001;
+  ethereum.engine.v1.ElgamalPrivateKey timelock_privatekey = 11001;
 }
 
 message BeaconStateRequestV2 {
