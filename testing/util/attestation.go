@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	enginev1 "github.com/prysmaticlabs/prysm/v3/proto/engine/v1"
+	"github.com/prysmaticlabs/prysm/v3/crypto/timelock"
 	"math"
 
 	"github.com/prysmaticlabs/go-bitfield"
@@ -37,11 +37,7 @@ func NewAttestation() *ethpb.Attestation {
 			Target: &ethpb.Checkpoint{
 				Root: make([]byte, fieldparams.RootLength),
 			},
-			TimelockPublickey: &enginev1.ElgamalPublicKey{
-				G: make([]byte, 512),
-				P: make([]byte, 512),
-				Y: make([]byte, 512),
-			},
+			TimelockPuzzle: timelock.PuzzlePlaceHolder(),
 		},
 		Signature: make([]byte, 96),
 	}

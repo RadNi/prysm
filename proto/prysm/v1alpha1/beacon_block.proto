@@ -383,15 +383,6 @@ message BeaconBlockBodyBellatrix {
     ethereum.engine.v1.ElgamalPrivateKey timelock_privatekey = 11;
 }
 
-message TimelockPuzzle {
-    bytes n = 1 [(ethereum.eth.ext.ssz_size) = "256"];
-    bytes g = 2 [(ethereum.eth.ext.ssz_size) = "256"];
-    uint64 t = 3;
-    bytes h = 4 [(ethereum.eth.ext.ssz_size) = "256"];
-    bytes u = 5 [(ethereum.eth.ext.ssz_size) = "256"];
-    bytes v = 6 [(ethereum.eth.ext.ssz_size) = "65536"];
-}
-
 message SignedBlindedBeaconBlockBellatrix {
     // The unsigned blinded beacon block itself.
     BlindedBeaconBlockBellatrix block = 1;

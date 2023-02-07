@@ -416,6 +416,20 @@ type BeaconBlockBodyAltairJson struct {
 	SyncAggregate     *SyncAggregateJson         `json:"sync_aggregate"`
 }
 
+type TimelockPuzzleJson struct {
+	N string `json:"n" hex:"true"`
+	G string `json:"g" hex:"true"`
+	T string `json:"t" hex:"true"`
+	H string `json:"h" hex:"true"`
+	U string `json:"u" hex:"true"`
+	//V     string `json:"v" hex:"true"`
+	A string `json:"a" hex:"true"`
+	//B     string `json:"b" hex:"true"`
+	//Alpha string `json:"alpha" hex:"true"`
+	Beta string `json:"beta" hex:"true"`
+	Tau  string `json:"tau" hex:"true"`
+}
+
 type ElgamalPublicKeyJson struct {
 	P string `json:"p" hex:"true"`
 	G string `json:"g" hex:"true"`
@@ -551,12 +565,12 @@ type AttestationJson struct {
 }
 
 type AttestationDataJson struct {
-	Slot              string                `json:"slot"`
-	CommitteeIndex    string                `json:"index"`
-	BeaconBlockRoot   string                `json:"beacon_block_root" hex:"true"`
-	Source            *CheckpointJson       `json:"source"`
-	Target            *CheckpointJson       `json:"target"`
-	TimelockPublickey *ElgamalPublicKeyJson `json:"timelock_publickey"`
+	Slot            string              `json:"slot"`
+	CommitteeIndex  string              `json:"index"`
+	BeaconBlockRoot string              `json:"beacon_block_root" hex:"true"`
+	Source          *CheckpointJson     `json:"source"`
+	Target          *CheckpointJson     `json:"target"`
+	TimelockPuzzle  *TimelockPuzzleJson `json:"timelock_puzzle"`
 }
 
 type DepositJson struct {

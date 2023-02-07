@@ -251,7 +251,7 @@ func V1Alpha1BeaconBlockBellatrixToV2Blinded(v1alpha1Block *ethpbalpha.BeaconBlo
 			BaseFeePerGas:      bytesutil.SafeCopyBytes(v1alpha1Block.Body.ExecutionPayload.BaseFeePerGas),
 			BlockHash:          bytesutil.SafeCopyBytes(v1alpha1Block.Body.ExecutionPayload.BlockHash),
 			TransactionsRoot:   transactionsRoot[:],
-			TimelockPrivatekey: ethpbalpha.CopyTimelockPrivatekey(v1alpha1Block.Body.ExecutionPayload.TimelockPrivatekey),
+			TimelockPrivatekey: ethpbalpha.CopyElgamalPrivatekey(v1alpha1Block.Body.ExecutionPayload.TimelockPrivatekey),
 		},
 	}
 	v2Block := &ethpbv2.BlindedBeaconBlockBellatrix{

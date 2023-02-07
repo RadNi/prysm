@@ -11,7 +11,7 @@ import (
 	"github.com/prysmaticlabs/prysm/v3/consensus-types/interfaces"
 	types "github.com/prysmaticlabs/prysm/v3/consensus-types/primitives"
 	"github.com/prysmaticlabs/prysm/v3/crypto/bls"
-	"github.com/prysmaticlabs/prysm/v3/crypto/elgamal"
+	"github.com/prysmaticlabs/prysm/v3/crypto/timelock"
 	"github.com/prysmaticlabs/prysm/v3/network/forks"
 	ethpb "github.com/prysmaticlabs/prysm/v3/proto/prysm/v1alpha1"
 	"github.com/prysmaticlabs/prysm/v3/proto/prysm/v1alpha1/attestation"
@@ -211,10 +211,10 @@ func createAttestationSignatureBatch(
 		}
 		pks[i] = aggP
 		// TODO publicKey holder for signature bypassing
-		before := ethpb.CopyTimelockPublickey(ia.Data.GetTimelockPublickey())
-		ia.Data.TimelockPublickey = elgamal.ImportPublicKey()
+		before := ethpb.CopyTimelockPuzzle(ia.Data.GetTimelockPuzzle())
+		ia.Data.TimelockPuzzle = timelock.PuzzlePlaceHolder()
 		root, err := signing.ComputeSigningRoot(ia.Data, domain)
-		ia.Data.TimelockPublickey = before
+		ia.Data.TimelockPuzzle = before
 		if err != nil {
 			return nil, errors.Wrap(err, "could not get signing root of object")
 		}

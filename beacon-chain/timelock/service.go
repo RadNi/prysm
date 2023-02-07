@@ -2,8 +2,10 @@ package timelock
 
 import (
 	"context"
+	"fmt"
 	types "github.com/prysmaticlabs/prysm/v3/consensus-types/primitives"
 	"github.com/prysmaticlabs/prysm/v3/crypto/elgamal"
+	"math/big"
 	"time"
 )
 
@@ -132,9 +134,31 @@ func (s *Service) Status() error {
 }
 
 func solve(solver *timelockSolver, ch chan *TimelockSolution) {
+	//p := solver.request.Puzzle
+	//sk := timelock.PuzzleSolve(
+	//	new(big.Int).SetBytes(p.U),
+	//	new(big.Int).SetBytes(p.V),
+	//	new(big.Int).SetBytes(p.N),
+	//	new(big.Int).SetBytes(p.G),
+	//	new(big.Int).SetUint64(p.T),
+	//	new(big.Int).SetBytes(p.H),
+	//)
+	//ch <- &TimelockSolution{
+	//	Solution: &enginev1.ElgamalPrivateKey{
+	//		PublicKey: &enginev1.ElgamalPublicKey{
+	//			G: p.G,
+	//			P: p.N,
+	//			Y: p.U,
+	//		},
+	//		X: sk.Bytes(),
+	//	},
+	//	SlotNumber: solver.request.SlotNumber,
+	//}
+	T := new(big.Int).SetBytes(solver.request.Puzzle.T).Uint64()
+	fmt.Printf("starting time lock for %v with %v secs\n", solver.request.SlotNumber, T)
 	select {
 
-	case <-time.After(time.Second * time.Duration(solver.request.Puzzle.T)):
+	case <-time.After(time.Second * time.Duration(T)):
 		ch <- &TimelockSolution{
 			Solution:   elgamal.ImportPrivateKey(),
 			SlotNumber: solver.request.SlotNumber,

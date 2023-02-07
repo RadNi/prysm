@@ -25,5 +25,5 @@ func (b *BeaconState) LatestTimelockPrivatekey() (*enginev1.ElgamalPrivateKey, e
 // latestTimelockPrivatekeyVal of the beacon state.
 // This assumes that a lock is already held on BeaconState.
 func (b *BeaconState) latestTimelockPrivatekeyVal() *enginev1.ElgamalPrivateKey {
-	return ethpb.CopyTimelockPrivatekey(b.latestTimelockPrivateKey)
+	return ethpb.CopyElgamalPrivatekey(b.latestTimelockPrivateKey)
 }
