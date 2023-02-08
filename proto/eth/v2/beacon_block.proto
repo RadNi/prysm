@@ -195,6 +195,8 @@ message BeaconBlockBodyBellatrix {
   ethereum.engine.v1.ExecutionPayload execution_payload = 10;
 
   ethereum.engine.v1.ElgamalPrivateKey timelock_privatekey = 11;
+
+  v1.TimelockPuzzle timelock_puzzle = 12;
 }
 
 message BlindedBeaconBlockBodyBellatrix {

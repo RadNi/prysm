@@ -789,6 +789,11 @@ func (b *BeaconBlockBody) TimelockPrivatekey() *enginev1.ElgamalPrivateKey {
 	return b.timelockPrivateKey
 }
 
+// TimelockPuzzle returns the Timelock Puzzle in the block.
+func (b *BeaconBlockBody) TimelockPuzzle() *eth.TimelockPuzzle {
+	return b.timelockPuzzle
+}
+
 // Execution returns the execution payload of the block body.
 func (b *BeaconBlockBody) Execution() (interfaces.ExecutionData, error) {
 	switch b.version {

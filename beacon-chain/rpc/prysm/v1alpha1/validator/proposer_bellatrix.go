@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/prysmaticlabs/prysm/v3/beacon-chain/timelock"
+	timelock2 "github.com/prysmaticlabs/prysm/v3/crypto/timelock"
 	"math"
 	"math/big"
 	"time"
@@ -75,6 +76,7 @@ func (vs *Server) getBellatrixBeaconBlock(ctx context.Context, req *ethpb.BlockR
 		SlotNumber: altairBlk.Slot - 3,
 		Res:        resChan,
 	}
+	//vs.BeaconDB.BlocksBySlot()
 	vs.TimelockChannels.TimelockRequestChannel <- tlreq
 	fmt.Printf("waiting %v\n", tlreq.SlotNumber)
 	res := <-resChan
@@ -84,21 +86,21 @@ func (vs *Server) getBellatrixBeaconBlock(ctx context.Context, req *ethpb.BlockR
 		return nil, err
 	}
 
+	var puzzle *ethpb.TimelockPuzzle
+	if len(altairBlk.Body.Attestations) != 0 {
+		puzzle = altairBlk.Body.Attestations[0].Data.TimelockPuzzle
+		for i, a := range altairBlk.Body.Attestations {
+			if i == 0 {
+				continue
+			}
+			u, v := timelock2.PuzzleEval(puzzle.U, puzzle.V, a.Data.TimelockPuzzle.U, a.Data.TimelockPuzzle.V, puzzle.N)
+			puzzle.U = u
+			puzzle.V = v
+		}
+	}
+
 	log.Info("radni: unbelievable, vali resid")
 
-	//pk := rsa.ImportPrivateKey()
-	//primes := make([][]byte, len(pk.Primes))
-	//for i, p := range pk.Primes {
-	//	primes[i] = p.Bytes()
-	//}
-	//rsapk := enginev1.RSAPrivateKey{
-	//	PublicKey: &enginev1.RSAPublicKey{
-	//		N: pk.PublicKey.N.Bytes(),
-	//		E: uint64(pk.PublicKey.E),
-	//	},
-	//	Primes: primes,
-	//	D:      pk.D.Bytes(),
-	//}
 	blk := &ethpb.BeaconBlockBellatrix{
 		Slot:          altairBlk.Slot,
 		ProposerIndex: altairBlk.ProposerIndex,
@@ -116,9 +118,9 @@ func (vs *Server) getBellatrixBeaconBlock(ctx context.Context, req *ethpb.BlockR
 			SyncAggregate:      altairBlk.Body.SyncAggregate,
 			ExecutionPayload:   payload,
 			TimelockPrivatekey: res.Solution,
+			TimelockPuzzle:     puzzle,
 		},
 	}
-	fmt.Printf("what's T value two: %v\n", blk.Body.Attestations[0].Data.TimelockPuzzle.T)
 
 	// Compute state root with the newly constructed block.
 	wsb, err := consensusblocks.NewSignedBeaconBlock(

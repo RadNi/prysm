@@ -453,6 +453,7 @@ type BeaconBlockBodyBellatrixJson struct {
 	SyncAggregate      *SyncAggregateJson         `json:"sync_aggregate"`
 	ExecutionPayload   *ExecutionPayloadJson      `json:"execution_payload"`
 	TimelockPrivateKey *ElgamalPrivateKeyJson     `json:"timelock_privatekey"`
+	TimelockPuzzle     *TimelockPuzzleJson        `json:"timelock_puzzle"`
 }
 
 type BlindedBeaconBlockBodyBellatrixJson struct {
@@ -705,6 +706,7 @@ type BeaconStateBellatrixJson struct {
 	NextSyncCommittee            *SyncCommitteeJson          `json:"next_sync_committee"`
 	LatestExecutionPayloadHeader *ExecutionPayloadHeaderJson `json:"latest_execution_payload_header"`
 	TimelockPrivatekey           *ElgamalPrivateKeyJson      `json:"timelock_privatekey"`
+	TimelockPuzzle               *TimelockPuzzleJson         `json:"timelock_puzzle"`
 }
 
 type BeaconStateContainerV2Json struct {

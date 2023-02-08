@@ -3,8 +3,6 @@ package validator
 import (
 	"context"
 	"fmt"
-	enginev1 "github.com/prysmaticlabs/prysm/v3/proto/engine/v1"
-
 	"github.com/pkg/errors"
 	"github.com/prysmaticlabs/prysm/v3/beacon-chain/core/blocks"
 	"github.com/prysmaticlabs/prysm/v3/beacon-chain/core/helpers"
@@ -21,16 +19,15 @@ import (
 
 // blockData required to create a beacon block.
 type blockData struct {
-	ParentRoot         []byte
-	Graffiti           [32]byte
-	ProposerIdx        types.ValidatorIndex
-	Eth1Data           *ethpb.Eth1Data
-	Deposits           []*ethpb.Deposit
-	Attestations       []*ethpb.Attestation
-	ProposerSlashings  []*ethpb.ProposerSlashing
-	AttesterSlashings  []*ethpb.AttesterSlashing
-	VoluntaryExits     []*ethpb.SignedVoluntaryExit
-	TimelockPrivatekey *enginev1.ElgamalPrivateKey
+	ParentRoot        []byte
+	Graffiti          [32]byte
+	ProposerIdx       types.ValidatorIndex
+	Eth1Data          *ethpb.Eth1Data
+	Deposits          []*ethpb.Deposit
+	Attestations      []*ethpb.Attestation
+	ProposerSlashings []*ethpb.ProposerSlashing
+	AttesterSlashings []*ethpb.AttesterSlashing
+	VoluntaryExits    []*ethpb.SignedVoluntaryExit
 }
 
 func (vs *Server) getPhase0BeaconBlock(ctx context.Context, req *ethpb.BlockRequest) (*ethpb.BeaconBlock, error) {
@@ -58,7 +55,6 @@ func (vs *Server) getPhase0BeaconBlock(ctx context.Context, req *ethpb.BlockRequ
 			AttesterSlashings: blkData.AttesterSlashings,
 			VoluntaryExits:    blkData.VoluntaryExits,
 			Graffiti:          blkData.Graffiti[:],
-			//TimelockPrivatekey: blkData.TimelockPrivatekey,
 		},
 	}
 

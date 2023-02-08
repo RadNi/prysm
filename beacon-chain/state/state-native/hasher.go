@@ -242,6 +242,12 @@ func ComputeFieldRootsWithHasher(ctx context.Context, state *BeaconState) ([][]b
 			return nil, err2
 		}
 		fieldRoots[nativetypes.TimelockPrivateKey.RealPosition()] = prvKeyRoot[:]
+
+		puzzleRoot, err3 := state.latestTimelockPuzzle.HashTreeRoot()
+		if err3 != nil {
+			return nil, err3
+		}
+		fieldRoots[nativetypes.TimelockPuzzle.RealPosition()] = puzzleRoot[:]
 	}
 
 	if state.version == version.Capella {

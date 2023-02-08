@@ -121,7 +121,6 @@ func CopyBeaconBlockBody(body *BeaconBlockBody) *BeaconBlockBody {
 		Attestations:      CopyAttestations(body.Attestations),
 		Deposits:          CopyDeposits(body.Deposits),
 		VoluntaryExits:    CopySignedVoluntaryExits(body.VoluntaryExits),
-		//TimelockPrivatekey: CopyTimelockPrivatekey(body.TimelockPrivatekey),
 	}
 }
 
@@ -165,7 +164,6 @@ func CopyBeaconBlockBodyAltair(body *BeaconBlockBodyAltair) *BeaconBlockBodyAlta
 		Deposits:          CopyDeposits(body.Deposits),
 		VoluntaryExits:    CopySignedVoluntaryExits(body.VoluntaryExits),
 		SyncAggregate:     CopySyncAggregate(body.SyncAggregate),
-		//TimelockPrivatekey: CopyTimelockPrivatekey(body.TimelockPrivatekey),
 	}
 }
 
@@ -220,7 +218,7 @@ func CopyBeaconBlockHeader(header *BeaconBlockHeader) *BeaconBlockHeader {
 	}
 }
 
-// CopyTimelockPublickey copies the provided AttestationDataTimelockPublickey.
+// CopyTimelockPuzzle copies the provided TimelockPuzzle.
 func CopyTimelockPuzzle(pub *TimelockPuzzle) *TimelockPuzzle {
 	if pub == nil {
 		return nil
@@ -240,7 +238,7 @@ func CopyTimelockPuzzle(pub *TimelockPuzzle) *TimelockPuzzle {
 	}
 }
 
-// CopyTimelockPublickey copies the provided AttestationDataTimelockPublickey.
+// CopyElgamalPublickey copies the provided ElgamalPublicKey.
 func CopyElgamalPublickey(pub *enginev1.ElgamalPublicKey) *enginev1.ElgamalPublicKey {
 	if pub == nil {
 		return nil
@@ -252,7 +250,7 @@ func CopyElgamalPublickey(pub *enginev1.ElgamalPublicKey) *enginev1.ElgamalPubli
 	}
 }
 
-// CopyTimelockPrivatekey copies the provided BeaconBlockTimelockPrivatekey.
+// CopyElgamalPrivatekey copies the provided ElgamalPrivateKey.
 func CopyElgamalPrivatekey(prv *enginev1.ElgamalPrivateKey) *enginev1.ElgamalPrivateKey {
 	if prv == nil {
 		return nil
@@ -466,6 +464,7 @@ func CopyBeaconBlockBodyBellatrix(body *BeaconBlockBodyBellatrix) *BeaconBlockBo
 		SyncAggregate:      CopySyncAggregate(body.SyncAggregate),
 		ExecutionPayload:   CopyExecutionPayload(body.ExecutionPayload),
 		TimelockPrivatekey: CopyElgamalPrivatekey(body.TimelockPrivatekey),
+		TimelockPuzzle:     CopyTimelockPuzzle(body.TimelockPuzzle),
 	}
 }
 

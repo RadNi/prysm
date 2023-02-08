@@ -5,7 +5,6 @@ package state
 
 import (
 	"context"
-
 	"github.com/prysmaticlabs/go-bitfield"
 	fieldparams "github.com/prysmaticlabs/prysm/v3/config/fieldparams"
 	"github.com/prysmaticlabs/prysm/v3/consensus-types/interfaces"
@@ -64,6 +63,7 @@ type ReadOnlyBeaconState interface {
 	Version() int
 	LatestExecutionPayloadHeader() (interfaces.ExecutionData, error)
 	LatestTimelockPrivatekey() (*enginev1.ElgamalPrivateKey, error)
+	LatestTimelockPuzzle() (*ethpb.TimelockPuzzle, error)
 	LastWithdrawalValidatorIndex() (types.ValidatorIndex, error)
 	ExpectedWithdrawals() ([]*enginev1.Withdrawal, error)
 }
@@ -89,6 +89,7 @@ type WriteOnlyBeaconState interface {
 	AppendHistoricalRoots(root [32]byte) error
 	SetLatestExecutionPayloadHeader(payload interfaces.ExecutionData) error
 	SetTimelockPrivatekey(val *enginev1.ElgamalPrivateKey) error
+	SetTimelockPuzzle(val *ethpb.TimelockPuzzle) error
 	SetNextWithdrawalIndex(i uint64) error
 	SetLastWithdrawalValidatorIndex(i types.ValidatorIndex) error
 }

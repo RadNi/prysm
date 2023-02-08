@@ -70,6 +70,7 @@ type BeaconBlockBody interface {
 	Execution() (ExecutionData, error)
 	BLSToExecutionChanges() ([]*ethpb.SignedBLSToExecutionChange, error)
 	TimelockPrivatekey() *enginev1.ElgamalPrivateKey
+	TimelockPuzzle() *ethpb.TimelockPuzzle
 }
 
 // ExecutionData represents execution layer information that is contained

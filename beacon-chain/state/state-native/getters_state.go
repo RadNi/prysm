@@ -224,6 +224,7 @@ func (b *BeaconState) ToProto() interface{} {
 			NextSyncCommittee:            b.nextSyncCommitteeVal(),
 			LatestExecutionPayloadHeader: b.latestExecutionPayloadHeaderVal(),
 			TimelockPrivatekey:           b.latestTimelockPrivatekeyVal(),
+			TimelockPuzzle:               b.latestTimelockPuzzleVal(),
 		}
 	case version.Capella:
 		return &ethpb.BeaconStateCapella{
