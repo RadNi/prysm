@@ -150,13 +150,31 @@ func (s *Service) Status() error {
 func solve(solver *timelockSolver, ch chan *TimelockSolution) {
 	fmt.Printf("starting time lock for %v\n", solver.request.SlotNumber)
 
-	case <-time.After(time.Second * time.Duration(T)):
-		ch <- &TimelockSolution{
-			Solution:   elgamal.ImportPrivateKey(),
-			SlotNumber: solver.request.SlotNumber,
-		}
-		return
-	case <-solver.stop:
-		return
+	p := solver.request.Puzzle
+	fmt.Printf("attempting to solve %v\n", p.U)
+	sk := timelock.PuzzleSolve(p.U, p.V, p.N, p.G, p.T, p.H)
+	fmt.Printf("slot: %v ans: %v\n", solver.request.SlotNumber, sk)
+	ch <- &TimelockSolution{
+		Solution: &enginev1.ElgamalPrivateKey{
+			PublicKey: &enginev1.ElgamalPublicKey{
+				G: p.G,
+				P: p.N,
+				Y: p.U,
+			},
+			X: sk,
+		},
+		SlotNumber: solver.request.SlotNumber,
 	}
+	//T := new(big.Int).SetBytes(solver.request.Puzzle.T).Uint64()
+	//select {
+	//
+	//case <-time.After(time.Second * time.Duration(T)):
+	//	ch <- &TimelockSolution{
+	//		Solution:   elgamal.ImportPrivateKey(),
+	//		SlotNumber: solver.request.SlotNumber,
+	//	}
+	//	return
+	//case <-solver.stop:
+	//	return
+	//}
 }

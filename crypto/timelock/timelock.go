@@ -120,6 +120,7 @@ func PuzzleGen(_s, _n, _g, _time, _h []byte) ([]byte, []byte, []byte, []byte, []
 	g := new(big.Int).SetBytes(_g)
 	time := new(big.Int).SetBytes(_time)
 	h := new(big.Int).SetBytes(_h)
+
 	u, v := genUV(_s, _s, _n, _g, _time, _h)
 	x, err := rand.Int(rand.Reader, n)
 	if err != nil {
@@ -160,10 +161,7 @@ func PuzzleGen(_s, _n, _g, _time, _h []byte) ([]byte, []byte, []byte, []byte, []
 
 	tau := new(big.Int).SetBytes(g.Bytes())
 	tau = ModExpWithSquaring(tau, t, n)
-	//B             []byte `protobuf:"bytes,8,opt,name=b,proto3" json:"b,omitempty" ssz-size:"262144"`
-	//Alpha         []byte `protobuf:"bytes,9,opt,name=alpha,proto3" json:"alpha,omitempty" ssz-size:"66048"`
-	//Beta          []byte `protobuf:"bytes,10,opt,name=beta,proto3" json:"beta,omitempty" ssz-size:"512"`
-	//Tau           []byte `protobuf:"bytes,11,opt,name=tau,proto3" json:"tau,omitempty" ssz-size:"512"
+
 	return padOrTrim(u, 512),
 		padOrTrim(v, 262144),
 		padOrTrim(a.Bytes(), 512),
@@ -194,22 +192,6 @@ func PuzzleSolve(_u, _v, _n, _g, _t, _h []byte) []byte {
 	s.Sub(s, one)
 	s.Div(s, n)
 	fmt.Printf("puzzle sollved in lib: %v\n", s.Bytes())
-	f, _ := os.Create("/tmp/dat2")
-	f.WriteString("uFirst: ")
-	f.WriteString(new(big.Int).SetBytes(_u).String())
-	f.WriteString("u: ")
-	f.WriteString(u.String())
-	f.WriteString("\n")
-	f.WriteString("v: ")
-	f.WriteString(v.String())
-	f.WriteString("\n")
-	f.WriteString("n: ")
-	f.WriteString(n.String())
-	f.WriteString("\n")
-	f.WriteString("s: ")
-	f.WriteString(s.String())
-	f.WriteString("\n")
-	f.Close()
 	return padOrTrim(s.Bytes(), 512)
 }
 
