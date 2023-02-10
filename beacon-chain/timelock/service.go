@@ -5,8 +5,8 @@ import (
 	"fmt"
 	types "github.com/prysmaticlabs/prysm/v3/consensus-types/primitives"
 	"github.com/prysmaticlabs/prysm/v3/crypto/elgamal"
-	"math/big"
-	"time"
+	"github.com/prysmaticlabs/prysm/v3/crypto/timelock"
+	enginev1 "github.com/prysmaticlabs/prysm/v3/proto/engine/v1"
 )
 
 type Channels struct {
@@ -69,29 +69,43 @@ func (s *Service) Start() {
 			}
 			delete(s.solvers, sol.SlotNumber)
 		case req := <-s.channels.TimelockRequestChannel:
-			if req.SlotNumber <= 7 {
+			if sol, prs := s.solutions[req.SlotNumber]; prs {
+				fmt.Printf("sending already known answer\n")
+				req.Res <- sol
+			} else if req.SlotNumber <= 7 {
 				if req.Res != nil {
+					fmt.Printf("sending placeholder\n")
 					req.Res <- &TimelockSolution{
 						Solution:   elgamal.ImportPrivateKey(),
 						SlotNumber: req.SlotNumber,
 					}
 				}
-			} else {
-
-				if sol, prs := s.solutions[req.SlotNumber]; prs {
+			} else if req.Puzzle == nil {
+				fmt.Printf("request was nil\n")
+				sol := &TimelockSolution{
+					Solution:   elgamal.PlaceHolderPrivateKey(),
+					SlotNumber: req.SlotNumber,
+				}
+				s.solutions[req.SlotNumber] = sol
+				if req.Res != nil {
 					req.Res <- sol
-				} else {
-					if _, prs := s.solvers[req.SlotNumber]; !prs {
-						solver := &timelockSolver{
-							request: req,
-							stop:    make(chan bool),
-						}
-						s.solvers[req.SlotNumber] = solver
-						go solve(solver, puzzleSolved)
+				}
+			} else {
+				// TODO handle the case in which the solution hasn't been found yet, but the solver is still working on it
+				if _, prs := s.solvers[req.SlotNumber]; !prs {
+					solver := &timelockSolver{
+						request: req,
+						stop:    make(chan bool),
 					}
+					s.solvers[req.SlotNumber] = solver
+					go solve(solver, puzzleSolved)
 				}
 			}
 		case x := <-s.channels.TimelockSolutionFoundChannel:
+			if x.Solution == nil {
+				fmt.Printf("found a nill solution for slot %v. Replacing it with placeholder\n", x.SlotNumber)
+				x.Solution = elgamal.PlaceHolderPrivateKey()
+			}
 			if rs, pres := s.solvers[x.SlotNumber]; pres {
 				r := rs.request
 				if r.Res != nil {
@@ -134,29 +148,7 @@ func (s *Service) Status() error {
 }
 
 func solve(solver *timelockSolver, ch chan *TimelockSolution) {
-	//p := solver.request.Puzzle
-	//sk := timelock.PuzzleSolve(
-	//	new(big.Int).SetBytes(p.U),
-	//	new(big.Int).SetBytes(p.V),
-	//	new(big.Int).SetBytes(p.N),
-	//	new(big.Int).SetBytes(p.G),
-	//	new(big.Int).SetUint64(p.T),
-	//	new(big.Int).SetBytes(p.H),
-	//)
-	//ch <- &TimelockSolution{
-	//	Solution: &enginev1.ElgamalPrivateKey{
-	//		PublicKey: &enginev1.ElgamalPublicKey{
-	//			G: p.G,
-	//			P: p.N,
-	//			Y: p.U,
-	//		},
-	//		X: sk.Bytes(),
-	//	},
-	//	SlotNumber: solver.request.SlotNumber,
-	//}
-	T := new(big.Int).SetBytes(solver.request.Puzzle.T).Uint64()
-	fmt.Printf("starting time lock for %v with %v secs\n", solver.request.SlotNumber, T)
-	select {
+	fmt.Printf("starting time lock for %v\n", solver.request.SlotNumber)
 
 	case <-time.After(time.Second * time.Duration(T)):
 		ch <- &TimelockSolution{

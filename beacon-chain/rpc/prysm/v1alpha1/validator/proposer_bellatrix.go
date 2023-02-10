@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"github.com/prysmaticlabs/prysm/v3/beacon-chain/timelock"
 	timelock2 "github.com/prysmaticlabs/prysm/v3/crypto/timelock"
-	"math"
 	"math/big"
 	"time"
 
@@ -70,9 +69,10 @@ func (vs *Server) getBellatrixBeaconBlock(ctx context.Context, req *ethpb.BlockR
 	}
 
 	resChan := make(chan *timelock.TimelockSolution)
-	T := new(big.Int).SetInt64(int64(uint64(slots.DivideSlotBy(2)+slots.MultiplySlotBy(2)) / uint64(math.Pow10(9))))
+	//T := new(big.Int).SetInt64(int64(uint64(slots.DivideSlotBy(2)+slots.MultiplySlotBy(2)) / uint64(math.Pow10(9))))
+	//blks, err := vs.BeaconDB.BlocksBySlot(ctx, altairBlk.Slot-3)
 	tlreq := &timelock.TimelockRequest{
-		Puzzle:     &ethpb.TimelockPuzzle{T: T.Bytes()},
+		Puzzle:     nil, // blks[0].Block().Body().TimelockPuzzle(),
 		SlotNumber: altairBlk.Slot - 3,
 		Res:        resChan,
 	}
@@ -88,14 +88,15 @@ func (vs *Server) getBellatrixBeaconBlock(ctx context.Context, req *ethpb.BlockR
 
 	var puzzle *ethpb.TimelockPuzzle
 	if len(altairBlk.Body.Attestations) != 0 {
-		puzzle = altairBlk.Body.Attestations[0].Data.TimelockPuzzle
-		for i, a := range altairBlk.Body.Attestations {
-			if i == 0 {
-				continue
+		for _, a := range altairBlk.Body.Attestations {
+			if a.Data.Slot == altairBlk.Slot-1 {
+				if puzzle == nil {
+					puzzle = ethpb.CopyTimelockPuzzle(a.Data.TimelockPuzzle)
+				}
+				u, v := timelock2.PuzzleEval(puzzle.U, puzzle.V, a.Data.TimelockPuzzle.U, a.Data.TimelockPuzzle.V, puzzle.N)
+				puzzle.U = u
+				puzzle.V = v
 			}
-			u, v := timelock2.PuzzleEval(puzzle.U, puzzle.V, a.Data.TimelockPuzzle.U, a.Data.TimelockPuzzle.V, puzzle.N)
-			puzzle.U = u
-			puzzle.V = v
 		}
 	}
 
@@ -117,7 +118,7 @@ func (vs *Server) getBellatrixBeaconBlock(ctx context.Context, req *ethpb.BlockR
 			VoluntaryExits:     altairBlk.Body.VoluntaryExits,
 			SyncAggregate:      altairBlk.Body.SyncAggregate,
 			ExecutionPayload:   payload,
-			TimelockPrivatekey: res.Solution,
+			TimelockPrivatekey: ethpb.CopyElgamalPrivatekey(res.Solution),
 			TimelockPuzzle:     puzzle,
 		},
 	}

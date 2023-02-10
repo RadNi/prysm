@@ -129,11 +129,10 @@ func (vs *Server) GetAttestationData(ctx context.Context, req *ethpb.Attestation
 			targetRoot = headRoot
 		}
 	}
-	s := new(big.Int).SetInt64(31)
+	s := new(big.Int).SetInt64(24)
 	ph := timelock.PuzzlePlaceHolder()
-	T := []byte{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xff}
+	T := []byte{0x00, 0x00, 0x00, 0x00, 0x00, 0x09, 0x32, 0x26}
 	u, v, a, b, alpha, beta, tau := timelock.PuzzleGen(s.Bytes(), ph.N, ph.G, T, ph.H)
-
 	log.Info("radni: inja bayad ye publickey ezafe konam be AttestationData obj.")
 	res = &ethpb.AttestationData{
 		Slot:            req.Slot,
@@ -147,7 +146,7 @@ func (vs *Server) GetAttestationData(ctx context.Context, req *ethpb.Attestation
 		TimelockPuzzle: &ethpb.TimelockPuzzle{
 			N:     ph.N,
 			G:     ph.G,
-			T:     ph.T,
+			T:     T,
 			H:     ph.H,
 			U:     u,
 			V:     v,
@@ -158,8 +157,6 @@ func (vs *Server) GetAttestationData(ctx context.Context, req *ethpb.Attestation
 			Tau:   tau,
 		},
 	}
-	//fmt.Printf("before\n")
-	//spew.Dump(res)
 
 	if err := vs.AttestationCache.Put(ctx, req, res); err != nil {
 		return nil, status.Errorf(codes.Internal, "Could not store attestation data in cache: %v", err)
