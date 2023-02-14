@@ -7,6 +7,7 @@ import (
 	"github.com/prysmaticlabs/prysm/v3/crypto/elgamal"
 	"github.com/prysmaticlabs/prysm/v3/crypto/timelock"
 	enginev1 "github.com/prysmaticlabs/prysm/v3/proto/engine/v1"
+	"time"
 )
 
 type Channels struct {
@@ -63,6 +64,7 @@ func (s *Service) Start() {
 		select {
 		case sol := <-puzzleSolved:
 			s.solutions[sol.SlotNumber] = sol
+			s.cleanSolutions(sol.SlotNumber)
 			r := s.solvers[sol.SlotNumber]
 			if r.request.Res != nil {
 				r.request.Res <- sol
@@ -80,8 +82,16 @@ func (s *Service) Start() {
 						SlotNumber: req.SlotNumber,
 					}
 				}
+			} else if _, prs := s.solvers[req.SlotNumber]; !prs {
+				fmt.Printf("First time getting this puzzle. Starting to solve it\n")
+				solver := &timelockSolver{
+					request: req,
+					stop:    make(chan bool),
+				}
+				s.solvers[req.SlotNumber] = solver
+				go solve(solver, puzzleSolved)
 			} else if req.Puzzle == nil {
-				fmt.Printf("request was nil\n")
+				fmt.Printf("Request was nil. Sending placeholder\n")
 				sol := &TimelockSolution{
 					Solution:   elgamal.PlaceHolderPrivateKey(),
 					SlotNumber: req.SlotNumber,
@@ -91,14 +101,15 @@ func (s *Service) Start() {
 					req.Res <- sol
 				}
 			} else {
+				fmt.Printf("Timelock for slot %v is delayed. Sending placeholder\n", req.SlotNumber)
 				// TODO handle the case in which the solution hasn't been found yet, but the solver is still working on it
-				if _, prs := s.solvers[req.SlotNumber]; !prs {
-					solver := &timelockSolver{
-						request: req,
-						stop:    make(chan bool),
-					}
-					s.solvers[req.SlotNumber] = solver
-					go solve(solver, puzzleSolved)
+				sol := &TimelockSolution{
+					Solution:   elgamal.PlaceHolderPrivateKey(),
+					SlotNumber: req.SlotNumber,
+				}
+				s.solutions[req.SlotNumber] = sol
+				if req.Res != nil {
+					req.Res <- sol
 				}
 			}
 		case x := <-s.channels.TimelockSolutionFoundChannel:
@@ -115,6 +126,7 @@ func (s *Service) Start() {
 				delete(s.solvers, r.SlotNumber)
 			}
 			s.solutions[x.SlotNumber] = x
+			s.cleanSolutions(x.SlotNumber)
 		case <-s.stop:
 			close(s.channels.TimelockRequestChannel)
 			close(s.channels.TimelockSolutionFoundChannel)
@@ -129,6 +141,16 @@ func (s *Service) Start() {
 			continue
 		}
 	}
+}
+
+func (s *Service) cleanSolutions(slot types.Slot) {
+	updated := make(map[types.Slot]*TimelockSolution)
+	for k, v := range s.solutions {
+		if uint64(k) >= uint64(slot)-3 {
+			updated[k] = v
+		}
+	}
+	s.solutions = updated
 }
 
 // Stop the web3 service's main event loop and associated goroutines.
@@ -152,7 +174,9 @@ func solve(solver *timelockSolver, ch chan *TimelockSolution) {
 
 	p := solver.request.Puzzle
 	fmt.Printf("attempting to solve %v\n", p.U)
-	sk := timelock.PuzzleSolve(p.U, p.V, p.N, p.G, p.T, p.H)
+	t := time.Now()
+	sk := timelock.PuzzleSolve(p.U, p.V, p.N, p.G, p.T, p.H, int(solver.request.SlotNumber))
+	fmt.Printf("duration for %v is %v\n", solver.request.SlotNumber, time.Now().Sub(t).Seconds())
 	fmt.Printf("slot: %v ans: %v\n", solver.request.SlotNumber, sk)
 	ch <- &TimelockSolution{
 		Solution: &enginev1.ElgamalPrivateKey{

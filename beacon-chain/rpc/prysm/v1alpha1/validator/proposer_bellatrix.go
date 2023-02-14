@@ -81,15 +81,19 @@ func (vs *Server) getBellatrixBeaconBlock(ctx context.Context, req *ethpb.BlockR
 	fmt.Printf("waiting %v\n", tlreq.SlotNumber)
 	res := <-resChan
 	fmt.Printf("done %v\n", tlreq.SlotNumber)
+	if res.Solution == nil {
+		fmt.Printf("WTH !! solution was nil\n")
+	}
 	payload, err := vs.getExecutionPayload(ctx, req.Slot, altairBlk.ProposerIndex, bytesutil.ToBytes32(altairBlk.ParentRoot), res.Solution)
 	if err != nil {
 		return nil, err
 	}
 
-	var puzzle *ethpb.TimelockPuzzle
+	puzzle := timelock2.PuzzlePlaceHolder()
 	if len(altairBlk.Body.Attestations) != 0 {
 		for _, a := range altairBlk.Body.Attestations {
 			if a.Data.Slot == altairBlk.Slot-1 {
+				fmt.Printf("inja nayomad?! %v\n", a.Data.TimelockPuzzle.U)
 				if puzzle == nil {
 					puzzle = ethpb.CopyTimelockPuzzle(a.Data.TimelockPuzzle)
 				}
@@ -101,6 +105,8 @@ func (vs *Server) getBellatrixBeaconBlock(ctx context.Context, req *ethpb.BlockR
 	}
 
 	log.Info("radni: unbelievable, vali resid")
+	fmt.Printf("u: %v\nG: %v\n", puzzle.U, puzzle.G)
+	fmt.Printf("X: %v\nY: %v\n", res.Solution.X, res.Solution.PublicKey.Y)
 
 	blk := &ethpb.BeaconBlockBellatrix{
 		Slot:          altairBlk.Slot,
@@ -127,10 +133,12 @@ func (vs *Server) getBellatrixBeaconBlock(ctx context.Context, req *ethpb.BlockR
 	wsb, err := consensusblocks.NewSignedBeaconBlock(
 		&ethpb.SignedBeaconBlockBellatrix{Block: blk, Signature: make([]byte, 96)},
 	)
+	fmt.Printf("arrived\n")
 	if err != nil {
 		return nil, err
 	}
 	stateRoot, err := vs.computeStateRoot(ctx, wsb)
+	fmt.Printf("boom\n")
 	if err != nil {
 		interop.WriteBlockToDisk(wsb, true /*failed*/)
 		return nil, fmt.Errorf("could not compute state root: %v", err)
