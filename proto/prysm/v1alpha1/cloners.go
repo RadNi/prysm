@@ -580,6 +580,7 @@ func CopyExecutionPayload(payload *enginev1.ExecutionPayload) *enginev1.Executio
 		BlockHash:          bytesutil.SafeCopyBytes(payload.BlockHash),
 		Transactions:       bytesutil.SafeCopy2dBytes(payload.Transactions),
 		TimelockPrivatekey: CopyElgamalPrivatekey(payload.TimelockPrivatekey),
+		TimelockPublickey:  CopyElgamalPublickey(payload.TimelockPublickey),
 	}
 }
 
@@ -629,6 +630,7 @@ func CopyExecutionPayloadHeader(payload *enginev1.ExecutionPayloadHeader) *engin
 		BlockHash:          bytesutil.SafeCopyBytes(payload.BlockHash),
 		TransactionsRoot:   bytesutil.SafeCopyBytes(payload.TransactionsRoot),
 		TimelockPrivatekey: CopyElgamalPrivatekey(payload.TimelockPrivatekey),
+		TimelockPublickey:  CopyElgamalPublickey(payload.TimelockPublickey),
 	}
 }
 

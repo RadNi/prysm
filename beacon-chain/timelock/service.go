@@ -78,7 +78,7 @@ func (s *Service) Start() {
 				if req.Res != nil {
 					fmt.Printf("sending placeholder\n")
 					req.Res <- &TimelockSolution{
-						Solution:   elgamal.ImportPrivateKey(),
+						Solution:   elgamal.PlaceHolderPrivateKey(),
 						SlotNumber: req.SlotNumber,
 					}
 				}

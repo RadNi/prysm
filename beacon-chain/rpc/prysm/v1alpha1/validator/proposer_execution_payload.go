@@ -41,7 +41,7 @@ var (
 
 // This returns the execution payload of a given slot. The function has full awareness of pre and post merge.
 // The payload is computed given the respected time of merge.
-func (vs *Server) getExecutionPayload(ctx context.Context, slot types.Slot, vIdx types.ValidatorIndex, headRoot [32]byte, prvKey *enginev1.ElgamalPrivateKey) (*enginev1.ExecutionPayload, error) {
+func (vs *Server) getExecutionPayload(ctx context.Context, slot types.Slot, vIdx types.ValidatorIndex, headRoot [32]byte, prvKey *enginev1.ElgamalPrivateKey, pubKey *enginev1.ElgamalPublicKey) (*enginev1.ExecutionPayload, error) {
 	log.Info("radni: headRoot for payloadID:")
 	log.Info(headRoot)
 	proposerID, payloadId, ok := vs.ProposerSlotIndexCache.GetProposerPayloadIDs(slot, headRoot)
@@ -165,7 +165,8 @@ func (vs *Server) getExecutionPayload(ctx context.Context, slot types.Slot, vIdx
 		Timestamp:             uint64(t.Unix()),
 		PrevRandao:            random,
 		SuggestedFeeRecipient: feeRecipient.Bytes(),
-		TimelockPrivatekey:    prv,
+		TimelockPrivatekey:    eth.CopyElgamalPrivatekey(prv),
+		TimelockPublickey:     eth.CopyElgamalPublickey(pubKey),
 	}
 	fmt.Printf("radni: here\n")
 	spew.Dump(p.TimelockPrivatekey)
@@ -177,6 +178,8 @@ func (vs *Server) getExecutionPayload(ctx context.Context, slot types.Slot, vIdx
 		return nil, fmt.Errorf("nil payload with block hash: %#x", parentHash)
 	}
 	payload, err := vs.ExecutionEngineCaller.GetPayload(ctx, *payloadID)
+	fmt.Printf("when getting payload")
+	spew.Dump(payload.TimelockPublickey)
 	if err != nil {
 		return nil, err
 	}

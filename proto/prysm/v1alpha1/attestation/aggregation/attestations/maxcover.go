@@ -1,9 +1,10 @@
 package attestations
 
 import (
-	"github.com/prysmaticlabs/prysm/v3/crypto/timelock"
 	"math/big"
 	"sort"
+
+	"github.com/prysmaticlabs/prysm/v3/crypto/timelock"
 
 	"github.com/pkg/errors"
 	"github.com/prysmaticlabs/go-bitfield"

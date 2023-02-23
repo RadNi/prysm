@@ -93,6 +93,11 @@ func UpgradeToBellatrix(state state.BeaconState) (state.BeaconState, error) {
 				},
 				X: make([]byte, 512),
 			},
+			TimelockPublickey: &enginev1.ElgamalPublicKey{
+				P: make([]byte, 512),
+				G: make([]byte, 512),
+				Y: make([]byte, 512),
+			},
 		},
 		TimelockPrivatekey: &enginev1.ElgamalPrivateKey{
 			PublicKey: &enginev1.ElgamalPublicKey{

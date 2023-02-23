@@ -3,7 +3,6 @@ package blockchain
 import (
 	"context"
 	"fmt"
-	"github.com/ethereum/go-ethereum/common"
 	"github.com/pkg/errors"
 	"github.com/prysmaticlabs/prysm/v3/beacon-chain/core/blocks"
 	"github.com/prysmaticlabs/prysm/v3/beacon-chain/core/helpers"
@@ -16,9 +15,10 @@ import (
 	consensusblocks "github.com/prysmaticlabs/prysm/v3/consensus-types/blocks"
 	"github.com/prysmaticlabs/prysm/v3/consensus-types/interfaces"
 	types "github.com/prysmaticlabs/prysm/v3/consensus-types/primitives"
-	"github.com/prysmaticlabs/prysm/v3/crypto/elgamal"
+	"github.com/prysmaticlabs/prysm/v3/crypto/timelock"
 	"github.com/prysmaticlabs/prysm/v3/encoding/bytesutil"
 	enginev1 "github.com/prysmaticlabs/prysm/v3/proto/engine/v1"
+	eth "github.com/prysmaticlabs/prysm/v3/proto/prysm/v1alpha1"
 	"github.com/prysmaticlabs/prysm/v3/time/slots"
 	"github.com/sirupsen/logrus"
 	"go.opencensus.io/trace"
@@ -292,27 +292,19 @@ func (s *Service) getPayloadAttribute(ctx context.Context, st state.BeaconState,
 		feeRecipient = recipient
 	}
 
-	// Get TimelockPrivatekey
-	prvv := elgamal.ImportPrivateKey()
-	prv := enginev1.ElgamalPrivateKey{
-		PublicKey: &enginev1.ElgamalPublicKey{
-			P: common.CopyBytes(prvv.PublicKey.P),
-			G: common.CopyBytes(prvv.PublicKey.G),
-			Y: common.CopyBytes(prvv.PublicKey.Y),
-		},
-		X: common.CopyBytes(prvv.X),
-	}
-
 	// Get timestamp.
 	t, err := slots.ToTime(uint64(s.genesisTime.Unix()), slot)
 	if err != nil {
 		return false, nil, 0, err
 	}
+	prv, _ := st.LatestTimelockPrivatekey()
+	puzzle, _ := st.LatestTimelockPuzzle()
 	attr := &enginev1.PayloadAttributes{
 		Timestamp:             uint64(t.Unix()),
 		PrevRandao:            prevRando,
 		SuggestedFeeRecipient: feeRecipient.Bytes(),
-		TimelockPrivatekey:    &prv,
+		TimelockPrivatekey:    eth.CopyElgamalPrivatekey(prv),
+		TimelockPublickey:     eth.CopyElgamalPublickey(timelock.PuzzleToPublicKey(puzzle)),
 	}
 	return true, attr, proposerID, nil
 }

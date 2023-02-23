@@ -97,4 +97,5 @@ type ExecutionData interface {
 	Transactions() ([][]byte, error)
 	Withdrawals() ([]*enginev1.Withdrawal, error)
 	TimelockPrivatekey() (*enginev1.ElgamalPrivateKey, error)
+	TimelockPublickey() (*enginev1.ElgamalPublicKey, error)
 }

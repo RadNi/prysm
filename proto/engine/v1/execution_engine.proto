@@ -40,6 +40,7 @@ message ExecutionPayload {
 	bytes block_hash            = 13 [(ethereum.eth.ext.ssz_size) = "32"];
 	repeated bytes transactions = 14 [(ethereum.eth.ext.ssz_size) = "?,?", (ethereum.eth.ext.ssz_max)  = "1048576,1073741824"];
 	ElgamalPrivateKey timelock_privatekey = 15;
+	ElgamalPublicKey  timelock_publickey = 16;
 }
 
 message ExecutionPayloadCapella {
@@ -77,6 +78,7 @@ message ExecutionPayloadHeader {
 	bytes block_hash        = 13 [(ethereum.eth.ext.ssz_size) = "32"];
 	bytes transactions_root = 14 [(ethereum.eth.ext.ssz_size) = "32"];
 	ElgamalPrivateKey timelock_privatekey = 15;
+	ElgamalPublicKey  timelock_publickey = 16;
 }
 
 message ExecutionPayloadHeaderCapella {
@@ -120,6 +122,7 @@ message PayloadAttributes {
 	bytes prev_randao             = 2 [(ethereum.eth.ext.ssz_size) = "32"];
 	bytes suggested_fee_recipient = 3 [(ethereum.eth.ext.ssz_size) = "20"];
 	ElgamalPrivateKey timelock_privatekey = 4;
+	ElgamalPublicKey timelock_publickey = 5;
 }
 
 message PayloadStatus {

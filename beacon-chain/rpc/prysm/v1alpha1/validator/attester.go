@@ -2,6 +2,7 @@ package validator
 
 import (
 	"context"
+	"crypto/rand"
 	"errors"
 	"fmt"
 	"github.com/prysmaticlabs/prysm/v3/beacon-chain/cache"
@@ -129,8 +130,8 @@ func (vs *Server) GetAttestationData(ctx context.Context, req *ethpb.Attestation
 			targetRoot = headRoot
 		}
 	}
-	s := new(big.Int).SetInt64(24)
 	ph := timelock.PuzzlePlaceHolder()
+	s, _ := rand.Int(rand.Reader, new(big.Int).SetBytes(ph.N))
 	u, v, a, b, alpha, beta, tau := timelock.PuzzleGen(s.Bytes(), ph.N, ph.G, ph.T, ph.H)
 	log.Info("radni: inja bayad ye publickey ezafe konam be AttestationData obj.")
 	res = &ethpb.AttestationData{

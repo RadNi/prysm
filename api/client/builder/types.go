@@ -230,6 +230,7 @@ func (h *ExecutionPayloadHeader) ToProto() (*v1.ExecutionPayloadHeader, error) {
 		BlockHash:          h.BlockHash,
 		TransactionsRoot:   h.TransactionsRoot,
 		TimelockPrivatekey: h.TimelockPrivatekey,
+		TimelockPublickey:  h.TimelockPublickey,
 	}, nil
 }
 
@@ -255,6 +256,7 @@ type ExecutionPayloadHeader struct {
 	BlockHash          hexutil.Bytes         `json:"block_hash,omitempty"`
 	TransactionsRoot   hexutil.Bytes         `json:"transactions_root,omitempty"`
 	TimelockPrivatekey *v1.ElgamalPrivateKey `json:"timelock_privatekey,omitempty"`
+	TimelockPublickey  *v1.ElgamalPublicKey  `json:"timelock_publickey,omitempty"`
 	*v1.ExecutionPayloadHeader
 }
 
@@ -316,6 +318,7 @@ type ExecutionPayload struct {
 	BlockHash          hexutil.Bytes         `json:"block_hash,omitempty"`
 	Transactions       []hexutil.Bytes       `json:"transactions,omitempty"`
 	TimelockPrivatekey *v1.ElgamalPrivateKey `json:"timelock_privatekey,omitempty"`
+	TimelockPublicKey  *v1.ElgamalPublicKey  `json:"timelock_publickey,omitempty"`
 }
 
 func (r *ExecPayloadResponse) ToProto() (*v1.ExecutionPayload, error) {
@@ -343,6 +346,7 @@ func (p *ExecutionPayload) ToProto() (*v1.ExecutionPayload, error) {
 		BlockHash:          p.BlockHash,
 		Transactions:       txs,
 		TimelockPrivatekey: p.TimelockPrivatekey,
+		TimelockPublickey:  p.TimelockPublicKey,
 	}, nil
 }
 
