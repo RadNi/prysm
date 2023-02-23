@@ -14,7 +14,6 @@ import (
 	"github.com/prysmaticlabs/prysm/v3/time"
 	"github.com/prysmaticlabs/prysm/v3/time/slots"
 	"go.opencensus.io/trace"
-	"math"
 )
 
 // This defines how many epochs since finality the run time will begin to save hot state on to the DB.
@@ -162,12 +161,14 @@ func (s *Service) handlePostBlockOperations(b interfaces.BeaconBlock) error {
 		s.cfg.SlashingPool.MarkIncludedAttesterSlashing(as)
 	}
 	if b.Version() == int(eth.Version_BELLATRIX) {
-		s.cfg.TimelockChannels.TimelockSolutionFoundChannel <- &timelock.TimelockSolution{
-			Solution:   b.Body().TimelockPrivatekey(),
-			SlotNumber: b.Slot().SubSlot(3),
+		if b.Body().TimelockPrivatekey() != nil {
+			s.cfg.TimelockChannels.TimelockSolutionFoundChannel <- &timelock.TimelockSolution{
+				Solution:   b.Body().TimelockPrivatekey(),
+				SlotNumber: b.Slot().SubSlot(3),
+			}
 		}
 		s.cfg.TimelockChannels.TimelockRequestChannel <- &timelock.TimelockRequest{
-			Puzzle:     &ethpb.TimelockPuzzle{T: uint64(slots.DivideSlotBy(2)+slots.MultiplySlotBy(2)) / uint64(math.Pow10(9))},
+			Puzzle:     ethpb.CopyTimelockPuzzle(b.Body().TimelockPuzzle()),
 			SlotNumber: b.Slot(),
 		}
 	} else {

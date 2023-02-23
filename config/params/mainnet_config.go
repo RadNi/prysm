@@ -26,7 +26,7 @@ const (
 )
 
 var mainnetNetworkConfig = &NetworkConfig{
-	GossipMaxSize:                   1 << 20,      // 1 MiB
+	GossipMaxSize:                   2 * 1 << 20,  // 1 MiB
 	GossipMaxSizeBellatrix:          10 * 1 << 20, // 10 MiB
 	MaxChunkSize:                    1 << 20,      // 1 MiB
 	MaxChunkSizeBellatrix:           10 * 1 << 20, // 10 MiB
@@ -188,7 +188,7 @@ var mainnetBeaconConfig = &BeaconChainConfig{
 	PresetBase:                     "mainnet",
 	BeaconStateFieldCount:          21,
 	BeaconStateAltairFieldCount:    24,
-	BeaconStateBellatrixFieldCount: 26,
+	BeaconStateBellatrixFieldCount: 27,
 	BeaconStateCapellaFieldCount:   27,
 
 	// Slasher related values.

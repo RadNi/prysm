@@ -416,6 +416,20 @@ type BeaconBlockBodyAltairJson struct {
 	SyncAggregate     *SyncAggregateJson         `json:"sync_aggregate"`
 }
 
+type TimelockPuzzleJson struct {
+	N string `json:"n" hex:"true"`
+	G string `json:"g" hex:"true"`
+	T string `json:"t" hex:"true"`
+	H string `json:"h" hex:"true"`
+	U string `json:"u" hex:"true"`
+	//V     string `json:"v" hex:"true"`
+	A string `json:"a" hex:"true"`
+	//B     string `json:"b" hex:"true"`
+	//Alpha string `json:"alpha" hex:"true"`
+	Beta string `json:"beta" hex:"true"`
+	Tau  string `json:"tau" hex:"true"`
+}
+
 type ElgamalPublicKeyJson struct {
 	P string `json:"p" hex:"true"`
 	G string `json:"g" hex:"true"`
@@ -439,6 +453,7 @@ type BeaconBlockBodyBellatrixJson struct {
 	SyncAggregate      *SyncAggregateJson         `json:"sync_aggregate"`
 	ExecutionPayload   *ExecutionPayloadJson      `json:"execution_payload"`
 	TimelockPrivateKey *ElgamalPrivateKeyJson     `json:"timelock_privatekey"`
+	TimelockPuzzle     *TimelockPuzzleJson        `json:"timelock_puzzle"`
 }
 
 type BlindedBeaconBlockBodyBellatrixJson struct {
@@ -455,20 +470,22 @@ type BlindedBeaconBlockBodyBellatrixJson struct {
 }
 
 type ExecutionPayloadJson struct {
-	ParentHash    string   `json:"parent_hash" hex:"true"`
-	FeeRecipient  string   `json:"fee_recipient" hex:"true"`
-	StateRoot     string   `json:"state_root" hex:"true"`
-	ReceiptsRoot  string   `json:"receipts_root" hex:"true"`
-	LogsBloom     string   `json:"logs_bloom" hex:"true"`
-	PrevRandao    string   `json:"prev_randao" hex:"true"`
-	BlockNumber   string   `json:"block_number"`
-	GasLimit      string   `json:"gas_limit"`
-	GasUsed       string   `json:"gas_used"`
-	TimeStamp     string   `json:"timestamp"`
-	ExtraData     string   `json:"extra_data" hex:"true"`
-	BaseFeePerGas string   `json:"base_fee_per_gas" uint256:"true"`
-	BlockHash     string   `json:"block_hash" hex:"true"`
-	Transactions  []string `json:"transactions" hex:"true"`
+	ParentHash         string                 `json:"parent_hash" hex:"true"`
+	FeeRecipient       string                 `json:"fee_recipient" hex:"true"`
+	StateRoot          string                 `json:"state_root" hex:"true"`
+	ReceiptsRoot       string                 `json:"receipts_root" hex:"true"`
+	LogsBloom          string                 `json:"logs_bloom" hex:"true"`
+	PrevRandao         string                 `json:"prev_randao" hex:"true"`
+	BlockNumber        string                 `json:"block_number"`
+	GasLimit           string                 `json:"gas_limit"`
+	GasUsed            string                 `json:"gas_used"`
+	TimeStamp          string                 `json:"timestamp"`
+	ExtraData          string                 `json:"extra_data" hex:"true"`
+	BaseFeePerGas      string                 `json:"base_fee_per_gas" uint256:"true"`
+	BlockHash          string                 `json:"block_hash" hex:"true"`
+	Transactions       []string               `json:"transactions" hex:"true"`
+	TimelockPrivateKey *ElgamalPrivateKeyJson `json:"timelockPrivatekey" hex:"true"`
+	TimelockPublicKey  *ElgamalPublicKeyJson  `json:"timelockPublickey" hex:"true"`
 }
 
 type ExecutionPayloadHeaderJson struct {
@@ -551,12 +568,12 @@ type AttestationJson struct {
 }
 
 type AttestationDataJson struct {
-	Slot              string                `json:"slot"`
-	CommitteeIndex    string                `json:"index"`
-	BeaconBlockRoot   string                `json:"beacon_block_root" hex:"true"`
-	Source            *CheckpointJson       `json:"source"`
-	Target            *CheckpointJson       `json:"target"`
-	TimelockPublickey *ElgamalPublicKeyJson `json:"timelock_publickey"`
+	Slot            string              `json:"slot"`
+	CommitteeIndex  string              `json:"index"`
+	BeaconBlockRoot string              `json:"beacon_block_root" hex:"true"`
+	Source          *CheckpointJson     `json:"source"`
+	Target          *CheckpointJson     `json:"target"`
+	TimelockPuzzle  *TimelockPuzzleJson `json:"timelock_puzzle"`
 }
 
 type DepositJson struct {
@@ -691,6 +708,7 @@ type BeaconStateBellatrixJson struct {
 	NextSyncCommittee            *SyncCommitteeJson          `json:"next_sync_committee"`
 	LatestExecutionPayloadHeader *ExecutionPayloadHeaderJson `json:"latest_execution_payload_header"`
 	TimelockPrivatekey           *ElgamalPrivateKeyJson      `json:"timelock_privatekey"`
+	TimelockPuzzle               *TimelockPuzzleJson         `json:"timelock_puzzle"`
 }
 
 type BeaconStateContainerV2Json struct {

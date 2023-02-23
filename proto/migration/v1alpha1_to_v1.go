@@ -5,7 +5,6 @@ import (
 	"github.com/prysmaticlabs/prysm/v3/beacon-chain/state"
 	"github.com/prysmaticlabs/prysm/v3/consensus-types/interfaces"
 	"github.com/prysmaticlabs/prysm/v3/encoding/bytesutil"
-	enginev1 "github.com/prysmaticlabs/prysm/v3/proto/engine/v1"
 	ethpbv1 "github.com/prysmaticlabs/prysm/v3/proto/eth/v1"
 	ethpbalpha "github.com/prysmaticlabs/prysm/v3/proto/prysm/v1alpha1"
 	"google.golang.org/protobuf/proto"
@@ -151,10 +150,18 @@ func V1Alpha1AttDataToV1(v1alpha1AttData *ethpbalpha.AttestationData) *ethpbv1.A
 			Root:  v1alpha1AttData.Target.Root,
 			Epoch: v1alpha1AttData.Target.Epoch,
 		},
-		TimelockPublickey: &ethpbv1.ElgamalPublicKey{
-			G: v1alpha1AttData.TimelockPublickey.G,
-			P: v1alpha1AttData.TimelockPublickey.P,
-			Y: v1alpha1AttData.TimelockPublickey.Y,
+		TimelockPuzzle: &ethpbv1.TimelockPuzzle{
+			N:     v1alpha1AttData.TimelockPuzzle.N,
+			G:     v1alpha1AttData.TimelockPuzzle.G,
+			T:     v1alpha1AttData.TimelockPuzzle.T,
+			H:     v1alpha1AttData.TimelockPuzzle.H,
+			U:     v1alpha1AttData.TimelockPuzzle.U,
+			V:     v1alpha1AttData.TimelockPuzzle.V,
+			A:     v1alpha1AttData.TimelockPuzzle.A,
+			B:     v1alpha1AttData.TimelockPuzzle.B,
+			Alpha: v1alpha1AttData.TimelockPuzzle.Alpha,
+			Beta:  v1alpha1AttData.TimelockPuzzle.Beta,
+			Tau:   v1alpha1AttData.TimelockPuzzle.Tau,
 		},
 	}
 }
@@ -284,10 +291,18 @@ func V1AttDataToV1Alpha1(v1AttData *ethpbv1.AttestationData) *ethpbalpha.Attesta
 			Root:  v1AttData.Target.Root,
 			Epoch: v1AttData.Target.Epoch,
 		},
-		TimelockPublickey: &enginev1.ElgamalPublicKey{
-			G: v1AttData.TimelockPublickey.G,
-			Y: v1AttData.TimelockPublickey.Y,
-			P: v1AttData.TimelockPublickey.P,
+		TimelockPuzzle: &ethpbalpha.TimelockPuzzle{
+			N:     v1AttData.TimelockPuzzle.N,
+			G:     v1AttData.TimelockPuzzle.G,
+			T:     v1AttData.TimelockPuzzle.T,
+			H:     v1AttData.TimelockPuzzle.H,
+			U:     v1AttData.TimelockPuzzle.U,
+			V:     v1AttData.TimelockPuzzle.V,
+			A:     v1AttData.TimelockPuzzle.A,
+			B:     v1AttData.TimelockPuzzle.B,
+			Alpha: v1AttData.TimelockPuzzle.Alpha,
+			Beta:  v1AttData.TimelockPuzzle.Beta,
+			Tau:   v1AttData.TimelockPuzzle.Tau,
 		},
 	}
 }
@@ -424,10 +439,18 @@ func BeaconStateToProto(state state.BeaconState) (*ethpbv1.BeaconState, error) {
 					Epoch: data.Target.Epoch,
 					Root:  data.Target.Root,
 				},
-				TimelockPublickey: &ethpbv1.ElgamalPublicKey{
-					G: data.TimelockPublickey.G,
-					Y: data.TimelockPublickey.Y,
-					P: data.TimelockPublickey.P,
+				TimelockPuzzle: &ethpbv1.TimelockPuzzle{
+					N:     data.TimelockPuzzle.N,
+					G:     data.TimelockPuzzle.G,
+					T:     data.TimelockPuzzle.T,
+					H:     data.TimelockPuzzle.H,
+					U:     data.TimelockPuzzle.U,
+					V:     data.TimelockPuzzle.V,
+					A:     data.TimelockPuzzle.A,
+					B:     data.TimelockPuzzle.B,
+					Alpha: data.TimelockPuzzle.Alpha,
+					Beta:  data.TimelockPuzzle.Beta,
+					Tau:   data.TimelockPuzzle.Tau,
 				},
 			},
 			InclusionDelay: att.InclusionDelay,
@@ -451,10 +474,18 @@ func BeaconStateToProto(state state.BeaconState) (*ethpbv1.BeaconState, error) {
 					Epoch: data.Target.Epoch,
 					Root:  data.Target.Root,
 				},
-				TimelockPublickey: &ethpbv1.ElgamalPublicKey{
-					G: data.TimelockPublickey.G,
-					Y: data.TimelockPublickey.Y,
-					P: data.TimelockPublickey.P,
+				TimelockPuzzle: &ethpbv1.TimelockPuzzle{
+					N:     data.TimelockPuzzle.N,
+					G:     data.TimelockPuzzle.G,
+					T:     data.TimelockPuzzle.T,
+					H:     data.TimelockPuzzle.H,
+					U:     data.TimelockPuzzle.U,
+					V:     data.TimelockPuzzle.V,
+					A:     data.TimelockPuzzle.A,
+					B:     data.TimelockPuzzle.B,
+					Alpha: data.TimelockPuzzle.Alpha,
+					Beta:  data.TimelockPuzzle.Beta,
+					Tau:   data.TimelockPuzzle.Tau,
 				},
 			},
 			InclusionDelay: att.InclusionDelay,

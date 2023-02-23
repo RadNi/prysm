@@ -5,6 +5,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/prysmaticlabs/prysm/v3/crypto/timelock"
 	"strings"
 	"time"
 
@@ -101,8 +102,10 @@ func (v *validator) SubmitAttestation(ctx context.Context, slot types.Slot, pubK
 	}
 
 	// TODO publicKey placeholder for signature bypassing
-	//data.TimelockPublickey =
+	before := ethpb.CopyTimelockPuzzle(data.GetTimelockPuzzle())
+	data.TimelockPuzzle = timelock.PuzzlePlaceHolder()
 	sig, _, err := v.signAtt(ctx, pubKey, data, slot)
+	data.TimelockPuzzle = before
 	if err != nil {
 		log.WithError(err).Error("Could not sign attestation")
 		if v.emitAccountMetrics {

@@ -48,7 +48,6 @@ func (vs *Server) BuildAltairBeaconBlock(ctx context.Context, req *ethpb.BlockRe
 			VoluntaryExits:    blkData.VoluntaryExits,
 			Graffiti:          blkData.Graffiti[:],
 			SyncAggregate:     syncAggregate,
-			//TimelockPrivatekey: blkData.TimelockPrivatekey,
 		},
 	}, nil
 }

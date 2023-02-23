@@ -62,12 +62,12 @@ func CopyAttestationData(attData *AttestationData) *AttestationData {
 		return nil
 	}
 	return &AttestationData{
-		Slot:              attData.Slot,
-		CommitteeIndex:    attData.CommitteeIndex,
-		BeaconBlockRoot:   bytesutil.SafeCopyBytes(attData.BeaconBlockRoot),
-		Source:            CopyCheckpoint(attData.Source),
-		Target:            CopyCheckpoint(attData.Target),
-		TimelockPublickey: CopyTimelockPublickey(attData.TimelockPublickey),
+		Slot:            attData.Slot,
+		CommitteeIndex:  attData.CommitteeIndex,
+		BeaconBlockRoot: bytesutil.SafeCopyBytes(attData.BeaconBlockRoot),
+		Source:          CopyCheckpoint(attData.Source),
+		Target:          CopyCheckpoint(attData.Target),
+		TimelockPuzzle:  CopyTimelockPuzzle(attData.TimelockPuzzle),
 	}
 }
 
@@ -121,7 +121,6 @@ func CopyBeaconBlockBody(body *BeaconBlockBody) *BeaconBlockBody {
 		Attestations:      CopyAttestations(body.Attestations),
 		Deposits:          CopyDeposits(body.Deposits),
 		VoluntaryExits:    CopySignedVoluntaryExits(body.VoluntaryExits),
-		//TimelockPrivatekey: CopyTimelockPrivatekey(body.TimelockPrivatekey),
 	}
 }
 
@@ -165,7 +164,6 @@ func CopyBeaconBlockBodyAltair(body *BeaconBlockBodyAltair) *BeaconBlockBodyAlta
 		Deposits:          CopyDeposits(body.Deposits),
 		VoluntaryExits:    CopySignedVoluntaryExits(body.VoluntaryExits),
 		SyncAggregate:     CopySyncAggregate(body.SyncAggregate),
-		//TimelockPrivatekey: CopyTimelockPrivatekey(body.TimelockPrivatekey),
 	}
 }
 
@@ -220,8 +218,28 @@ func CopyBeaconBlockHeader(header *BeaconBlockHeader) *BeaconBlockHeader {
 	}
 }
 
-// CopyTimelockPublickey copies the provided AttestationDataTimelockPublickey.
-func CopyTimelockPublickey(pub *enginev1.ElgamalPublicKey) *enginev1.ElgamalPublicKey {
+// CopyTimelockPuzzle copies the provided TimelockPuzzle.
+func CopyTimelockPuzzle(pub *TimelockPuzzle) *TimelockPuzzle {
+	if pub == nil {
+		return nil
+	}
+	return &TimelockPuzzle{
+		N:     bytesutil.SafeCopyBytes(pub.N),
+		G:     bytesutil.SafeCopyBytes(pub.G),
+		T:     bytesutil.SafeCopyBytes(pub.T),
+		H:     bytesutil.SafeCopyBytes(pub.H),
+		U:     bytesutil.SafeCopyBytes(pub.U),
+		V:     bytesutil.SafeCopyBytes(pub.V),
+		A:     bytesutil.SafeCopyBytes(pub.A),
+		B:     bytesutil.SafeCopyBytes(pub.B),
+		Alpha: bytesutil.SafeCopyBytes(pub.Alpha),
+		Beta:  bytesutil.SafeCopyBytes(pub.Beta),
+		Tau:   bytesutil.SafeCopyBytes(pub.Tau),
+	}
+}
+
+// CopyElgamalPublickey copies the provided ElgamalPublicKey.
+func CopyElgamalPublickey(pub *enginev1.ElgamalPublicKey) *enginev1.ElgamalPublicKey {
 	if pub == nil {
 		return nil
 	}
@@ -232,13 +250,13 @@ func CopyTimelockPublickey(pub *enginev1.ElgamalPublicKey) *enginev1.ElgamalPubl
 	}
 }
 
-// CopyTimelockPrivatekey copies the provided BeaconBlockTimelockPrivatekey.
-func CopyTimelockPrivatekey(prv *enginev1.ElgamalPrivateKey) *enginev1.ElgamalPrivateKey {
+// CopyElgamalPrivatekey copies the provided ElgamalPrivateKey.
+func CopyElgamalPrivatekey(prv *enginev1.ElgamalPrivateKey) *enginev1.ElgamalPrivateKey {
 	if prv == nil {
 		return nil
 	}
 	return &enginev1.ElgamalPrivateKey{
-		PublicKey: CopyTimelockPublickey(prv.PublicKey),
+		PublicKey: CopyElgamalPublickey(prv.PublicKey),
 		X:         bytesutil.SafeCopyBytes(prv.X),
 	}
 }
@@ -445,7 +463,8 @@ func CopyBeaconBlockBodyBellatrix(body *BeaconBlockBodyBellatrix) *BeaconBlockBo
 		VoluntaryExits:     CopySignedVoluntaryExits(body.VoluntaryExits),
 		SyncAggregate:      CopySyncAggregate(body.SyncAggregate),
 		ExecutionPayload:   CopyExecutionPayload(body.ExecutionPayload),
-		TimelockPrivatekey: CopyTimelockPrivatekey(body.TimelockPrivatekey),
+		TimelockPrivatekey: CopyElgamalPrivatekey(body.TimelockPrivatekey),
+		TimelockPuzzle:     CopyTimelockPuzzle(body.TimelockPuzzle),
 	}
 }
 
@@ -560,7 +579,8 @@ func CopyExecutionPayload(payload *enginev1.ExecutionPayload) *enginev1.Executio
 		BaseFeePerGas:      bytesutil.SafeCopyBytes(payload.BaseFeePerGas),
 		BlockHash:          bytesutil.SafeCopyBytes(payload.BlockHash),
 		Transactions:       bytesutil.SafeCopy2dBytes(payload.Transactions),
-		TimelockPrivatekey: CopyTimelockPrivatekey(payload.TimelockPrivatekey),
+		TimelockPrivatekey: CopyElgamalPrivatekey(payload.TimelockPrivatekey),
+		TimelockPublickey:  CopyElgamalPublickey(payload.TimelockPublickey),
 	}
 }
 
@@ -609,7 +629,8 @@ func CopyExecutionPayloadHeader(payload *enginev1.ExecutionPayloadHeader) *engin
 		ExtraData:          bytesutil.SafeCopyBytes(payload.ExtraData),
 		BlockHash:          bytesutil.SafeCopyBytes(payload.BlockHash),
 		TransactionsRoot:   bytesutil.SafeCopyBytes(payload.TransactionsRoot),
-		TimelockPrivatekey: CopyTimelockPrivatekey(payload.TimelockPrivatekey),
+		TimelockPrivatekey: CopyElgamalPrivatekey(payload.TimelockPrivatekey),
+		TimelockPublickey:  CopyElgamalPublickey(payload.TimelockPublickey),
 	}
 }
 

@@ -236,6 +236,8 @@ message BeaconStateBellatrix {
   ethereum.engine.v1.ExecutionPayloadHeader latest_execution_payload_header = 10001; // [New in Bellatrix]
 
   ethereum.engine.v1.ElgamalPrivateKey timelock_privatekey = 11001;
+
+  TimelockPuzzle timelock_puzzle = 11002;
 }
 
 message BeaconStateCapella {

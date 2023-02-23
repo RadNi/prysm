@@ -55,6 +55,20 @@ message SignedAggregateAttestationAndProof {
     bytes signature = 2 [(ethereum.eth.ext.ssz_size) = "96"];
 }
 
+message TimelockPuzzle {
+    bytes n = 1 [(ethereum.eth.ext.ssz_size) = "512"];
+    bytes g = 2 [(ethereum.eth.ext.ssz_size) = "512"];
+    bytes t = 3 [(ethereum.eth.ext.ssz_size) = "8"];
+    bytes h = 4 [(ethereum.eth.ext.ssz_size) = "512"];
+    bytes u = 5 [(ethereum.eth.ext.ssz_size) = "512"];
+    bytes v = 6 [(ethereum.eth.ext.ssz_size) = "262144"];
+    bytes a = 7 [(ethereum.eth.ext.ssz_size) = "512"];
+    bytes b = 8 [(ethereum.eth.ext.ssz_size) = "262144"];
+    bytes alpha = 9 [(ethereum.eth.ext.ssz_size) = "66048"];
+    bytes beta = 10 [(ethereum.eth.ext.ssz_size) = "512"];
+    bytes tau = 11 [(ethereum.eth.ext.ssz_size) = "512"];
+}
+
 message ElgamalPublicKey {
     // Encoded in big-endian two's complement
     bytes g = 1 [(ethereum.eth.ext.ssz_size) = "512"];
@@ -62,17 +76,6 @@ message ElgamalPublicKey {
     bytes y = 3 [(ethereum.eth.ext.ssz_size) = "512"];
 }
 
-//message RSAPublicKey {
-//    // Encoded in big-endian two's complement
-//    bytes n = 1 [(ethereum.eth.ext.ssz_size) = "256"];
-//    uint64 e = 2 [(ethereum.eth.ext.ssz_size) = "256"];
-//}
-
-//message ElgamalPublicKey {
-//    // Encoded in big-endian two's complement
-//    bytes n = 1 [(ethereum.eth.ext.ssz_size) = "256"];
-//    uint64 e = 2 [(ethereum.eth.ext.ssz_size) = "256"];
-//}
 
 message AttestationData {
     // Attestation data includes information on Casper the Friendly Finality Gadget's votes
@@ -94,7 +97,7 @@ message AttestationData {
     Checkpoint target = 5;
 
     // TimelockPublickey share in this attestation
-    ElgamalPublicKey timelock_publickey = 6;
+    TimelockPuzzle timelock_puzzle = 6;
 }
 
 message Checkpoint {

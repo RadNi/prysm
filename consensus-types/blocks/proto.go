@@ -238,7 +238,6 @@ func (b *BeaconBlockBody) Proto() (proto.Message, error) {
 			Attestations:      b.attestations,
 			Deposits:          b.deposits,
 			VoluntaryExits:    b.voluntaryExits,
-			//TimelockPrivatekey: b.timelockPrivateKey,
 		}, nil
 	case version.Altair:
 		return &eth.BeaconBlockBodyAltair{
@@ -251,7 +250,6 @@ func (b *BeaconBlockBody) Proto() (proto.Message, error) {
 			Deposits:          b.deposits,
 			VoluntaryExits:    b.voluntaryExits,
 			SyncAggregate:     b.syncAggregate,
-			//TimelockPrivatekey: b.timelockPrivateKey,
 		}, nil
 	case version.Bellatrix:
 		if b.isBlinded {
@@ -296,6 +294,7 @@ func (b *BeaconBlockBody) Proto() (proto.Message, error) {
 			SyncAggregate:      b.syncAggregate,
 			ExecutionPayload:   p,
 			TimelockPrivatekey: b.timelockPrivateKey,
+			TimelockPuzzle:     b.timelockPuzzle,
 		}, nil
 	case version.Capella:
 		if b.isBlinded {
@@ -635,6 +634,7 @@ func initBlockBodyFromProtoBellatrix(pb *eth.BeaconBlockBodyBellatrix) (*BeaconB
 		syncAggregate:      pb.SyncAggregate,
 		executionPayload:   p,
 		timelockPrivateKey: pb.TimelockPrivatekey,
+		timelockPuzzle:     pb.TimelockPuzzle,
 	}
 	return b, nil
 }

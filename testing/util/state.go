@@ -227,6 +227,11 @@ func NewBeaconStateBellatrix(options ...func(state *ethpb.BeaconStateBellatrix) 
 				},
 				X: make([]byte, 512),
 			},
+			TimelockPublickey: &enginev1.ElgamalPublicKey{
+				P: make([]byte, 512),
+				G: make([]byte, 512),
+				Y: make([]byte, 512),
+			},
 		},
 	}
 

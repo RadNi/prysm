@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-
 	"github.com/pkg/errors"
 	"github.com/prysmaticlabs/prysm/v3/beacon-chain/core/altair"
 	b "github.com/prysmaticlabs/prysm/v3/beacon-chain/core/blocks"
@@ -293,7 +292,6 @@ func ProcessBlockForStateRoot(
 		tracing.AnnotateError(span, err)
 		return nil, errors.Wrap(err, "could not process block header")
 	}
-
 	enabled, err := b.IsExecutionEnabled(state, blk.Body())
 	if err != nil {
 		return nil, errors.Wrap(err, "could not check if execution is enabled")
@@ -349,6 +347,10 @@ func ProcessBlockForStateRoot(
 		err = state.SetTimelockPrivatekey(signed.Block().Body().TimelockPrivatekey())
 		if err != nil {
 			return nil, errors.Wrap(err, "SetTimelockPrivatekey failed")
+		}
+		err = state.SetTimelockPuzzle(signed.Block().Body().TimelockPuzzle())
+		if err != nil {
+			return nil, errors.Wrap(err, "SetTimelockPuzzle failed")
 		}
 	}
 	return state, nil

@@ -80,6 +80,7 @@ var bellatrixFields = append(
 	altairFields,
 	nativetypes.LatestExecutionPayloadHeader,
 	nativetypes.TimelockPrivateKey,
+	nativetypes.TimelockPuzzle,
 )
 
 var capellaFields = append(
@@ -92,7 +93,7 @@ var capellaFields = append(
 const (
 	phase0SharedFieldRefCount    = 10
 	altairSharedFieldRefCount    = 11
-	bellatrixSharedFieldRefCount = 13
+	bellatrixSharedFieldRefCount = 14
 	capellaSharedFieldRefCount   = 13
 )
 
@@ -356,6 +357,7 @@ func InitializeFromProtoUnsafeBellatrix(st *ethpb.BeaconStateBellatrix) (state.B
 		nextSyncCommittee:            st.NextSyncCommittee,
 		latestExecutionPayloadHeader: st.LatestExecutionPayloadHeader,
 		latestTimelockPrivateKey:     st.TimelockPrivatekey,
+		latestTimelockPuzzle:         st.TimelockPuzzle,
 
 		dirtyFields:           make(map[nativetypes.FieldIndex]bool, fieldCount),
 		dirtyIndices:          make(map[nativetypes.FieldIndex][]uint64, fieldCount),
@@ -390,6 +392,7 @@ func InitializeFromProtoUnsafeBellatrix(st *ethpb.BeaconStateBellatrix) (state.B
 	b.sharedFieldReferences[nativetypes.InactivityScores] = stateutil.NewRef(1)
 	b.sharedFieldReferences[nativetypes.LatestExecutionPayloadHeader] = stateutil.NewRef(1) // New in Bellatrix.
 	b.sharedFieldReferences[nativetypes.TimelockPrivateKey] = stateutil.NewRef(1)
+	b.sharedFieldReferences[nativetypes.TimelockPuzzle] = stateutil.NewRef(1)
 
 	state.StateCount.Inc()
 	// Finalizer runs when dst is being destroyed in garbage collection.
@@ -552,6 +555,7 @@ func (b *BeaconState) Copy() state.BeaconState {
 		nextSyncCommittee:                   b.nextSyncCommitteeVal(),
 		latestExecutionPayloadHeader:        b.latestExecutionPayloadHeaderVal(),
 		latestTimelockPrivateKey:            b.latestTimelockPrivatekeyVal(),
+		latestTimelockPuzzle:                b.latestTimelockPuzzleVal(),
 		latestExecutionPayloadHeaderCapella: b.latestExecutionPayloadHeaderCapellaVal(),
 
 		dirtyFields:      make(map[nativetypes.FieldIndex]bool, fieldCount),
@@ -857,6 +861,8 @@ func (b *BeaconState) rootSelector(ctx context.Context, field nativetypes.FieldI
 		return b.latestExecutionPayloadHeader.HashTreeRoot()
 	case nativetypes.TimelockPrivateKey:
 		return b.latestTimelockPrivateKey.HashTreeRoot()
+	case nativetypes.TimelockPuzzle:
+		return b.latestTimelockPuzzle.HashTreeRoot()
 	case nativetypes.LatestExecutionPayloadHeaderCapella:
 		return b.latestExecutionPayloadHeaderCapella.HashTreeRoot()
 	case nativetypes.NextWithdrawalIndex:

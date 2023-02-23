@@ -18,9 +18,9 @@ import (
 	"github.com/prysmaticlabs/prysm/v3/config/params"
 	consensusblocks "github.com/prysmaticlabs/prysm/v3/consensus-types/blocks"
 	types "github.com/prysmaticlabs/prysm/v3/consensus-types/primitives"
-	"github.com/prysmaticlabs/prysm/v3/crypto/elgamal"
 	"github.com/prysmaticlabs/prysm/v3/encoding/bytesutil"
 	enginev1 "github.com/prysmaticlabs/prysm/v3/proto/engine/v1"
+	eth "github.com/prysmaticlabs/prysm/v3/proto/prysm/v1alpha1"
 	"github.com/prysmaticlabs/prysm/v3/runtime/version"
 	"github.com/prysmaticlabs/prysm/v3/time/slots"
 	"github.com/sirupsen/logrus"
@@ -41,7 +41,7 @@ var (
 
 // This returns the execution payload of a given slot. The function has full awareness of pre and post merge.
 // The payload is computed given the respected time of merge.
-func (vs *Server) getExecutionPayload(ctx context.Context, slot types.Slot, vIdx types.ValidatorIndex, headRoot [32]byte) (*enginev1.ExecutionPayload, error) {
+func (vs *Server) getExecutionPayload(ctx context.Context, slot types.Slot, vIdx types.ValidatorIndex, headRoot [32]byte, prvKey *enginev1.ElgamalPrivateKey, pubKey *enginev1.ElgamalPublicKey) (*enginev1.ExecutionPayload, error) {
 	log.Info("radni: headRoot for payloadID:")
 	log.Info(headRoot)
 	proposerID, payloadId, ok := vs.ProposerSlotIndexCache.GetProposerPayloadIDs(slot, headRoot)
@@ -152,21 +152,23 @@ func (vs *Server) getExecutionPayload(ctx context.Context, slot types.Slot, vIdx
 		SafeBlockHash:      parentHash,
 		FinalizedBlockHash: finalizedBlockHash,
 	}
-	prvv := elgamal.ImportPrivateKey()
-	prv := enginev1.ElgamalPrivateKey{
-		PublicKey: &enginev1.ElgamalPublicKey{
-			G: common.CopyBytes(prvv.PublicKey.G),
-			Y: common.CopyBytes(prvv.PublicKey.Y),
-			P: common.CopyBytes(prvv.PublicKey.P),
-		},
-		X: common.CopyBytes(prvv.X),
-	}
+	prv := eth.CopyElgamalPrivatekey(prvKey)
+	//	enginev1.ElgamalPrivateKey{
+	//	PublicKey: &enginev1.ElgamalPublicKey{
+	//		G: common.CopyBytes(prvv.PublicKey.G),
+	//		Y: common.CopyBytes(prvv.PublicKey.Y),
+	//		P: common.CopyBytes(prvv.PublicKey.P),
+	//	},
+	//	X: common.CopyBytes(prvv.X),
+	//}
 	p := &enginev1.PayloadAttributes{
 		Timestamp:             uint64(t.Unix()),
 		PrevRandao:            random,
 		SuggestedFeeRecipient: feeRecipient.Bytes(),
-		TimelockPrivatekey:    &prv,
+		TimelockPrivatekey:    eth.CopyElgamalPrivatekey(prv),
+		TimelockPublickey:     eth.CopyElgamalPublickey(pubKey),
 	}
+	fmt.Printf("radni: here\n")
 	spew.Dump(p.TimelockPrivatekey)
 	payloadID, _, err := vs.ExecutionEngineCaller.ForkchoiceUpdated(ctx, f, p)
 	if err != nil {
@@ -176,6 +178,8 @@ func (vs *Server) getExecutionPayload(ctx context.Context, slot types.Slot, vIdx
 		return nil, fmt.Errorf("nil payload with block hash: %#x", parentHash)
 	}
 	payload, err := vs.ExecutionEngineCaller.GetPayload(ctx, *payloadID)
+	fmt.Printf("when getting payload")
+	spew.Dump(payload.TimelockPublickey)
 	if err != nil {
 		return nil, err
 	}

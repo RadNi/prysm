@@ -26,6 +26,7 @@ go_library(
         "//validator:__subpackages__",
     ],
     deps = [
+        "//crypto/timelock:go_default_library",
         "//crypto/elgamal:go_default_library",
         "//beacon-chain/core/helpers:go_default_library",
         "//beacon-chain/core/signing:go_default_library",

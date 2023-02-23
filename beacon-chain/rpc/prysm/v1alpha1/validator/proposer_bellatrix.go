@@ -4,9 +4,8 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"github.com/davecgh/go-spew/spew"
 	"github.com/prysmaticlabs/prysm/v3/beacon-chain/timelock"
-	"math"
+	timelock2 "github.com/prysmaticlabs/prysm/v3/crypto/timelock"
 	"math/big"
 	"time"
 
@@ -68,34 +67,52 @@ func (vs *Server) getBellatrixBeaconBlock(ctx context.Context, req *ethpb.BlockR
 			}).Error("Could not determine validator has registered. Defaulting to local execution client")
 		}
 	}
-	payload, err := vs.getExecutionPayload(ctx, req.Slot, altairBlk.ProposerIndex, bytesutil.ToBytes32(altairBlk.ParentRoot))
+
+	puzzle := timelock2.PuzzlePlaceHolder()
+	if len(altairBlk.Body.Attestations) != 0 {
+		for _, a := range altairBlk.Body.Attestations {
+			if a.Data.Slot == altairBlk.Slot-1 {
+				fmt.Printf("inja nayomad?! %v\n", a.Data.TimelockPuzzle.U)
+				if puzzle == nil {
+					puzzle = ethpb.CopyTimelockPuzzle(a.Data.TimelockPuzzle)
+				}
+				u, v := timelock2.PuzzleEval(puzzle.U, puzzle.V, a.Data.TimelockPuzzle.U, a.Data.TimelockPuzzle.V, puzzle.N)
+				puzzle.U = u
+				puzzle.V = v
+			}
+		}
+	}
+
+	resChan := make(chan *timelock.TimelockSolution)
+	//T := new(big.Int).SetInt64(int64(uint64(slots.DivideSlotBy(2)+slots.MultiplySlotBy(2)) / uint64(math.Pow10(9))))
+	//blks, err := vs.BeaconDB.BlocksBySlot(ctx, altairBlk.Slot-3)
+	tlreq := &timelock.TimelockRequest{
+		Puzzle:     nil, // blks[0].Block().Body().TimelockPuzzle(),
+		SlotNumber: altairBlk.Slot - 3,
+		Res:        resChan,
+	}
+	//vs.BeaconDB.BlocksBySlot()
+	vs.TimelockChannels.TimelockRequestChannel <- tlreq
+	fmt.Printf("waiting %v\n", tlreq.SlotNumber)
+	res := <-resChan
+	fmt.Printf("done %v\n", tlreq.SlotNumber)
+	if res.Solution == nil {
+		fmt.Printf("WTH !! solution was nil\n")
+	}
+	payload, err := vs.getExecutionPayload(ctx, req.Slot, altairBlk.ProposerIndex, bytesutil.ToBytes32(altairBlk.ParentRoot), res.Solution, timelock2.PuzzleToPublicKey(puzzle))
 	if err != nil {
 		return nil, err
 	}
 
-	log.Info("radni: unbelievable, vali resid")
+	//s := new(big.Int).SetInt64(1)
+	//ph := timelock2.PuzzlePlaceHolder()
+	//T := []byte{0x00, 0x00, 0x00, 0x00, 0x00, 0x09, 0x32, 0x26}
+	//u, v, a, b, alpha, beta, tau := timelock2.PuzzleGen(s.Bytes(), ph.N, ph.G, T, ph.H)
+	//puzzle
 
-	resChan := make(chan *timelock.TimelockSolution)
-	tlreq := &timelock.TimelockRequest{
-		Puzzle:     &ethpb.TimelockPuzzle{T: uint64(slots.DivideSlotBy(2)+slots.MultiplySlotBy(2)) / uint64(math.Pow10(9))},
-		SlotNumber: altairBlk.Slot - 3,
-		Res:        resChan,
-	}
-	vs.TimelockChannels.TimelockRequestChannel <- tlreq
-	res := <-resChan
-	//pk := rsa.ImportPrivateKey()
-	//primes := make([][]byte, len(pk.Primes))
-	//for i, p := range pk.Primes {
-	//	primes[i] = p.Bytes()
-	//}
-	//rsapk := enginev1.RSAPrivateKey{
-	//	PublicKey: &enginev1.RSAPublicKey{
-	//		N: pk.PublicKey.N.Bytes(),
-	//		E: uint64(pk.PublicKey.E),
-	//	},
-	//	Primes: primes,
-	//	D:      pk.D.Bytes(),
-	//}
+	log.Info("radni: unbelievable, vali resid")
+	//fmt.Printf("u: %v\nG: %v\n", payload.TimelockPublickey.Y, payload.TimelockPublickey.G)
+
 	blk := &ethpb.BeaconBlockBellatrix{
 		Slot:          altairBlk.Slot,
 		ProposerIndex: altairBlk.ProposerIndex,
@@ -112,13 +129,17 @@ func (vs *Server) getBellatrixBeaconBlock(ctx context.Context, req *ethpb.BlockR
 			VoluntaryExits:     altairBlk.Body.VoluntaryExits,
 			SyncAggregate:      altairBlk.Body.SyncAggregate,
 			ExecutionPayload:   payload,
-			TimelockPrivatekey: res.Solution,
+			TimelockPrivatekey: ethpb.CopyElgamalPrivatekey(res.Solution),
+			TimelockPuzzle:     puzzle,
 		},
 	}
+
 	// Compute state root with the newly constructed block.
 	wsb, err := consensusblocks.NewSignedBeaconBlock(
 		&ethpb.SignedBeaconBlockBellatrix{Block: blk, Signature: make([]byte, 96)},
 	)
+	fmt.Printf("arrived\n")
+	fmt.Printf("X: %v\nY: %v\n", res.Solution.X, res.Solution.PublicKey.Y)
 	if err != nil {
 		return nil, err
 	}
@@ -127,7 +148,7 @@ func (vs *Server) getBellatrixBeaconBlock(ctx context.Context, req *ethpb.BlockR
 		interop.WriteBlockToDisk(wsb, true /*failed*/)
 		return nil, fmt.Errorf("could not compute state root: %v", err)
 	}
-	spew.Dump(blk.Body.Attestations)
+	//spew.Dump(blk.Body.Attestations)
 	blk.StateRoot = stateRoot
 	return &ethpb.GenericBeaconBlock{Block: &ethpb.GenericBeaconBlock_Bellatrix{Bellatrix: blk}}, nil
 }

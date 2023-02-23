@@ -2,6 +2,7 @@ package validator
 
 import (
 	"context"
+	"crypto/rand"
 	"errors"
 	"fmt"
 	"github.com/prysmaticlabs/prysm/v3/beacon-chain/cache"
@@ -13,7 +14,7 @@ import (
 	"github.com/prysmaticlabs/prysm/v3/config/params"
 	types "github.com/prysmaticlabs/prysm/v3/consensus-types/primitives"
 	"github.com/prysmaticlabs/prysm/v3/crypto/bls"
-	"github.com/prysmaticlabs/prysm/v3/crypto/elgamal"
+	"github.com/prysmaticlabs/prysm/v3/crypto/timelock"
 	"github.com/prysmaticlabs/prysm/v3/encoding/bytesutil"
 	ethpb "github.com/prysmaticlabs/prysm/v3/proto/prysm/v1alpha1"
 	"github.com/prysmaticlabs/prysm/v3/time/slots"
@@ -21,6 +22,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
+	"math/big"
 )
 
 // GetAttestationData requests that the beacon node produce an attestation data object,
@@ -128,9 +130,10 @@ func (vs *Server) GetAttestationData(ctx context.Context, req *ethpb.Attestation
 			targetRoot = headRoot
 		}
 	}
-
+	ph := timelock.PuzzlePlaceHolder()
+	s, _ := rand.Int(rand.Reader, new(big.Int).SetBytes(ph.N))
+	u, v, a, b, alpha, beta, tau := timelock.PuzzleGen(s.Bytes(), ph.N, ph.G, ph.T, ph.H)
 	log.Info("radni: inja bayad ye publickey ezafe konam be AttestationData obj.")
-	pk := elgamal.ImportPublicKey()
 	res = &ethpb.AttestationData{
 		Slot:            req.Slot,
 		CommitteeIndex:  req.CommitteeIndex,
@@ -140,10 +143,20 @@ func (vs *Server) GetAttestationData(ctx context.Context, req *ethpb.Attestation
 			Epoch: targetEpoch,
 			Root:  targetRoot,
 		},
-		TimelockPublickey: pk,
+		TimelockPuzzle: &ethpb.TimelockPuzzle{
+			N:     ph.N,
+			G:     ph.G,
+			T:     ph.T,
+			H:     ph.H,
+			U:     u,
+			V:     v,
+			A:     a,
+			B:     b,
+			Alpha: alpha,
+			Beta:  beta,
+			Tau:   tau,
+		},
 	}
-	//fmt.Printf("before\n")
-	//spew.Dump(res)
 
 	if err := vs.AttestationCache.Put(ctx, req, res); err != nil {
 		return nil, status.Errorf(codes.Internal, "Could not store attestation data in cache: %v", err)

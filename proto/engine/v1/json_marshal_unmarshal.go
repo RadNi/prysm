@@ -126,6 +126,7 @@ type executionPayloadJSON struct {
 	BlockHash          *common.Hash       `json:"blockHash"`
 	Transactions       []hexutil.Bytes    `json:"transactions"`
 	TimelockPrivatekey *ElgamalPrivateKey `json:"timelockPrivatekey"`
+	TimelockPublickey  *ElgamalPublicKey  `json:"timelockPublickey"`
 }
 
 // MarshalJSON --
@@ -163,6 +164,7 @@ func (e *ExecutionPayload) MarshalJSON() ([]byte, error) {
 		BlockHash:          &bHash,
 		Transactions:       transactions,
 		TimelockPrivatekey: e.TimelockPrivatekey,
+		TimelockPublickey:  e.TimelockPublickey,
 	})
 }
 
@@ -216,6 +218,9 @@ func (e *ExecutionPayload) UnmarshalJSON(enc []byte) error {
 	if dec.TimelockPrivatekey == nil {
 		return errors.New("missing required field 'TimelockPrivatekey' for ExecutionPayload")
 	}
+	if dec.TimelockPublickey == nil {
+		return errors.New("missing required field 'TimelockPublickey' for ExecutionPayload")
+	}
 	*e = ExecutionPayload{}
 	e.ParentHash = dec.ParentHash.Bytes()
 	e.FeeRecipient = dec.FeeRecipient.Bytes()
@@ -240,6 +245,7 @@ func (e *ExecutionPayload) UnmarshalJSON(enc []byte) error {
 	}
 	e.Transactions = transactions
 	e.TimelockPrivatekey = dec.TimelockPrivatekey
+	e.TimelockPublickey = dec.TimelockPublickey
 	return nil
 }
 
@@ -308,6 +314,7 @@ type payloadAttributesJSON struct {
 	SuggestedFeeRecipient hexutil.Bytes  `json:"suggestedFeeRecipient"`
 
 	TimelockPrivatekey *ElgamalPrivateKey `json:"timelockPrivatekey"`
+	TimelockPublickey  *ElgamalPublicKey  `json:"timelockPublickey"`
 }
 
 // MarshalJSON --
@@ -317,6 +324,7 @@ func (p *PayloadAttributes) MarshalJSON() ([]byte, error) {
 		PrevRandao:            p.PrevRandao,
 		SuggestedFeeRecipient: p.SuggestedFeeRecipient,
 		TimelockPrivatekey:    p.TimelockPrivatekey,
+		TimelockPublickey:     p.TimelockPublickey,
 	})
 	if er != nil {
 		fmt.Printf("error khord")
@@ -326,10 +334,6 @@ func (p *PayloadAttributes) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON --
 func (p *PayloadAttributes) UnmarshalJSON(enc []byte) error {
-	//primes := make([][]byte, len(p.Primes))
-	//for i, v := range p.Primes {
-	//	primes[i] = v
-	//}
 	dec := payloadAttributesJSON{}
 	if err := json.Unmarshal(enc, &dec); err != nil {
 		return err
@@ -339,8 +343,7 @@ func (p *PayloadAttributes) UnmarshalJSON(enc []byte) error {
 	p.PrevRandao = dec.PrevRandao
 	p.SuggestedFeeRecipient = dec.SuggestedFeeRecipient
 	p.TimelockPrivatekey = dec.TimelockPrivatekey
-	//p.D = dec.D
-	//p.Primes = primes
+	p.TimelockPublickey = dec.TimelockPublickey
 	return nil
 }
 

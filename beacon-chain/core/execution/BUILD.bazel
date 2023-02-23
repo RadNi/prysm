@@ -10,6 +10,7 @@ go_library(
         "//validator/client:__pkg__",
     ],
     deps = [
+        "//crypto/timelock:go_default_library",
         "//beacon-chain/core/time:go_default_library",
         "//beacon-chain/state:go_default_library",
         "//beacon-chain/state/state-native:go_default_library",

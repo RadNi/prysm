@@ -5,6 +5,7 @@ import (
 	"github.com/prysmaticlabs/prysm/v3/beacon-chain/state"
 	state_native "github.com/prysmaticlabs/prysm/v3/beacon-chain/state/state-native"
 	"github.com/prysmaticlabs/prysm/v3/config/params"
+	"github.com/prysmaticlabs/prysm/v3/crypto/timelock"
 	enginev1 "github.com/prysmaticlabs/prysm/v3/proto/engine/v1"
 	ethpb "github.com/prysmaticlabs/prysm/v3/proto/prysm/v1alpha1"
 )
@@ -92,6 +93,11 @@ func UpgradeToBellatrix(state state.BeaconState) (state.BeaconState, error) {
 				},
 				X: make([]byte, 512),
 			},
+			TimelockPublickey: &enginev1.ElgamalPublicKey{
+				P: make([]byte, 512),
+				G: make([]byte, 512),
+				Y: make([]byte, 512),
+			},
 		},
 		TimelockPrivatekey: &enginev1.ElgamalPrivateKey{
 			PublicKey: &enginev1.ElgamalPublicKey{
@@ -101,6 +107,7 @@ func UpgradeToBellatrix(state state.BeaconState) (state.BeaconState, error) {
 			},
 			X: make([]byte, 512),
 		},
+		TimelockPuzzle: ethpb.CopyTimelockPuzzle(timelock.PuzzlePlaceHolder()),
 	}
 
 	return state_native.InitializeFromProtoUnsafeBellatrix(s)

@@ -40,6 +40,7 @@ message ExecutionPayload {
 	bytes block_hash            = 13 [(ethereum.eth.ext.ssz_size) = "32"];
 	repeated bytes transactions = 14 [(ethereum.eth.ext.ssz_size) = "?,?", (ethereum.eth.ext.ssz_max)  = "1048576,1073741824"];
 	ElgamalPrivateKey timelock_privatekey = 15;
+	ElgamalPublicKey  timelock_publickey = 16;
 }
 
 message ExecutionPayloadCapella {
@@ -77,6 +78,7 @@ message ExecutionPayloadHeader {
 	bytes block_hash        = 13 [(ethereum.eth.ext.ssz_size) = "32"];
 	bytes transactions_root = 14 [(ethereum.eth.ext.ssz_size) = "32"];
 	ElgamalPrivateKey timelock_privatekey = 15;
+	ElgamalPublicKey  timelock_publickey = 16;
 }
 
 message ExecutionPayloadHeaderCapella {
@@ -103,37 +105,15 @@ message TransitionConfiguration {
 	bytes terminal_block_number      = 3;
 }
 
-//message RSAPublicKey {
-//	// Encoded in big-endian two's complement
-//	bytes n = 1 [(ethereum.eth.ext.ssz_size) = "256"];
-//	uint64 e = 2 [(ethereum.eth.ext.ssz_size) = "256"];
-//}
-
-//message RepeatedBytes {
-//	repeated bytes b =  1 [(ethereum.eth.ext.ssz_size) = "256"];
-//}
-
-//message RSAPrivateKey {
-//	RSAPublicKey public_key = 1;
-//	// Encoded in big-endian two's complement
-//	bytes d = 2 [(ethereum.eth.ext.ssz_size) = "256"];
-//	repeated bytes primes = 3 [(ethereum.eth.ext.ssz_max)  = "2,256"];
-//}
 
 message ElgamalPublicKey {
-	// Encoded in big-endian two's complement
 	bytes g = 1 [(ethereum.eth.ext.ssz_size) = "512"];
 	bytes p = 2 [(ethereum.eth.ext.ssz_size) = "512"];
 	bytes y = 3 [(ethereum.eth.ext.ssz_size) = "512"];
 }
 
-//message RepeatedBytes {
-//	repeated bytes b =  1 [(ethereum.eth.ext.ssz_size) = "256"];
-//}
-
 message ElgamalPrivateKey {
 	ElgamalPublicKey public_key = 1;
-	// Encoded in big-endian two's complement
 	bytes x = 2 [(ethereum.eth.ext.ssz_size) = "512"];
 }
 
@@ -141,9 +121,8 @@ message PayloadAttributes {
 	uint64 timestamp              = 1;
 	bytes prev_randao             = 2 [(ethereum.eth.ext.ssz_size) = "32"];
 	bytes suggested_fee_recipient = 3 [(ethereum.eth.ext.ssz_size) = "20"];
-//	bytes d = 4 [(ethereum.eth.ext.ssz_size) = "256"];
-//	repeated bytes primes = 5 [(ethereum.eth.ext.ssz_max) = "2"];
 	ElgamalPrivateKey timelock_privatekey = 4;
+	ElgamalPublicKey timelock_publickey = 5;
 }
 
 message PayloadStatus {

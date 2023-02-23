@@ -3,6 +3,7 @@ package blocks
 import (
 	"bytes"
 	"errors"
+	eth "github.com/prysmaticlabs/prysm/v3/proto/prysm/v1alpha1"
 
 	fastssz "github.com/prysmaticlabs/fastssz"
 	fieldparams "github.com/prysmaticlabs/prysm/v3/config/fieldparams"
@@ -138,6 +139,11 @@ func (e executionPayload) BlockHash() []byte {
 // Transactions --
 func (e executionPayload) Transactions() ([][]byte, error) {
 	return e.p.Transactions, nil
+}
+
+// TimelockPublickey --
+func (e executionPayload) TimelockPublickey() (*enginev1.ElgamalPublicKey, error) {
+	return e.p.TimelockPublickey, nil
 }
 
 // TimelockPrivatekey --
@@ -281,6 +287,11 @@ func (e executionPayloadHeader) TimelockPrivatekey() (*enginev1.ElgamalPrivateKe
 	return e.p.TimelockPrivatekey, nil
 }
 
+// TimelockPublickey --
+func (e executionPayloadHeader) TimelockPublickey() (*enginev1.ElgamalPublicKey, error) {
+	return e.p.TimelockPublickey, nil
+}
+
 // Withdrawals --
 func (e executionPayloadHeader) Withdrawals() ([]*enginev1.Withdrawal, error) {
 	return nil, ErrUnsupportedGetter
@@ -300,6 +311,10 @@ func PayloadToHeader(payload interfaces.ExecutionData) (*enginev1.ExecutionPaylo
 	if err != nil {
 		return nil, err
 	}
+	pubKey, err := payload.TimelockPublickey()
+	if err != nil {
+		return nil, err
+	}
 	return &enginev1.ExecutionPayloadHeader{
 		ParentHash:         bytesutil.SafeCopyBytes(payload.ParentHash()),
 		FeeRecipient:       bytesutil.SafeCopyBytes(payload.FeeRecipient()),
@@ -315,7 +330,8 @@ func PayloadToHeader(payload interfaces.ExecutionData) (*enginev1.ExecutionPaylo
 		BaseFeePerGas:      bytesutil.SafeCopyBytes(payload.BaseFeePerGas()),
 		BlockHash:          bytesutil.SafeCopyBytes(payload.BlockHash()),
 		TransactionsRoot:   txRoot[:],
-		TimelockPrivatekey: prvKey,
+		TimelockPrivatekey: eth.CopyElgamalPrivatekey(prvKey),
+		TimelockPublickey:  eth.CopyElgamalPublickey(pubKey),
 	}, nil
 }
 
@@ -443,6 +459,11 @@ func (e executionPayloadCapella) BlockHash() []byte {
 // Transactions --
 func (e executionPayloadCapella) Transactions() ([][]byte, error) {
 	return e.p.Transactions, nil
+}
+
+// TimelockPublickey --
+func (e executionPayloadCapella) TimelockPublickey() (*enginev1.ElgamalPublicKey, error) {
+	return nil, ErrUnsupportedGetter
 }
 
 // TimelockPrivatekey --
@@ -583,6 +604,11 @@ func (executionPayloadHeaderCapella) Transactions() ([][]byte, error) {
 
 // TimelockPrivatekey --
 func (executionPayloadHeaderCapella) TimelockPrivatekey() (*enginev1.ElgamalPrivateKey, error) {
+	return nil, ErrUnsupportedGetter
+}
+
+// TimelockPublickey --
+func (executionPayloadHeaderCapella) TimelockPublickey() (*enginev1.ElgamalPublicKey, error) {
 	return nil, ErrUnsupportedGetter
 }
 
