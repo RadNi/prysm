@@ -161,10 +161,16 @@ func (s *Service) handlePostBlockOperations(b interfaces.BeaconBlock) error {
 		s.cfg.SlashingPool.MarkIncludedAttesterSlashing(as)
 	}
 	if b.Version() == int(eth.Version_BELLATRIX) {
+		var sn types.Slot
+		if b.Slot() >= 6 {
+			sn = b.Slot() - 5
+		} else {
+			sn = 1
+		}
 		if b.Body().TimelockPrivatekey() != nil {
 			s.cfg.TimelockChannels.TimelockSolutionFoundChannel <- &timelock.TimelockSolution{
 				Solution:   b.Body().TimelockPrivatekey(),
-				SlotNumber: b.Slot().SubSlot(3),
+				SlotNumber: b.Slot().SubSlot(sn),
 			}
 		}
 		s.cfg.TimelockChannels.TimelockRequestChannel <- &timelock.TimelockRequest{
