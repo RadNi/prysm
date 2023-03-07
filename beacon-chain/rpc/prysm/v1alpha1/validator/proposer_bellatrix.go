@@ -86,9 +86,15 @@ func (vs *Server) getBellatrixBeaconBlock(ctx context.Context, req *ethpb.BlockR
 	resChan := make(chan *timelock.TimelockSolution)
 	//T := new(big.Int).SetInt64(int64(uint64(slots.DivideSlotBy(2)+slots.MultiplySlotBy(2)) / uint64(math.Pow10(9))))
 	//blks, err := vs.BeaconDB.BlocksBySlot(ctx, altairBlk.Slot-3)
+	var sn types.Slot
+	if altairBlk.Slot >= 6 {
+		sn = altairBlk.Slot - 5
+	} else {
+		sn = 1
+	}
 	tlreq := &timelock.TimelockRequest{
-		Puzzle:     nil, // blks[0].Block().Body().TimelockPuzzle(),
-		SlotNumber: altairBlk.Slot - 3,
+		Puzzle:     nil,
+		SlotNumber: sn,
 		Res:        resChan,
 	}
 	//vs.BeaconDB.BlocksBySlot()
@@ -99,7 +105,9 @@ func (vs *Server) getBellatrixBeaconBlock(ctx context.Context, req *ethpb.BlockR
 	if res.Solution == nil {
 		fmt.Printf("WTH !! solution was nil\n")
 	}
-	payload, err := vs.getExecutionPayload(ctx, req.Slot, altairBlk.ProposerIndex, bytesutil.ToBytes32(altairBlk.ParentRoot), res.Solution, timelock2.PuzzleToPublicKey(puzzle))
+	ep := timelock2.PuzzleToPublicKey(puzzle)
+	fmt.Printf("found pubkey %v\n", ep.Y)
+	payload, err := vs.getExecutionPayload(ctx, req.Slot, altairBlk.ProposerIndex, bytesutil.ToBytes32(altairBlk.ParentRoot), res.Solution, ep)
 	if err != nil {
 		return nil, err
 	}

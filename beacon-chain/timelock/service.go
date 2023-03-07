@@ -7,6 +7,7 @@ import (
 	"github.com/prysmaticlabs/prysm/v3/crypto/elgamal"
 	"github.com/prysmaticlabs/prysm/v3/crypto/timelock"
 	enginev1 "github.com/prysmaticlabs/prysm/v3/proto/engine/v1"
+	log "github.com/sirupsen/logrus"
 	"time"
 )
 
@@ -74,7 +75,7 @@ func (s *Service) Start() {
 			if sol, prs := s.solutions[req.SlotNumber]; prs {
 				fmt.Printf("sending already known answer\n")
 				req.Res <- sol
-			} else if req.SlotNumber <= 7 {
+			} else if req.SlotNumber <= 6 {
 				if req.Res != nil {
 					fmt.Printf("sending placeholder\n")
 					req.Res <- &TimelockSolution{
@@ -146,7 +147,7 @@ func (s *Service) Start() {
 func (s *Service) cleanSolutions(slot types.Slot) {
 	updated := make(map[types.Slot]*TimelockSolution)
 	for k, v := range s.solutions {
-		if uint64(k) >= uint64(slot)-3 {
+		if uint64(k) >= uint64(slot)-5 {
 			updated[k] = v
 		}
 	}
@@ -173,6 +174,14 @@ func solve(solver *timelockSolver, ch chan *TimelockSolution) {
 	fmt.Printf("starting time lock for %v\n", solver.request.SlotNumber)
 
 	p := solver.request.Puzzle
+	if p == nil {
+		log.Error("Got a nil puzzle to solve. Returning the place holder")
+		ch <- &TimelockSolution{
+			Solution:   elgamal.PlaceHolderPrivateKey(),
+			SlotNumber: solver.request.SlotNumber,
+		}
+		return
+	}
 	fmt.Printf("attempting to solve %v\n", p.U)
 	t := time.Now()
 	sk := timelock.PuzzleSolve(p.U, p.V, p.N, p.G, p.T, p.H, int(solver.request.SlotNumber))
