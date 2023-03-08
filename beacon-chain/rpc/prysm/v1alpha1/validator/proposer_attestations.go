@@ -22,7 +22,6 @@ import (
 type proposerAtts []*ethpb.Attestation
 
 func (vs *Server) packAttestations(ctx context.Context, latestState state.BeaconState) ([]*ethpb.Attestation, error) {
-	log.Info("radni: packAttestation")
 	ctx, span := trace.StartSpan(ctx, "ProposerServer.packAttestations")
 	defer span.End()
 

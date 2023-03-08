@@ -133,7 +133,6 @@ func (vs *Server) GetAttestationData(ctx context.Context, req *ethpb.Attestation
 	ph := timelock.PuzzlePlaceHolder()
 	s, _ := rand.Int(rand.Reader, new(big.Int).Div(new(big.Int).SetBytes(ph.N), new(big.Int).SetUint64(10000000)))
 	u, v, a, b, alpha, beta, tau := timelock.PuzzleGen(s.Bytes(), ph.N, ph.G, ph.T, ph.H)
-	log.Info("radni: inja bayad ye publickey ezafe konam be AttestationData obj.")
 	res = &ethpb.AttestationData{
 		Slot:            req.Slot,
 		CommitteeIndex:  req.CommitteeIndex,

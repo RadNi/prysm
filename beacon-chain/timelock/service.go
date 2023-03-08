@@ -2,6 +2,7 @@ package timelock
 
 import (
 	"context"
+	"encoding/hex"
 	"fmt"
 	types "github.com/prysmaticlabs/prysm/v3/consensus-types/primitives"
 	"github.com/prysmaticlabs/prysm/v3/crypto/elgamal"
@@ -73,18 +74,15 @@ func (s *Service) Start() {
 			delete(s.solvers, sol.SlotNumber)
 		case req := <-s.channels.TimelockRequestChannel:
 			if sol, prs := s.solutions[req.SlotNumber]; prs {
-				fmt.Printf("sending already known answer\n")
 				req.Res <- sol
 			} else if req.SlotNumber <= 6 {
 				if req.Res != nil {
-					fmt.Printf("sending placeholder\n")
 					req.Res <- &TimelockSolution{
 						Solution:   elgamal.PlaceHolderPrivateKey(),
 						SlotNumber: req.SlotNumber,
 					}
 				}
 			} else if _, prs := s.solvers[req.SlotNumber]; !prs {
-				fmt.Printf("First time getting this puzzle. Starting to solve it\n")
 				solver := &timelockSolver{
 					request: req,
 					stop:    make(chan bool),
@@ -92,7 +90,6 @@ func (s *Service) Start() {
 				s.solvers[req.SlotNumber] = solver
 				go solve(solver, puzzleSolved)
 			} else if req.Puzzle == nil {
-				fmt.Printf("Request was nil. Sending placeholder\n")
 				sol := &TimelockSolution{
 					Solution:   elgamal.PlaceHolderPrivateKey(),
 					SlotNumber: req.SlotNumber,
@@ -115,7 +112,6 @@ func (s *Service) Start() {
 			}
 		case x := <-s.channels.TimelockSolutionFoundChannel:
 			if x.Solution == nil {
-				fmt.Printf("found a nill solution for slot %v. Replacing it with placeholder\n", x.SlotNumber)
 				x.Solution = elgamal.PlaceHolderPrivateKey()
 			}
 			if rs, pres := s.solvers[x.SlotNumber]; pres {
@@ -171,7 +167,6 @@ func (s *Service) Status() error {
 }
 
 func solve(solver *timelockSolver, ch chan *TimelockSolution) {
-	fmt.Printf("starting time lock for %v\n", solver.request.SlotNumber)
 
 	p := solver.request.Puzzle
 	if p == nil {
@@ -182,11 +177,14 @@ func solve(solver *timelockSolver, ch chan *TimelockSolution) {
 		}
 		return
 	}
-	fmt.Printf("attempting to solve %v\n", p.U)
 	t := time.Now()
 	sk := timelock.PuzzleSolve(p.U, p.V, p.N, p.G, p.T, p.H, int(solver.request.SlotNumber))
-	fmt.Printf("duration for %v is %v\n", solver.request.SlotNumber, time.Now().Sub(t).Seconds())
-	fmt.Printf("slot: %v ans: %v\n", solver.request.SlotNumber, sk)
+
+	log.WithFields(log.Fields{
+		"duration":   time.Now().Sub(t).Seconds(),
+		"slotNumber": solver.request.SlotNumber,
+		"pubKey":     fmt.Sprintf("0x%s...", hex.EncodeToString(solver.request.Puzzle.U)[:8]),
+	}).Info("Solved a timelock puzzle")
 	ch <- &TimelockSolution{
 		Solution: &enginev1.ElgamalPrivateKey{
 			PublicKey: &enginev1.ElgamalPublicKey{

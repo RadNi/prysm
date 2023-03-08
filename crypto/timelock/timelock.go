@@ -178,7 +178,6 @@ func PuzzleSolve(_u, _v, _n, _g, _t, _h []byte, slot int) []byte {
 	u := new(big.Int).SetBytes(_u)
 	v := new(big.Int).SetBytes(_v)
 	n := new(big.Int).SetBytes(_n)
-	fmt.Printf("puzzle started solving in lib: u: %v\n", u.Bytes())
 	//h := new(big.Int).SetBytes(_h.Bytes())
 	t := new(big.Int).SetBytes(_t)
 	one := new(big.Int).SetInt64(1)
@@ -194,7 +193,6 @@ func PuzzleSolve(_u, _v, _n, _g, _t, _h []byte, slot int) []byte {
 	s = s.Mod(s, n2)
 	s.Sub(s, one)
 	s.Div(s, n)
-	fmt.Printf("puzzle sollved in lib: %v\n", s.Bytes())
 	return padOrTrim(s.Bytes(), 512)
 }
 

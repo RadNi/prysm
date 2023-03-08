@@ -125,9 +125,6 @@ func (s *Service) ForkchoiceUpdated(
 	ctx, cancel := context.WithDeadline(ctx, d)
 	defer cancel()
 	result := &ForkchoiceUpdatedResponse{}
-	log.Info("radni: engin_client.go")
-	//fmt.Printf("%v\n", attrs)
-	//fmt.Printf("%d\n", attrs.Timestamp)
 	err := s.rpcClient.CallContext(ctx, result, ForkchoiceUpdatedMethod, state, attrs)
 	if err != nil {
 		return nil, nil, handleRPCError(err)

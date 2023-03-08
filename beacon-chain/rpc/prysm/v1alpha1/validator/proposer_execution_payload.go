@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"github.com/davecgh/go-spew/spew"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/pkg/errors"
 	"github.com/prometheus/client_golang/prometheus"
@@ -42,8 +41,6 @@ var (
 // This returns the execution payload of a given slot. The function has full awareness of pre and post merge.
 // The payload is computed given the respected time of merge.
 func (vs *Server) getExecutionPayload(ctx context.Context, slot types.Slot, vIdx types.ValidatorIndex, headRoot [32]byte, prvKey *enginev1.ElgamalPrivateKey, pubKey *enginev1.ElgamalPublicKey) (*enginev1.ExecutionPayload, error) {
-	log.Info("radni: headRoot for payloadID:")
-	log.Info(headRoot)
 	proposerID, payloadId, ok := vs.ProposerSlotIndexCache.GetProposerPayloadIDs(slot, headRoot)
 	feeRecipient := params.BeaconConfig().DefaultFeeRecipient
 	recipient, err := vs.BeaconDB.FeeRecipientByValidatorID(ctx, vIdx)
@@ -74,7 +71,6 @@ func (vs *Server) getExecutionPayload(ctx context.Context, slot types.Slot, vIdx
 		switch {
 		case err == nil:
 			warnIfFeeRecipientDiffers(payload, feeRecipient)
-			log.Info("radni: fek konam inja execution payload ro jam mikone")
 			return payload, nil
 		case errors.Is(err, context.DeadlineExceeded):
 		default:
@@ -153,14 +149,6 @@ func (vs *Server) getExecutionPayload(ctx context.Context, slot types.Slot, vIdx
 		FinalizedBlockHash: finalizedBlockHash,
 	}
 	prv := eth.CopyElgamalPrivatekey(prvKey)
-	//	enginev1.ElgamalPrivateKey{
-	//	PublicKey: &enginev1.ElgamalPublicKey{
-	//		G: common.CopyBytes(prvv.PublicKey.G),
-	//		Y: common.CopyBytes(prvv.PublicKey.Y),
-	//		P: common.CopyBytes(prvv.PublicKey.P),
-	//	},
-	//	X: common.CopyBytes(prvv.X),
-	//}
 	p := &enginev1.PayloadAttributes{
 		Timestamp:             uint64(t.Unix()),
 		PrevRandao:            random,
@@ -168,8 +156,6 @@ func (vs *Server) getExecutionPayload(ctx context.Context, slot types.Slot, vIdx
 		TimelockPrivatekey:    eth.CopyElgamalPrivatekey(prv),
 		TimelockPublickey:     eth.CopyElgamalPublickey(pubKey),
 	}
-	fmt.Printf("radni: here\n")
-	spew.Dump(p.TimelockPrivatekey)
 	payloadID, _, err := vs.ExecutionEngineCaller.ForkchoiceUpdated(ctx, f, p)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not prepare payload")
@@ -178,8 +164,6 @@ func (vs *Server) getExecutionPayload(ctx context.Context, slot types.Slot, vIdx
 		return nil, fmt.Errorf("nil payload with block hash: %#x", parentHash)
 	}
 	payload, err := vs.ExecutionEngineCaller.GetPayload(ctx, *payloadID)
-	fmt.Printf("when getting payload")
-	spew.Dump(payload.TimelockPublickey)
 	if err != nil {
 		return nil, err
 	}

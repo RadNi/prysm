@@ -40,12 +40,10 @@ const eth1dataTimeout = 2 * time.Second
 // by passing in the slot and the signed randao reveal of the slot. Returns phase0 beacon blocks
 // before the Altair fork epoch and Altair blocks post-fork epoch.
 func (vs *Server) GetBeaconBlock(ctx context.Context, req *ethpb.BlockRequest) (*ethpb.GenericBeaconBlock, error) {
-	log2.Info("radni: GetBeaconBlock")
 	ctx, span := trace.StartSpan(ctx, "ProposerServer.GetBeaconBlock")
 	defer span.End()
 	span.AddAttributes(trace.Int64Attribute("slot", int64(req.Slot)))
 	if slots.ToEpoch(req.Slot) < params.BeaconConfig().AltairForkEpoch {
-		log2.Info("phase0")
 		blk, err := vs.getPhase0BeaconBlock(ctx, req)
 		//fmt.Printf("%v\n", blk)
 		if err != nil {
@@ -53,7 +51,6 @@ func (vs *Server) GetBeaconBlock(ctx context.Context, req *ethpb.BlockRequest) (
 		}
 		return &ethpb.GenericBeaconBlock{Block: &ethpb.GenericBeaconBlock_Phase0{Phase0: blk}}, nil
 	} else if slots.ToEpoch(req.Slot) < params.BeaconConfig().BellatrixForkEpoch {
-		log2.Info("altair")
 		blk, err := vs.getAltairBeaconBlock(ctx, req)
 		//fmt.Printf("%v\n", blk)
 		if err != nil {
@@ -73,7 +70,6 @@ func (vs *Server) GetBeaconBlock(ctx context.Context, req *ethpb.BlockRequest) (
 // ProposeBeaconBlock is called by a proposer during its assigned slot to create a block in an attempt
 // to get it processed by the beacon node as the canonical head.
 func (vs *Server) ProposeBeaconBlock(ctx context.Context, req *ethpb.GenericSignedBeaconBlock) (*ethpb.ProposeResponse, error) {
-	log2.Info("radni: ProposeBeaconBlock")
 	ctx, span := trace.StartSpan(ctx, "ProposerServer.ProposeBeaconBlock")
 	defer span.End()
 	blk, err := blocks.NewSignedBeaconBlock(req.Block)

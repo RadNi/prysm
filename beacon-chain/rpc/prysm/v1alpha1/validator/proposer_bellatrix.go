@@ -41,8 +41,6 @@ var builderGetPayloadMissCount = promauto.NewCounter(prometheus.CounterOpts{
 const blockBuilderTimeout = 1 * time.Second
 
 func (vs *Server) getBellatrixBeaconBlock(ctx context.Context, req *ethpb.BlockRequest) (*ethpb.GenericBeaconBlock, error) {
-	log.Info("radni: getBellatrixBeaconBlock")
-	log.Info("radni: be nazar miad inja block ro misaze")
 	altairBlk, err := vs.BuildAltairBeaconBlock(ctx, req)
 	if err != nil {
 		return nil, err
@@ -72,7 +70,6 @@ func (vs *Server) getBellatrixBeaconBlock(ctx context.Context, req *ethpb.BlockR
 	if len(altairBlk.Body.Attestations) != 0 {
 		for _, a := range altairBlk.Body.Attestations {
 			if a.Data.Slot == altairBlk.Slot-1 {
-				fmt.Printf("inja nayomad?! %v\n", a.Data.TimelockPuzzle.U)
 				if puzzle == nil {
 					puzzle = ethpb.CopyTimelockPuzzle(a.Data.TimelockPuzzle)
 				}
@@ -99,27 +96,15 @@ func (vs *Server) getBellatrixBeaconBlock(ctx context.Context, req *ethpb.BlockR
 	}
 	//vs.BeaconDB.BlocksBySlot()
 	vs.TimelockChannels.TimelockRequestChannel <- tlreq
-	fmt.Printf("waiting %v\n", tlreq.SlotNumber)
 	res := <-resChan
-	fmt.Printf("done %v\n", tlreq.SlotNumber)
 	if res.Solution == nil {
-		fmt.Printf("WTH !! solution was nil\n")
+		log.Error("WTH !! solution was nil\n")
 	}
 	ep := timelock2.PuzzleToPublicKey(puzzle)
-	fmt.Printf("found pubkey %v\n", ep.Y)
 	payload, err := vs.getExecutionPayload(ctx, req.Slot, altairBlk.ProposerIndex, bytesutil.ToBytes32(altairBlk.ParentRoot), res.Solution, ep)
 	if err != nil {
 		return nil, err
 	}
-
-	//s := new(big.Int).SetInt64(1)
-	//ph := timelock2.PuzzlePlaceHolder()
-	//T := []byte{0x00, 0x00, 0x00, 0x00, 0x00, 0x09, 0x32, 0x26}
-	//u, v, a, b, alpha, beta, tau := timelock2.PuzzleGen(s.Bytes(), ph.N, ph.G, T, ph.H)
-	//puzzle
-
-	log.Info("radni: unbelievable, vali resid")
-	//fmt.Printf("u: %v\nG: %v\n", payload.TimelockPublickey.Y, payload.TimelockPublickey.G)
 
 	blk := &ethpb.BeaconBlockBellatrix{
 		Slot:          altairBlk.Slot,
@@ -146,8 +131,6 @@ func (vs *Server) getBellatrixBeaconBlock(ctx context.Context, req *ethpb.BlockR
 	wsb, err := consensusblocks.NewSignedBeaconBlock(
 		&ethpb.SignedBeaconBlockBellatrix{Block: blk, Signature: make([]byte, 96)},
 	)
-	fmt.Printf("arrived\n")
-	fmt.Printf("X: %v\nY: %v\n", res.Solution.X, res.Solution.PublicKey.Y)
 	if err != nil {
 		return nil, err
 	}
@@ -507,7 +490,7 @@ func (vs *Server) validatorRegistered(ctx context.Context, id types.ValidatorInd
 func (vs *Server) validateBuilderSignature(bid *ethpb.SignedBuilderBid) error {
 	d, err := signing.ComputeDomain(params.BeaconConfig().DomainApplicationBuilder,
 		nil, /* fork version */
-		nil /* genesis val root */)
+		nil  /* genesis val root */)
 	if err != nil {
 		return err
 	}
