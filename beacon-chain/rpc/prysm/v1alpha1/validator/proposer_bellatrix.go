@@ -73,9 +73,12 @@ func (vs *Server) getBellatrixBeaconBlock(ctx context.Context, req *ethpb.BlockR
 				if puzzle == nil {
 					puzzle = ethpb.CopyTimelockPuzzle(a.Data.TimelockPuzzle)
 				}
-				u, v := timelock2.PuzzleEval(puzzle.U, puzzle.V, a.Data.TimelockPuzzle.U, a.Data.TimelockPuzzle.V, puzzle.N)
+				u, v, y, w := timelock2.PuzzleEval(puzzle.U, puzzle.V, puzzle.Y, puzzle.W, a.Data.TimelockPuzzle.U,
+					a.Data.TimelockPuzzle.V, a.Data.TimelockPuzzle.Y, a.Data.TimelockPuzzle.W, puzzle.N)
 				puzzle.U = u
 				puzzle.V = v
+				puzzle.Y = y
+				puzzle.W = w
 			}
 		}
 	}

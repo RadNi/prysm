@@ -31,11 +31,13 @@ message TimelockPuzzle {
     bytes h = 4 [(ethereum.eth.ext.ssz_size) = "512"];
     bytes u = 5 [(ethereum.eth.ext.ssz_size) = "512"];
     bytes v = 6 [(ethereum.eth.ext.ssz_size) = "262144"];
-    bytes a = 7 [(ethereum.eth.ext.ssz_size) = "512"];
-    bytes b = 8 [(ethereum.eth.ext.ssz_size) = "262144"];
-    bytes alpha = 9 [(ethereum.eth.ext.ssz_size) = "66048"];
-    bytes beta = 10 [(ethereum.eth.ext.ssz_size) = "512"];
-    bytes tau = 11 [(ethereum.eth.ext.ssz_size) = "512"];
+    bytes y = 7 [(ethereum.eth.ext.ssz_size) = "512"];
+    bytes w = 8 [(ethereum.eth.ext.ssz_size) = "262144"];
+    bytes a = 9 [(ethereum.eth.ext.ssz_size) = "512"];
+    bytes b = 10 [(ethereum.eth.ext.ssz_size) = "262144"];
+    bytes alpha = 11 [(ethereum.eth.ext.ssz_size) = "589824"];
+    bytes beta = 12 [(ethereum.eth.ext.ssz_size) = "393216"];
+    bytes tau = 13 [(ethereum.eth.ext.ssz_size) = "512"];
 }
 
 message Attestation {

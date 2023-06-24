@@ -34,16 +34,11 @@ func readPEM(filename string) (*pem.Block, []byte) {
 	return pem.Decode(b)
 }
 
-func ModExpWithSquaringPow2(gen, t, modulus *big.Int, slot int) *big.Int {
+func ModExpWithSquaringPow2(gen, t, modulus *big.Int) *big.Int {
 	i := new(big.Int).SetInt64(0)
 	two := new(big.Int).SetInt64(2)
 	one := new(big.Int).SetInt64(1)
 	for {
-		temp := new(big.Int)
-		temp.Mod(i, new(big.Int).SetInt64(50000))
-		if temp.Cmp(new(big.Int).SetInt64(0)) == 0 {
-			//fmt.Printf("slot: %d iteration: %d\n", slot, i)
-		}
 		gen = ModExpWithSquaring(gen, two, modulus)
 		i.Add(i, one)
 		if i.Cmp(t) == 0 {
@@ -57,16 +52,20 @@ func ModExpWithSquaring(_base, _exponent, _modulus *big.Int) *big.Int {
 	base := new(big.Int).SetBytes(_base.Bytes())
 	exponent := new(big.Int).SetBytes(_exponent.Bytes())
 	modulus := new(big.Int).SetBytes(_modulus.Bytes())
-	zero := new(big.Int).SetInt64(0)
-	one := new(big.Int).SetInt64(1)
-	two := new(big.Int).SetInt64(2)
+	zero := new(big.Int)
+	one := new(big.Int)
+	two := new(big.Int)
+	zero.SetInt64(0)
+	one.SetInt64(1)
+	two.SetInt64(2)
 	if exponent.Cmp(one) == 0 {
 		ret := new(big.Int).SetBytes(base.Bytes())
 		return ret
 	}
 	newExp := new(big.Int)
 	newExp.Div(exponent, two)
-	res := ModExpWithSquaring(base, newExp, modulus)
+	res := new(big.Int)
+	res = ModExpWithSquaring(base, newExp, modulus)
 	res.Mul(res, res)
 	res.Mod(res, modulus)
 	and := new(big.Int)
@@ -96,6 +95,44 @@ func inv(x, n *big.Int) *big.Int {
 	return inv
 }
 
+func genUV2(_s, _r, _n, _g, _t, _h []byte) UV {
+	s := new(big.Int).SetBytes(_s)
+	r := new(big.Int).SetBytes(_r)
+	n := new(big.Int).SetBytes(_n)
+	g := new(big.Int).SetBytes(_g)
+	//    t := new(big.Int).SetBytes(_t.Bytes())
+	h := new(big.Int).SetBytes(_h)
+	fmt.Printf("%v\n", 1)
+	one := new(big.Int).SetInt64(1)
+	fmt.Printf("%v\n", 2)
+	u := ModExpWithSquaring(g, r, n)
+	//rn := new(big.Int).Mul(r, n)
+	n2 := new(big.Int).Mul(n, n)
+	fmt.Printf("%v\n", 3)
+	hr := ModExpWithSquaring(h, r, n)
+	hrn := ModExpWithSquaring(hr, n, n2)
+	fmt.Printf("%v\n", 4)
+	n.Add(n, one)
+	fmt.Printf("%v\n", 5)
+	v := ModExpWithSquaring(n, s, n2)
+	fmt.Printf("%v\n", 6)
+	v = v.Mul(v, hrn)
+	v.Mod(v, n2)
+
+	ret := UV{
+		U: padOrTrim(u.Bytes(), 512),
+		V: padOrTrim(v.Bytes(), 262144),
+	}
+
+	return ret
+
+}
+
+type UV struct {
+	U []byte
+	V []byte
+}
+
 func genUV(_s, _r, _n, _g, _t, _h []byte) ([]byte, []byte) {
 	s := new(big.Int).SetBytes(_s)
 	r := new(big.Int).SetBytes(_r)
@@ -104,43 +141,73 @@ func genUV(_s, _r, _n, _g, _t, _h []byte) ([]byte, []byte) {
 	//    t := new(big.Int).SetBytes(_t.Bytes())
 	h := new(big.Int).SetBytes(_h)
 	one := new(big.Int).SetInt64(1)
-	u := ModExpWithSquaring(g, s, n)
-	sn := new(big.Int).Mul(s, n)
+	u := ModExpWithSquaring(g, r, n)
+	rn := new(big.Int).Mul(r, n)
 	n2 := new(big.Int).Mul(n, n)
-	hsn := ModExpWithSquaring(h, sn, n2)
+	hrn := ModExpWithSquaring(h, rn, n2)
 	n.Add(n, one)
-	v := ModExpWithSquaring(n, r, n2)
-	v = v.Mul(v, hsn)
+	v := ModExpWithSquaring(n, s, n2)
+	v = v.Mul(v, hrn)
 	v.Mod(v, n2)
 
 	return padOrTrim(u.Bytes(), 512), padOrTrim(v.Bytes(), 262144)
 
 }
 
-func PuzzleGen(_s, _n, _g, _time, _h []byte) ([]byte, []byte, []byte, []byte, []byte, []byte, []byte) {
+func PuzzleGen(_s, _n, _g, _time, _h []byte, l int64) ([]byte, []byte, []byte, []byte, []byte, []byte, []byte, []byte, []byte) {
 	s := new(big.Int).SetBytes(_s)
 	n := new(big.Int).SetBytes(_n)
 	g := new(big.Int).SetBytes(_g)
 	time := new(big.Int).SetBytes(_time)
 	h := new(big.Int).SetBytes(_h)
-
-	u, v := genUV(_s, _s, _n, _g, _time, _h)
-	x, err := rand.Int(rand.Reader, n)
+	two := new(big.Int).SetInt64(2)
+	fourp := new(big.Int).SetInt64(2 * l)
+	n_2 := new(big.Int).Div(n, two)
+	//n2 := new(big.Int).Mul(n, n)
+	n_4p := new(big.Int).Div(n, fourp)
+	r, err := rand.Int(rand.Reader, n_4p)
+	k, err := rand.Int(rand.Reader, n_2)
+	n_2l := new(big.Int).Div(n_2, new(big.Int).SetInt64(l))
+	n_2n_2l := new(big.Int).Add(n_2, n_2l)
+	lambda := ModExpWithSquaringPow2(new(big.Int).SetInt64(2), new(big.Int).SetInt64(int64(n.BitLen())), n)
+	x, err := rand.Int(rand.Reader, new(big.Int).Mul(n_2n_2l, lambda))
 	if err != nil {
 		panic(err)
 	}
-	t, err := rand.Int(rand.Reader, n)
+	t, err := rand.Int(rand.Reader, new(big.Int).Mul(n_2l, lambda))
 	if err != nil {
 		panic(err)
 	}
+	rps := new(big.Int).Add(s, r)
+	//fmt.Printf("s: %v\nn: %v\ng: %v\ntime:%v\nh: %v\n", s.String(), n.String(), g.String(), time.String(), h.String())
+	c1 := make(chan UV)
+	c2 := make(chan UV)
+	c3 := make(chan UV)
+	var u, v, y, w, _a, _b []byte
+	//u, v := genUV(_s, rps.Bytes(), _n, _g, _time, _h)
+	go func() {
+		c1 <- genUV2(_s, rps.Bytes(), _n, _g, _time, _h)
+	}()
+	go func() {
+		c2 <- genUV2(r.Bytes(), k.Bytes(), _n, _g, _time, _h)
+	}()
+	go func() {
+		c3 <- genUV2(t.Bytes(), x.Bytes(), _n, _g, _time, _h)
+	}()
 
-	_a, _b := genUV(x.Bytes(), t.Bytes(), _n, _g, _time, _h)
+	out := <-c1
+	u = out.U
+	v = out.V
+	out = <-c2
+	y = out.U
+	w = out.V
+	out = <-c3
+	_a = out.U
+	_b = out.V
 	a := new(big.Int).SetBytes(_a)
 	b := new(big.Int).SetBytes(_b)
 
-	n_2 := new(big.Int).SetBytes(n.Bytes())
-	two := new(big.Int).SetInt64(2)
-	n_2.Div(n_2, two)
+	tau := ModExpWithSquaring(g, t, n)
 
 	sha := sha512.New()
 	sha.Write(n.Bytes())
@@ -149,45 +216,100 @@ func PuzzleGen(_s, _n, _g, _time, _h []byte) ([]byte, []byte, []byte, []byte, []
 	sha.Write(h.Bytes())
 	sha.Write(a.Bytes())
 	sha.Write(b.Bytes())
+	sha.Write(tau.Bytes())
 	hsh := sha.Sum(nil)
 	e := new(big.Int).SetBytes(hsh)
 	e.Mod(e, n_2)
 
-	alpha := new(big.Int).SetBytes(s.Bytes())
+	alpha := new(big.Int).Add(r, s)
+	alpha.Add(alpha, k)
 	alpha.Mul(alpha, e)
 	alpha.Add(alpha, x)
+	//fmt.Printf("before: %v\n", alpha)
+	//alpha.Mod(alpha, n2)
+	//fmt.Printf("after: %v\n", alpha)
+	//fmt.Printf("r: %v\ns: %v\nk: %v\ng: %v\nalpha: %v\n", r, s, k, g, alpha)
 
-	beta := new(big.Int).SetBytes(s.Bytes())
+	// ---------------------------------------------------------
+	// u = g^{r+s}
+	// y = g^k
+	// a = g^x
+
+	//galpha := ModExpWithSquaring(g, alpha, n)
+	//uyea := new(big.Int).Mul(new(big.Int).SetBytes(u), new(big.Int).SetBytes(y))
+	//uyea = ModExpWithSquaring(uyea, e, n)
+	////uyea := new(big.Int).Mul(uyea, a)
+	//uyea = uyea.Mod(uyea, n)
+	////
+	//if galpha.Cmp(uyea) != 0 {
+	//	fmt.Printf("wrong one in construction \ngalpha: %v\nother: %v\n", galpha, uyea)
+	//}
+
+	// ---------------------------------------------------------
+
+	beta := new(big.Int).Add(r, s)
 	beta.Mul(beta, e)
 	beta.Add(beta, t)
-	beta.Mod(beta, n)
+	//beta.Mod(beta, n2)
 
-	tau := new(big.Int).SetBytes(g.Bytes())
-	tau = ModExpWithSquaring(tau, t, n)
+	//f, _ := os.Create("/tmp/dat4")
+	//f.WriteString(":\nu: ")
+	//f.WriteString(new(big.Int).SetBytes(u).String())
+	//f.WriteString("\n")
+	//f.WriteString("v: ")
+	//f.WriteString(new(big.Int).SetBytes(v).String())
+	//f.WriteString("\n")
+	//f.Close()
 
 	return padOrTrim(u, 512),
 		padOrTrim(v, 262144),
+		padOrTrim(y, 512),
+		padOrTrim(w, 262144),
 		padOrTrim(a.Bytes(), 512),
 		padOrTrim(b.Bytes(), 262144),
-		padOrTrim(alpha.Bytes(), 66048),
-		padOrTrim(beta.Bytes(), 512),
+		padOrTrim(alpha.Bytes(), 131328000),
+		padOrTrim(beta.Bytes(), 66048000),
 		padOrTrim(tau.Bytes(), 512)
 }
 
-func PuzzleSolve(_u, _v, _n, _g, _t, _h []byte, slot int) []byte {
+func PuzzleSolvePrivateKey(_u, _v, _y, _w, _n, _g, _t, _h []byte) []byte {
+	u := new(big.Int).SetBytes(_u)
+	v := new(big.Int).SetBytes(_v)
+	y := new(big.Int).SetBytes(_y)
+	w := new(big.Int).SetBytes(_w)
+	n := new(big.Int).SetBytes(_n)
+	t := new(big.Int).SetBytes(_t)
+	ph := PuzzlePlaceHolder()
+	__u, __v, _, _ := PuzzleEval(u.Bytes(), v.Bytes(), y.Bytes(), w.Bytes(), y.Bytes(), w.Bytes(), ph.Y, ph.W, n.Bytes())
+	u.SetBytes(__u)
+	v.SetBytes(__v)
+	one := new(big.Int).SetInt64(1)
+	n2 := new(big.Int)
+	n2.Mul(n, n)
+	x := ModExpWithSquaringPow2(u, t, n)
+	// fmt.Printf("w: %v\n", w)
+	winv := inv(x, n)
+	winvn := ModExpWithSquaring(winv, n, n2)
+	// fmt.Printf("winv: %v winvn: %v\n", winv, winvn)
+	s := new(big.Int)
+	s = s.Mul(v, winvn)
+	s = s.Mod(s, n2)
+	s.Sub(s, one)
+	s.Div(s, n)
+	return padOrTrim(s.Bytes(), 512)
+}
+
+func PuzzleSolve(_u, _v, _n, _g, _t, _h []byte) []byte {
 	u := new(big.Int).SetBytes(_u)
 	v := new(big.Int).SetBytes(_v)
 	n := new(big.Int).SetBytes(_n)
-	//h := new(big.Int).SetBytes(_h.Bytes())
 	t := new(big.Int).SetBytes(_t)
 	one := new(big.Int).SetInt64(1)
 	n2 := new(big.Int)
 	n2.Mul(n, n)
-	w := ModExpWithSquaringPow2(u, t, n, slot)
-	// fmt.Printf("w: %v\n", w)
+	w := ModExpWithSquaringPow2(u, t, n)
 	winv := inv(w, n)
 	winvn := ModExpWithSquaring(winv, n, n2)
-	// fmt.Printf("winv: %v winvn: %v\n", winv, winvn)
 	s := new(big.Int)
 	s = s.Mul(v, winvn)
 	s = s.Mod(s, n2)
@@ -254,37 +376,57 @@ func sample(n *big.Int) (*big.Int, *big.Int) {
 //	}
 //}
 
-func PuzzleEval(_u1, _v1, _u2, _v2, _n []byte) ([]byte, []byte) {
+func PuzzleEval(_u1, _v1, _y1, _w1, _u2, _v2, _y2, _w2, _n []byte) ([]byte, []byte, []byte, []byte) {
 	u1 := new(big.Int).SetBytes(_u1)
 	v1 := new(big.Int).SetBytes(_v1)
+	y1 := new(big.Int).SetBytes(_y1)
+	w1 := new(big.Int).SetBytes(_w1)
 	u2 := new(big.Int).SetBytes(_u2)
 	v2 := new(big.Int).SetBytes(_v2)
+	y2 := new(big.Int).SetBytes(_y2)
+	w2 := new(big.Int).SetBytes(_w2)
 	n := new(big.Int).SetBytes(_n)
 
 	v := new(big.Int)
 	u := new(big.Int)
+	y := new(big.Int)
+	w := new(big.Int)
 	n2 := new(big.Int)
 
 	n2 = n2.Mul(n, n)
 
-	v.Mul(v1, v2)
-	v.Mod(v, n2)
-
 	u.Mul(u1, u2)
 	u.Mod(u, n)
 
-	return padOrTrim(u.Bytes(), 512), padOrTrim(v.Bytes(), 262144)
+	v.Mul(v1, v2)
+	v.Mod(v, n2)
+
+	y.Mul(y1, y2)
+	y.Mod(y, n)
+
+	w.Mul(w1, w2)
+	w.Mod(w, n2)
+
+	return padOrTrim(u.Bytes(), 512),
+		padOrTrim(v.Bytes(), 262144),
+		padOrTrim(y.Bytes(), 512),
+		padOrTrim(w.Bytes(), 262144)
 }
 
-func PuzzleVerify(_u, _v, _a, _b, _alpha, _beta, _tau, _g, _h, _n, _t []byte) bool {
+func PuzzleVerify(_u, _v, _y, _w, _a, _b, _alpha, _beta, _tau, _g, _h, _n, _t []byte) bool {
 	// TODO u \in J_n
-	// TODO a \in J_n
+	// TODO v \in J_{n^2}
+	// TODO y \in J_n
+	// TODO w \in J_{n^2}
+	// TODO a \in J_N
 	// TODO t \in J_n
-	// TODO b \in Z_n^2
-	// TODO \alpha \in Z_{n^2/4+n}
-	// TODO \beta \in Z_n
+	// TODO b \in J_{n^2}
+	// TODO \alpha \in Z_{(N/2+N/n)*2^\lambda+(N/2+N/n)*2^{2\lambda}}
+	// TODO \beta \in Z_{N/n*2^\lambda + N/n*2^{2\lambda}}}
 	u := new(big.Int).SetBytes(_u)
 	v := new(big.Int).SetBytes(_v)
+	y := new(big.Int).SetBytes(_y)
+	w := new(big.Int).SetBytes(_w)
 	a := new(big.Int).SetBytes(_a)
 	b := new(big.Int).SetBytes(_b)
 	alpha := new(big.Int).SetBytes(_alpha)
@@ -294,6 +436,7 @@ func PuzzleVerify(_u, _v, _a, _b, _alpha, _beta, _tau, _g, _h, _n, _t []byte) bo
 	h := new(big.Int).SetBytes(_h)
 	n := new(big.Int).SetBytes(_n)
 	t := new(big.Int).SetBytes(_t)
+	n2 := new(big.Int).Mul(n, n)
 
 	two := new(big.Int).SetInt64(2)
 	n_2 := new(big.Int).SetBytes(n.Bytes())
@@ -305,28 +448,34 @@ func PuzzleVerify(_u, _v, _a, _b, _alpha, _beta, _tau, _g, _h, _n, _t []byte) bo
 	sha.Write(h.Bytes())
 	sha.Write(a.Bytes())
 	sha.Write(b.Bytes())
+	sha.Write(tau.Bytes())
 	hsh := sha.Sum(nil)
 	e := new(big.Int).SetBytes(hsh)
 	e.Mod(e, n_2)
 
-	_uagg, _vagg := genUV(alpha.Bytes(), beta.Bytes(), n.Bytes(), g.Bytes(), t.Bytes(), h.Bytes())
-	uagg := new(big.Int).SetBytes(_uagg)
-	vagg := new(big.Int).SetBytes(_vagg)
+	uy := new(big.Int).Mul(u, y)
+	uy.Mod(uy, n)
 
-	uea := ModExpWithSquaring(u, e, n)
-	uea.Mul(uea, a)
-	uea.Mod(uea, n)
-	if uea.Cmp(uagg) != 0 {
+	uye := ModExpWithSquaring(uy, e, n)
+	uye.Mod(uye, n)
+
+	uyea := new(big.Int).Mul(uye, a)
+	uyea.Mod(uyea, n)
+
+	_galpha, _vagg := genUV(beta.Bytes(), alpha.Bytes(), n.Bytes(), g.Bytes(), t.Bytes(), h.Bytes())
+	galpha := new(big.Int).SetBytes(_galpha)
+	vagg := new(big.Int).SetBytes(_vagg)
+	if galpha.Cmp(uyea) != 0 {
 		return false
 	}
-	n2 := new(big.Int)
-	n2.Mul(n, n)
 
-	veb := ModExpWithSquaring(v, e, n2)
-	veb.Mul(veb, b)
-	veb.Mod(veb, n2)
-
-	if veb.Cmp(vagg) != 0 {
+	vweb := new(big.Int).Mul(v, w)
+	vweb.Mod(vweb, n2)
+	vweb = ModExpWithSquaring(vweb, e, n2)
+	vweb.Mod(vweb, n2)
+	vweb.Mul(vweb, b)
+	vweb.Mod(vweb, n2)
+	if vweb.Cmp(vagg) != 0 {
 		return false
 	}
 
@@ -362,10 +511,12 @@ func PuzzlePlaceHolder() *eth.TimelockPuzzle {
 		H:     H,
 		U:     padOrTrim(new(big.Int).SetInt64(1).Bytes(), 512),
 		V:     padOrTrim(new(big.Int).SetInt64(1).Bytes(), 262144),
+		Y:     padOrTrim(new(big.Int).SetInt64(1).Bytes(), 512),
+		W:     padOrTrim(new(big.Int).SetInt64(1).Bytes(), 262144),
 		A:     padOrTrim(new(big.Int).SetInt64(1).Bytes(), 512),
 		B:     padOrTrim(new(big.Int).SetInt64(1).Bytes(), 262144),
-		Alpha: make([]byte, 66048),
-		Beta:  make([]byte, 512),
+		Alpha: make([]byte, 589824),
+		Beta:  make([]byte, 393216),
 		Tau:   make([]byte, 512),
 	}
 }

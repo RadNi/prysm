@@ -423,11 +423,13 @@ type TimelockPuzzleJson struct {
 	H string `json:"h" hex:"true"`
 	U string `json:"u" hex:"true"`
 	//V     string `json:"v" hex:"true"`
+	Y string `json:"y" hex:"true"`
+	//W     string `json:"w" hex:"true"`
 	A string `json:"a" hex:"true"`
 	//B     string `json:"b" hex:"true"`
 	//Alpha string `json:"alpha" hex:"true"`
-	Beta string `json:"beta" hex:"true"`
-	Tau  string `json:"tau" hex:"true"`
+	//Beta string `json:"beta" hex:"true"`
+	Tau string `json:"tau" hex:"true"`
 }
 
 type ElgamalPublicKeyJson struct {

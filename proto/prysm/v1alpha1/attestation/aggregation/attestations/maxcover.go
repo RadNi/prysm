@@ -176,9 +176,11 @@ func aggregateAttestations(atts []*ethpb.Attestation, keys []int, coverage *bitf
 					if puzzle == nil {
 						puzzle = ethpb.CopyTimelockPuzzle(p)
 					} else {
-						u, v := timelock.PuzzleEval(puzzle.U, puzzle.V, p.U, p.V, puzzle.N)
+						u, v, y, w := timelock.PuzzleEval(puzzle.U, puzzle.V, puzzle.Y, puzzle.W, p.U, p.V, p.Y, p.W, puzzle.N)
 						puzzle.U = u
 						puzzle.V = v
+						puzzle.Y = y
+						puzzle.W = w
 					}
 				}
 			}

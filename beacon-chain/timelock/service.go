@@ -178,7 +178,7 @@ func solve(solver *timelockSolver, ch chan *TimelockSolution) {
 		return
 	}
 	t := time.Now()
-	sk := timelock.PuzzleSolve(p.U, p.V, p.N, p.G, p.T, p.H, int(solver.request.SlotNumber))
+	sk := timelock.PuzzleSolvePrivateKey(p.U, p.V, p.Y, p.W, p.N, p.G, p.T, p.H)
 
 	log.WithFields(log.Fields{
 		"duration":   time.Now().Sub(t).Seconds(),

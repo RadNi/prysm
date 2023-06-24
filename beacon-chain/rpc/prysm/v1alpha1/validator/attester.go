@@ -131,8 +131,9 @@ func (vs *Server) GetAttestationData(ctx context.Context, req *ethpb.Attestation
 		}
 	}
 	ph := timelock.PuzzlePlaceHolder()
-	s, _ := rand.Int(rand.Reader, new(big.Int).Div(new(big.Int).SetBytes(ph.N), new(big.Int).SetUint64(10000000)))
-	u, v, a, b, alpha, beta, tau := timelock.PuzzleGen(s.Bytes(), ph.N, ph.G, ph.T, ph.H)
+	var l uint64 = 10000000
+	s, _ := rand.Int(rand.Reader, new(big.Int).Div(new(big.Int).SetBytes(ph.N), new(big.Int).SetUint64(l)))
+	u, v, y, w, a, b, alpha, beta, tau := timelock.PuzzleGen(s.Bytes(), ph.N, ph.G, ph.T, ph.H, int64(l))
 	res = &ethpb.AttestationData{
 		Slot:            req.Slot,
 		CommitteeIndex:  req.CommitteeIndex,
@@ -149,6 +150,8 @@ func (vs *Server) GetAttestationData(ctx context.Context, req *ethpb.Attestation
 			H:     ph.H,
 			U:     u,
 			V:     v,
+			Y:     y,
+			W:     w,
 			A:     a,
 			B:     b,
 			Alpha: alpha,

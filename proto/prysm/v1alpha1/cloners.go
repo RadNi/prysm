@@ -230,6 +230,8 @@ func CopyTimelockPuzzle(pub *TimelockPuzzle) *TimelockPuzzle {
 		H:     bytesutil.SafeCopyBytes(pub.H),
 		U:     bytesutil.SafeCopyBytes(pub.U),
 		V:     bytesutil.SafeCopyBytes(pub.V),
+		Y:     bytesutil.SafeCopyBytes(pub.Y),
+		W:     bytesutil.SafeCopyBytes(pub.W),
 		A:     bytesutil.SafeCopyBytes(pub.A),
 		B:     bytesutil.SafeCopyBytes(pub.B),
 		Alpha: bytesutil.SafeCopyBytes(pub.Alpha),
